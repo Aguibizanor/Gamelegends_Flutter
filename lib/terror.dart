@@ -1,31 +1,73 @@
 import 'package:flutter/material.dart';
 import 'navbar.dart';
 
-// Lista dos jogos para a categoria "Terror" (imagens devem estar em assets e declaradas no pubspec.yaml)
+// Lista dos jogos para a categoria "Terror" (agora com usuário, descrição e comentários!)
+// Removido o campo "pai"
 final _terrorGames = [
   {
     "img": "assets/tomate.png",
     "name": "Elevator Hitch",
-  },
-  {
-    "img": "assets/melancia.png",
-    "name": "Elevated Dread",
+    "user": "gamerzin123",
+    "description": "A elevator horror game with aliens.",
+    "comments": [
+      "O gato é fofo",
+      "Achei bem chato",
+      "Quero comprar",
+      "Very cool",
+      "Good game"
+    ],
   },
   {
     "img": "assets/uva.png",
     "name": "Pumpkin Panic",
+    "user": "mcbibim.1",
+    "description": "Atmospheric puzzle platformer.",
+    "comments": [
+      "I love blue",
+      "Recomendo",
+      "Passem longe!",
+      "KKK, fácil",
+      "Achei difícil"
+    ],
   },
   {
     "img": "assets/salada.png",
     "name": "They are here",
+    "user": "voaleao03",
+    "description": "Cute narrative puzzle game.",
+    "comments": [
+      "What is that?",
+      "Desperdício",
+      "Não recomendo",
+      "Joguem!",
+      "Méhh..."
+    ],
   },
   {
     "img": "assets/tangerina.png",
     "name": "The Vale",
+    "user": "alicegamer",
+    "description": "Blind adventure experience.",
+    "comments": [
+      "Legal demais!",
+      "Som imersivo",
+      "Assustador",
+      "História boa",
+      "Quero DLC"
+    ],
   },
   {
     "img": "assets/tamara.png",
     "name": "Clap Clap",
+    "user": "darknight",
+    "description": "Short indie horror.",
+    "comments": [
+      "Muito fácil",
+      "Jump scares bons",
+      "Trilha sonora top",
+      "Arte estilosa",
+      "Joguei com amigos"
+    ],
   },
 ];
 
@@ -45,11 +87,6 @@ class _TerrorPageState extends State<TerrorPage> {
     'plataformas': true,
     'postagem': true,
     'status': true,
-  };
-
-  Map<String, String> formData = {
-    'email': "",
-    'usuario': "",
   };
 
   void toggleList(String section) {
@@ -88,7 +125,7 @@ class _TerrorPageState extends State<TerrorPage> {
               Expanded(
                 child: Row(
                   children: [
-                    // Barra lateral
+                    // Barra lateral igual esportes.dart
                     AnimatedContainer(
                       duration: const Duration(milliseconds: 200),
                       width: isWide || isMobileOpen ? 260 : 0,
@@ -154,27 +191,33 @@ class _TerrorPageState extends State<TerrorPage> {
                           onPressed: toggleMobileMenu,
                         ),
                       ),
-                    // Lista de produtos/jogos
+                    // Conteúdo principal grande e bonito
                     Expanded(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 6),
-                        child: GridView.builder(
+                        child: ListView.builder(
                           padding: const EdgeInsets.all(10),
-                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: isWide ? 4 : 2,
-                            mainAxisSpacing: 16,
-                            crossAxisSpacing: 16,
-                            childAspectRatio: 0.8,
-                          ),
                           itemCount: _terrorGames.length,
                           itemBuilder: (context, index) {
-                            final produto = _terrorGames[index];
-                            return _GameCard(
-                              nome: produto['name']!,
-                              imageAsset: produto['img']!,
-                              onTap: () {
-                                // Navegue para a descrição se desejar
-                              },
+                            final game = _terrorGames[index];
+                            return _TerrorGameCard(
+                              img: (game.containsKey('img') && game['img'] != null)
+                                  ? game['img'] as String
+                                  : '',
+                              name: (game.containsKey('name') && game['name'] != null)
+                                  ? game['name'] as String
+                                  : '',
+                              user: (game.containsKey('user') && game['user'] != null)
+                                  ? game['user'] as String
+                                  : '',
+                              comments: (game['comments'] is List)
+                                  ? List<String>.from(game['comments'] as List)
+                                  : [],
+                              description: (game.containsKey('description') &&
+                                      game['description'] != null)
+                                  ? game['description'] as String
+                                  : '',
+                              onTap: () {},
                             );
                           },
                         ),
@@ -183,137 +226,8 @@ class _TerrorPageState extends State<TerrorPage> {
                   ],
                 ),
               ),
-              // Footer
-              Container(
-                color: const Color(0xFF90017F),
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 0),
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 1200),
-                    child: Wrap(
-                      runSpacing: 24,
-                      spacing: 50,
-                      children: [
-                        // Sobre
-                        SizedBox(
-                          width: 350,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text.rich(
-                                TextSpan(
-                                  children: [
-                                    TextSpan(
-                                      text: "Game",
-                                      style: TextStyle(fontWeight: FontWeight.bold),
-                                    ),
-                                    TextSpan(text: "Legends"),
-                                  ],
-                                ),
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 26,
-                                ),
-                              ),
-                              const SizedBox(height: 10),
-                              const Text(
-                                "Game Legends é uma plataforma dedicada a jogos indie, fornecendo uma maneira fácil para desenvolvedores distribuírem seus jogos e para jogadores descobrirem novas experiências.",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 15,
-                                ),
-                              ),
-                              const SizedBox(height: 16),
-                              Row(
-                                children: const [
-                                  Icon(Icons.phone, color: Colors.white70, size: 18),
-                                  SizedBox(width: 6),
-                                  Text(
-                                    "(99) 99999-9999",
-                                    style: TextStyle(color: Colors.white70),
-                                  ),
-                                  SizedBox(width: 18),
-                                  Icon(Icons.email, color: Colors.white70, size: 18),
-                                  SizedBox(width: 6),
-                                  Text(
-                                    "info@gamelegends.com",
-                                    style: TextStyle(color: Colors.white70),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 18),
-                              Row(
-                                children: [
-                                  IconButton(
-                                    icon: const Icon(Icons.facebook, color: Colors.white),
-                                    onPressed: () {},
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.camera_alt, color: Colors.white),
-                                    onPressed: () {},
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.alternate_email, color: Colors.white),
-                                    onPressed: () {},
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.business, color: Colors.white),
-                                    onPressed: () {},
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                        // Links rápidos
-                        SizedBox(
-                          width: 220,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text("Links Rápidos",
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 18)),
-                              const SizedBox(height: 10),
-                              ...[
-                                "Eventos",
-                                "Equipe",
-                                "Missão",
-                                "Serviços",
-                                "Afiliados"
-                              ].map((txt) => Padding(
-                                    padding: const EdgeInsets.symmetric(vertical: 2),
-                                    child: InkWell(
-                                      onTap: () {},
-                                      child: Text(
-                                        txt,
-                                        style: const TextStyle(
-                                            color: Colors.white70, fontSize: 15),
-                                      ),
-                                    ),
-                                  )),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              Container(
-                width: double.infinity,
-                color: const Color(0xFF90017F),
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                child: const Center(
-                  child: Text(
-                    "© gamelegends.com | Feito pelo time do Game Legends",
-                    style: TextStyle(color: Colors.white70),
-                  ),
-                ),
-              ),
+              // Footer igual esportes.dart
+              _buildFooter(),
             ],
           ),
           // Menu mobile overlay do topo
@@ -374,60 +288,276 @@ class _TerrorPageState extends State<TerrorPage> {
       ),
     );
   }
+
+  Widget _buildFooter() {
+    return Column(
+      children: [
+        Container(
+          color: const Color(0xFF90017F),
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 0),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1200),
+              child: Wrap(
+                runSpacing: 24,
+                spacing: 50,
+                children: [
+                  // Sobre
+                  SizedBox(
+                    width: 350,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text.rich(
+                          TextSpan(
+                            children: [
+                              TextSpan(
+                                text: "Game",
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              TextSpan(text: "Legends"),
+                            ],
+                          ),
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 26,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        const Text(
+                          "Game Legends é uma plataforma dedicada a jogos indie, fornecendo uma maneira fácil para desenvolvedores distribuírem seus jogos e para jogadores descobrirem novas experiências.",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 15,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          children: const [
+                            Icon(Icons.phone, color: Colors.white70, size: 18),
+                            SizedBox(width: 6),
+                            Text(
+                              "(99) 99999-9999",
+                              style: TextStyle(color: Colors.white70),
+                            ),
+                            SizedBox(width: 18),
+                            Icon(Icons.email, color: Colors.white70, size: 18),
+                            SizedBox(width: 6),
+                            Text(
+                              "info@gamelegends.com",
+                              style: TextStyle(color: Colors.white70),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 18),
+                        Row(
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.facebook, color: Colors.white),
+                              onPressed: () {},
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.camera_alt, color: Colors.white),
+                              onPressed: () {},
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.alternate_email, color: Colors.white),
+                              onPressed: () {},
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.business, color: Colors.white),
+                              onPressed: () {},
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Links rápidos
+                  SizedBox(
+                    width: 220,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text("Links Rápidos",
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18)),
+                        const SizedBox(height: 10),
+                        ...[
+                          "Eventos",
+                          "Equipe",
+                          "Missão",
+                          "Serviços",
+                          "Afiliados"
+                        ].map((txt) => Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 2),
+                              child: InkWell(
+                                onTap: () {},
+                                child: Text(
+                                  txt,
+                                  style: const TextStyle(
+                                      color: Colors.white70, fontSize: 15),
+                                ),
+                              ),
+                            )),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        Container(
+          width: double.infinity,
+          color: const Color(0xFF90017F),
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          child: const Center(
+            child: Text(
+              "© gamelegends.com | Feito pelo time do Game Legends",
+              style: TextStyle(color: Colors.white70),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 }
 
-class _GameCard extends StatelessWidget {
-  final String nome;
-  final String imageAsset;
+// Componente do Card com comentários no estilo da imagem enviada
+class _TerrorGameCard extends StatelessWidget {
+  final String img;
+  final String name;
+  final String user;
+  final List<String> comments;
+  final String description;
   final VoidCallback onTap;
 
-  const _GameCard({
-    required this.nome,
-    required this.imageAsset,
+  const _TerrorGameCard({
+    required this.img,
+    required this.name,
+    required this.user,
+    required this.comments,
+    required this.description,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 6,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(14),
-        onTap: onTap,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+      margin: const EdgeInsets.only(bottom: 20),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+      elevation: 5,
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              child: ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
-                child: Image.asset(
-                  imageAsset,
-                  fit: BoxFit.cover,
-                  errorBuilder: (c, o, s) => Container(
-                    color: Colors.grey[200],
-                    alignment: Alignment.center,
-                    child: const Text("sem imagem", style: TextStyle(color: Colors.black38)),
-                  ),
+            // Imagem
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.asset(
+                img,
+                width: 110,
+                height: 110,
+                fit: BoxFit.cover,
+                errorBuilder: (c, o, s) => Container(
+                  width: 110,
+                  height: 110,
+                  color: Colors.grey[200],
+                  alignment: Alignment.center,
+                  child: const Text("sem imagem", style: TextStyle(color: Colors.black38)),
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-              child: Center(
-                child: Text(
-                  nome,
-                  style: const TextStyle(
-                    color: Color(0xFF90017F),
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15,
+            const SizedBox(width: 15),
+            // Título, descrição e botão
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    name,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                      color: Color(0xFF90017F),
+                    ),
                   ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
+                  const SizedBox(height: 5),
+                  Text(
+                    description,
+                    style: const TextStyle(
+                      color: Color(0xFF3E78C9),
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF90017F),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(9),
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    ),
+                    onPressed: onTap,
+                    child: const Text(
+                      "ver detalhes",
+                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Usuário e comentários (modelo igual à imagem)
+            if (user.isNotEmpty)
+              Container(
+                margin: const EdgeInsets.only(left: 18, top: 2),
+                constraints: const BoxConstraints(
+                  maxWidth: 160,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.account_circle, size: 22, color: Color(0xFF90017F)),
+                        const SizedBox(width: 6),
+                        Text(
+                          user,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            color: Color(0xFF90017F),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    for (final comment in comments)
+                      Container(
+                        margin: const EdgeInsets.only(bottom: 4),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[200],
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          comment,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ),
-            )
           ],
         ),
       ),
