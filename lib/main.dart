@@ -211,7 +211,7 @@ class _MainPrincipalState extends State<MainPrincipal> {
                                       ),
                                       const SizedBox(height: 18),
                                       const Text(
-                                        'Venha conhecer \nnossa plataformas \nonde você poderá\nencontrar jogos\nda nossa comunidade.',
+                                        'Venha conhecer \nnossa plataforma \nonde você poderá\nencontrar jogos\nda nossa comunidade.',
                                         style: TextStyle(
                                           fontSize: 20,
                                           color: Colors.black87,
