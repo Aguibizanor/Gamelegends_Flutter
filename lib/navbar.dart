@@ -1,18 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 // Função para obter usuário logado do "banco" (SharedPreferences)
 Future<Map<String, dynamic>?> getUsuarioLogado() async {
   final prefs = await SharedPreferences.getInstance();
-  final tipo = prefs.getString('usuario'); // "Cliente", "ADM", "Desenvolvedor", etc
-  if (tipo == null) return null;
-  return {"usuario": tipo};
+  final usuarioStr = prefs.getString('usuario');
+  if (usuarioStr == null) return null;
+  try {
+    final usuarioMap = jsonDecode(usuarioStr) as Map<String, dynamic>;
+    return usuarioMap;
+  } catch (e) {
+    // Caso seja só uma string antiga, retorna como tipo
+    return {"tipo": usuarioStr};
+  }
 }
 
 // Para simular cadastro/login (chame após login/cadastro com sucesso)
-Future<void> salvarUsuarioLogado(String tipo) async {
+// Exemplo de uso: await salvarUsuarioLogado(nome: "João", tipo: "Cliente");
+Future<void> salvarUsuarioLogado({required String nome, required String tipo}) async {
   final prefs = await SharedPreferences.getInstance();
-  await prefs.setString('usuario', tipo); // Ex: "Cliente" ou "ADM" ou "Desenvolvedor"
+  await prefs.setString('usuario', jsonEncode({"nome": nome, "tipo": tipo}));
 }
 
 // Para simular logout
@@ -140,8 +148,7 @@ class _NavbarState extends State<Navbar> {
                         ),
                       )
                     else if (usuarioLogado != null &&
-                        usuarioLogado!["usuario"] != null &&
-                        usuarioLogado!["usuario"].toString().isNotEmpty)
+                        (usuarioLogado!["nome"] != null || usuarioLogado!["tipo"] != null))
                       Padding(
                         padding: const EdgeInsets.only(left: 12),
                         child: TextButton.icon(
@@ -153,32 +160,37 @@ class _NavbarState extends State<Navbar> {
                           ),
                           icon: const Icon(Icons.account_circle, color: Colors.white),
                           label: Text(
-                            'Perfil (${usuarioLogado!["usuario"]})',
+                            usuarioLogado!["nome"] != null
+                              ? 'perfil (${usuarioLogado!["nome"]})'
+                              : 'perfil',
                             style: const TextStyle(color: Colors.white),
                           ),
                         ),
                       )
-                    else ...[
-                      TextButton(
-                        onPressed: () => Navigator.pushNamed(context, '/login'),
-                        style: TextButton.styleFrom(
-                          backgroundColor: const Color(0xFF780069),
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-                        ),
-                        child: const Text('Login', style: TextStyle(color: Colors.white)),
+                    else
+                      Row(
+                        children: [
+                          TextButton(
+                            onPressed: () => Navigator.pushNamed(context, '/login'),
+                            style: TextButton.styleFrom(
+                              backgroundColor: const Color(0xFF780069),
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                            ),
+                            child: const Text('Login', style: TextStyle(color: Colors.white)),
+                          ),
+                          const SizedBox(width: 8),
+                          TextButton(
+                            onPressed: () => Navigator.pushNamed(context, '/cadastro'),
+                            style: TextButton.styleFrom(
+                              backgroundColor: const Color(0xFF780069),
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                            ),
+                            child: const Text('Registre-se', style: TextStyle(color: Colors.white)),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 8),
-                      TextButton(
-                        onPressed: () => Navigator.pushNamed(context, '/cadastro'),
-                        style: TextButton.styleFrom(
-                          backgroundColor: const Color(0xFF780069),
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-                        ),
-                        child: const Text('Registre-se', style: TextStyle(color: Colors.white)),
-                      ),
-                    ],
                   ],
                 ),
               ),
@@ -340,8 +352,7 @@ class _NavbarMobileMenuState extends State<NavbarMobileMenu> {
                               ),
                             )
                           else if (usuarioLogado != null &&
-                              usuarioLogado!["usuario"] != null &&
-                              usuarioLogado!["usuario"].toString().isNotEmpty)
+                              (usuarioLogado!["nome"] != null || usuarioLogado!["tipo"] != null))
                             TextButton.icon(
                               onPressed: () {
                                 widget.closeMenu();
@@ -354,37 +365,42 @@ class _NavbarMobileMenuState extends State<NavbarMobileMenu> {
                               ),
                               icon: const Icon(Icons.account_circle, color: Colors.white),
                               label: Text(
-                                'Perfil (${usuarioLogado!["usuario"]})',
+                                usuarioLogado!["nome"] != null
+                                  ? 'Perfil (${usuarioLogado!["nome"]})'
+                                  : 'Perfil',
                                 style: const TextStyle(color: Colors.white),
                               ),
                             )
-                          else ...[
-                            TextButton(
-                              onPressed: () {
-                                widget.closeMenu();
-                                Navigator.pushNamed(context, '/login');
-                              },
-                              style: TextButton.styleFrom(
-                                backgroundColor: const Color(0xFF780069),
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-                              ),
-                              child: const Text('Login', style: TextStyle(color: Colors.white)),
+                          else
+                            Row(
+                              children: [
+                                TextButton(
+                                  onPressed: () {
+                                    widget.closeMenu();
+                                    Navigator.pushNamed(context, '/login');
+                                  },
+                                  style: TextButton.styleFrom(
+                                    backgroundColor: const Color(0xFF780069),
+                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                                  ),
+                                  child: const Text('Login', style: TextStyle(color: Colors.white)),
+                                ),
+                                const SizedBox(width: 8),
+                                TextButton(
+                                  onPressed: () {
+                                    widget.closeMenu();
+                                    Navigator.pushNamed(context, '/cadastro');
+                                  },
+                                  style: TextButton.styleFrom(
+                                    backgroundColor: const Color(0xFF780069),
+                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                                  ),
+                                  child: const Text('Registre-se', style: TextStyle(color: Colors.white)),
+                                ),
+                              ],
                             ),
-                            const SizedBox(width: 8),
-                            TextButton(
-                              onPressed: () {
-                                widget.closeMenu();
-                                Navigator.pushNamed(context, '/cadastro');
-                              },
-                              style: TextButton.styleFrom(
-                                backgroundColor: const Color(0xFF780069),
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-                              ),
-                              child: const Text('Registre-se', style: TextStyle(color: Colors.white)),
-                            ),
-                          ],
                         ],
                       ),
                     ],

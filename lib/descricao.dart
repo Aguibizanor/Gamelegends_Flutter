@@ -148,7 +148,6 @@ class _PaginaDescricaoState extends State<PaginaDescricao> {
   }
 
   void onCadastrarCartao() async {
-    // Redirecione para tela de cadastro de cartão
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Implementar tela de cadastro de cartão!')),
     );
@@ -167,58 +166,15 @@ class _PaginaDescricaoState extends State<PaginaDescricao> {
     final isWide = MediaQuery.of(context).size.width > 700;
     return Scaffold(
       backgroundColor: const Color(0xFFF7F7F7),
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(70),
-        child: Navbar(
-          isMenuOpen: menuAberto,
-          onMenuTap: toggleMenu,
-          searchController: _searchController,
-        ),
-      ),
       body: Stack(
         children: [
           Column(
             children: [
-              if (!isWide && menuAberto)
-                Container(
-                  color: const Color(0xFF90017F),
-                  child: Column(
-                    children: [
-                      ListTile(
-                        title: const Text('Início', style: TextStyle(color: Colors.white)),
-                        leading: const Icon(Icons.home, color: Colors.white),
-                        onTap: () {
-                          setState(() => menuAberto = false);
-                          Navigator.pushNamed(context, '/index');
-                        },
-                      ),
-                      ListTile(
-                        title: const Text('Games', style: TextStyle(color: Colors.white)),
-                        leading: const Icon(Icons.videogame_asset, color: Colors.white),
-                        onTap: () {
-                          setState(() => menuAberto = false);
-                          Navigator.pushNamed(context, '/');
-                        },
-                      ),
-                      ListTile(
-                        title: const Text('Sobre', style: TextStyle(color: Colors.white)),
-                        leading: const Icon(Icons.info, color: Colors.white),
-                        onTap: () {
-                          setState(() => menuAberto = false);
-                          Navigator.pushNamed(context, '/que');
-                        },
-                      ),
-                      ListTile(
-                        title: const Text('Suporte', style: TextStyle(color: Colors.white)),
-                        leading: const Icon(Icons.headset, color: Colors.white),
-                        onTap: () {
-                          setState(() => menuAberto = false);
-                          Navigator.pushNamed(context, '/suporte');
-                        },
-                      ),
-                    ],
-                  ),
-                ),
+              Navbar(
+                isMenuOpen: menuAberto,
+                onMenuTap: toggleMenu,
+                searchController: _searchController,
+              ),
               Expanded(
                 child: Stack(
                   children: [
@@ -428,6 +384,11 @@ class _PaginaDescricaoState extends State<PaginaDescricao> {
               ),
             ],
           ),
+          if (menuAberto)
+            NavbarMobileMenu(
+              closeMenu: () => setState(() => menuAberto = false),
+              searchController: _searchController,
+            ),
         ],
       ),
     );

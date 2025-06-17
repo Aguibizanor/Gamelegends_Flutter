@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'navbar.dart'; // Certifique-se de que o arquivo navbar.dart está no mesmo diretório
+import 'navbar.dart';
 
 class CadastroForm extends StatefulWidget {
   const CadastroForm({super.key});
@@ -23,7 +23,8 @@ class _CadastroFormState extends State<CadastroForm> {
     'confirmarSenha': '',
     'usuario': '',
   };
-  final TextEditingController _searchController = TextEditingController(); // Necessário para Navbar
+  final TextEditingController _searchController = TextEditingController();
+  bool menuAberto = false;
 
   String _mensagem = '';
 
@@ -62,7 +63,6 @@ class _CadastroFormState extends State<CadastroForm> {
         return;
       }
 
-      // Regex para validar email (gmail, yahoo ou email.com)
       final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@(yahoo|gmail|email)\.com(\.br)?$');
       if (!emailRegex.hasMatch(_formData['email'] ?? '')) {
         setState(() {
@@ -87,8 +87,11 @@ class _CadastroFormState extends State<CadastroForm> {
           setState(() {
             _mensagem = 'Cadastro realizado com sucesso!';
           });
-          // Navegar para Login após sucesso (opcional)
-          // Navigator.pushNamed(context, '/Login');
+
+          await salvarUsuarioLogado(
+            nome: _formData['nome'] ?? '',
+            tipo: _formData['usuario'] ?? '',
+          );
         } else {
           final errorResponse = json.decode(response.body);
           setState(() {
@@ -103,135 +106,152 @@ class _CadastroFormState extends State<CadastroForm> {
     }
   }
 
+  void toggleMenu() => setState(() => menuAberto = !menuAberto);
+  void closeMenu() => setState(() => menuAberto = false);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: Navbar(
-        searchController: _searchController,
-      ),
-      backgroundColor: const Color(0xFFE9E9E9),
-      body: Center(
-        child: SingleChildScrollView(
-          child: Container(
-            width: MediaQuery.of(context).size.width > 600 ? 500 : null,
-            margin: const EdgeInsets.all(20),
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(10),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 10,
-                  spreadRadius: 5,
-                ),
-              ],
-            ),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(
-                    'CRIAR CONTA',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF90017F),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  _buildTextFormField(
-                    label: 'Nome',
-                    onSaved: (value) => _handleChange('nome', value ?? ''),
-                  ),
-                  _buildTextFormField(
-                    label: 'Sobrenome',
-                    onSaved: (value) => _handleChange('sobrenome', value ?? ''),
-                  ),
-                  _buildTextFormField(
-                    label: 'CPF',
-                    onSaved: (value) => _handleChange('cpf', value ?? ''),
-                    keyboardType: TextInputType.number,
-                    maxLength: 14,
-                  ),
-                  _buildTextFormField(
-                    label: 'Data de Nascimento',
-                    onSaved: (value) => _handleChange('dataNascimento', value ?? ''),
-                    keyboardType: TextInputType.datetime,
-                    isDate: true,
-                  ),
-                  _buildTextFormField(
-                    label: 'Email',
-                    onSaved: (value) => _handleChange('email', value ?? ''),
-                    keyboardType: TextInputType.emailAddress,
-                  ),
-                  _buildTextFormField(
-                    label: 'Telefone',
-                    onSaved: (value) => _handleChange('telefone', value ?? ''),
-                    keyboardType: TextInputType.phone,
-                    maxLength: 15,
-                  ),
-                  _buildTextFormField(
-                    label: 'Senha',
-                    onSaved: (value) => _handleChange('senha', value ?? ''),
-                    obscureText: true,
-                  ),
-                  _buildTextFormField(
-                    label: 'Confirmar Senha',
-                    onSaved: (value) => _handleChange('confirmarSenha', value ?? ''),
-                    obscureText: true,
-                  ),
-                  _buildDropdownUserType(),
-                  const SizedBox(height: 20),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _handleSubmit,
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 12,
-                          horizontal: 24,
-                        ),
-                        backgroundColor: const Color(0xFF007BFF),
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                      ),
-                      child: const Text(
-                        'CADASTRE-SE',
-                        style: TextStyle(fontSize: 18),
-                      ),
-                    ),
-                  ),
-                  if (_mensagem.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 16),
-                      child: Text(
-                        _mensagem,
-                        style: const TextStyle(color: Colors.red),
-                      ),
-                    ),
-                  const SizedBox(height: 14),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text('Já tem uma conta? '),
-                      GestureDetector(
-                        onTap: () => Navigator.pushNamed(context, '/login'),
-                        child: const Text(
-                          'Login',
-                          style: TextStyle(color: Color(0xFF007BFF), fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ],
-                  )
-                ],
+      body: Stack(
+        children: [
+          Column(
+            children: [
+              Navbar(
+                searchController: _searchController,
+                isMenuOpen: menuAberto,
+                onMenuTap: toggleMenu,
               ),
-            ),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Container(
+                    width: MediaQuery.of(context).size.width > 600 ? 500 : null,
+                    margin: const EdgeInsets.all(20),
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 10,
+                          spreadRadius: 5,
+                        ),
+                      ],
+                    ),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Text(
+                            'CRIAR CONTA',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF90017F),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          _buildTextFormField(
+                            label: 'Nome',
+                            onSaved: (value) => _handleChange('nome', value ?? ''),
+                          ),
+                          _buildTextFormField(
+                            label: 'Sobrenome',
+                            onSaved: (value) => _handleChange('sobrenome', value ?? ''),
+                          ),
+                          _buildTextFormField(
+                            label: 'CPF',
+                            onSaved: (value) => _handleChange('cpf', value ?? ''),
+                            keyboardType: TextInputType.number,
+                            maxLength: 14,
+                          ),
+                          _buildTextFormField(
+                            label: 'Data de Nascimento',
+                            onSaved: (value) => _handleChange('dataNascimento', value ?? ''),
+                            keyboardType: TextInputType.datetime,
+                            isDate: true,
+                          ),
+                          _buildTextFormField(
+                            label: 'Email',
+                            onSaved: (value) => _handleChange('email', value ?? ''),
+                            keyboardType: TextInputType.emailAddress,
+                          ),
+                          _buildTextFormField(
+                            label: 'Telefone',
+                            onSaved: (value) => _handleChange('telefone', value ?? ''),
+                            keyboardType: TextInputType.phone,
+                            maxLength: 15,
+                          ),
+                          _buildTextFormField(
+                            label: 'Senha',
+                            onSaved: (value) => _handleChange('senha', value ?? ''),
+                            obscureText: true,
+                          ),
+                          _buildTextFormField(
+                            label: 'Confirmar Senha',
+                            onSaved: (value) => _handleChange('confirmarSenha', value ?? ''),
+                            obscureText: true,
+                          ),
+                          _buildDropdownUserType(),
+                          const SizedBox(height: 20),
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: _handleSubmit,
+                              style: ElevatedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                  horizontal: 24,
+                                ),
+                                backgroundColor: const Color(0xFF007BFF),
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(5),
+                                ),
+                              ),
+                              child: const Text(
+                                'CADASTRE-SE',
+                                style: TextStyle(fontSize: 18),
+                              ),
+                            ),
+                          ),
+                          if (_mensagem.isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 16),
+                              child: Text(
+                                _mensagem,
+                                style: const TextStyle(color: Colors.red),
+                              ),
+                            ),
+                          const SizedBox(height: 14),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text('Já tem uma conta? '),
+                              GestureDetector(
+                                onTap: () => Navigator.pushNamed(context, '/login'),
+                                child: const Text(
+                                  'Login',
+                                  style: TextStyle(color: Color(0xFF007BFF), fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-        ),
+          if (menuAberto)
+            NavbarMobileMenu(
+              closeMenu: closeMenu,
+              searchController: _searchController,
+            ),
+        ],
       ),
     );
   }
@@ -308,14 +328,12 @@ class _CadastroFormState extends State<CadastroForm> {
                   },
                   onChanged: (value) {
                     if (label == 'CPF') {
-                      // Formatação automática do CPF
                       String cpf = value.replaceAll(RegExp(r'\D'), '').substring(0, value.length > 11 ? 11 : value.length);
                       if (cpf.length >= 3) cpf = cpf.replaceFirst(RegExp(r'^(\d{3})(\d)'), r'$1.$2');
                       if (cpf.length >= 6) cpf = cpf.replaceFirst(RegExp(r'^(\d{3})\.(\d{3})(\d)'), r'$1.$2.$3');
                       if (cpf.length >= 9) cpf = cpf.replaceFirst(RegExp(r'^(\d{3})\.(\d{3})\.(\d{3})(\d{1,2})'), r'$1.$2.$3-$4');
                       _handleChange('cpf', cpf);
                     } else if (label == 'Telefone') {
-                      // Formatação automática do telefone
                       String telefone = value.replaceAll(RegExp(r'\D'), '').substring(0, value.length > 11 ? 11 : value.length);
                       if (telefone.length >= 2) telefone = telefone.replaceFirst(RegExp(r'^(\d{2})(\d)'), r'($1) $2');
                       if (telefone.length >= 7) telefone = telefone.replaceFirst(RegExp(r'^(\(\d{2}\)\s\d{5})(\d)'), r'$1-$2');
