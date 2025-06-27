@@ -217,7 +217,7 @@ class _AventuraPageState extends State<AventuraPage> {
                   ],
                 ),
               ),
-              // Footer IDÊNTICO AO DO SUPORTE
+              // === Footer IDÊNTICO AO SUPORTE ===
               Container(
                 color: const Color(0xFF90017F),
                 padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
@@ -227,6 +227,7 @@ class _AventuraPageState extends State<AventuraPage> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
+                        // GameLegends
                         const Text(
                           "GameLegends",
                           style: TextStyle(
@@ -236,6 +237,8 @@ class _AventuraPageState extends State<AventuraPage> {
                           ),
                         ),
                         const SizedBox(height: 16),
+
+                        // Descrição
                         const Text(
                           "Game Legends é uma plataforma dedicada a jogos indie, fornecendo uma maneira fácil para desenvolvedores distribuírem seus jogos e para jogadores descobrirem novas experiências.",
                           textAlign: TextAlign.center,
@@ -245,6 +248,8 @@ class _AventuraPageState extends State<AventuraPage> {
                           ),
                         ),
                         const SizedBox(height: 16),
+
+                        // Contatos
                         const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -264,12 +269,16 @@ class _AventuraPageState extends State<AventuraPage> {
                           ],
                         ),
                         const SizedBox(height: 24),
+
+                        // Divisor
                         Container(
                           height: 1,
                           color: Colors.white.withOpacity(0.3),
                           margin: const EdgeInsets.symmetric(horizontal: 40),
                         ),
                         const SizedBox(height: 24),
+
+                        // Links Rápidos
                         const Text(
                           "Links Rápidos",
                           style: TextStyle(
@@ -279,6 +288,7 @@ class _AventuraPageState extends State<AventuraPage> {
                           ),
                         ),
                         const SizedBox(height: 12),
+
                         Column(
                           children: [
                             "Eventos",
@@ -302,6 +312,7 @@ class _AventuraPageState extends State<AventuraPage> {
                   ),
                 ),
               ),
+              // Rodapé inferior idêntico
               Container(
                 width: double.infinity,
                 color: const Color(0xFF90017F),
