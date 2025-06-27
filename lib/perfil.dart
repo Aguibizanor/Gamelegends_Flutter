@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'cartoes_perfil.dart';
 
 
 // Função robusta para obter usuário logado, igual Navbar
@@ -181,6 +182,11 @@ class _PaginaPerfilState extends State<PaginaPerfil> {
               leading: const Icon(Icons.headset_mic),
               title: const Text('Suporte'),
               onTap: () => Navigator.pushReplacementNamed(context, '/Suporte'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.credit_card),
+              title: const Text('Meus Cartões'),
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const CartoesPerfil())),
             ),
           ],
         ),
