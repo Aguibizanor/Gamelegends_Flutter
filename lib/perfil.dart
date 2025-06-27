@@ -1,10 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'dart:convert';
-import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 
-// O model Java possui: id, nome, sobrenome, cpf, datanascimento, email, senha, telefone, usuario
+// Função robusta para obter usuário logado, igual Navbar
+Future<Map<String, dynamic>?> getUsuarioLogado() async {
+  final prefs = await SharedPreferences.getInstance();
+  final usuarioStr = prefs.getString('usuario');
+  if (usuarioStr == null) return null;
+  try {
+    final usuarioMap = jsonDecode(usuarioStr) as Map<String, dynamic>;
+    return usuarioMap;
+  } catch (e) {
+    // Caso seja só uma string antiga, retorna como tipo
+    return {"nome": usuarioStr};
+  }
+}
 
 class PaginaPerfil extends StatefulWidget {
   const PaginaPerfil({Key? key}) : super(key: key);
@@ -15,15 +27,14 @@ class PaginaPerfil extends StatefulWidget {
 
 class _PaginaPerfilState extends State<PaginaPerfil> {
   Map<String, dynamic> formData = {
-    "id": null,
     "nome": "",
     "sobrenome": "",
     "cpf": "",
     "datanascimento": "",
     "email": "",
+    "senha": "",
     "telefone": "",
-    "usuario": "",
-    "senha": ""
+    // "usuario": "" // tipo/usuario removido conforme pedido
   };
   bool loading = true;
   bool modalVisible = false;
@@ -35,92 +46,24 @@ class _PaginaPerfilState extends State<PaginaPerfil> {
     _loadPerfil();
   }
 
-  // PEGAR ID DO CLIENTE LOGADO
-  Future<int?> getClienteId() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getInt('clienteId');
-  }
-
-  // API: USAR /cadastro/{id} e /cadastro
-  Future<Map<String, dynamic>?> getUsuarioBanco(int userId) async {
-    final response = await http.get(Uri.parse('http://localhost:8080/cadastro/$userId'));
-    if (response.statusCode == 200) {
-      return jsonDecode(response.body);
-    }
-    return null;
-  }
-
-  Future<void> updateUsuarioBanco(Map<String, dynamic> usuario) async {
-    await http.put(
-      Uri.parse('http://localhost:8080/cadastro/${usuario["id"]}'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode(usuario),
-    );
-  }
-
-  Future<void> deleteUsuarioBanco(int id) async {
-    await http.delete(
-      Uri.parse('http://localhost:8080/cadastro/$id'),
-    );
-  }
-
-  // CARREGAR PERFIL LOGADO
   Future<void> _loadPerfil() async {
-    try {
-      final id = await getClienteId();
-      if (id == null) {
-        setState(() { loading = false; });
-        if (mounted) Navigator.pushReplacementNamed(context, '/Login');
-        return;
-      }
-      final usuarioData = await getUsuarioBanco(id);
+    final usuarioData = await getUsuarioLogado();
+    setState(() {
       if (usuarioData != null) {
-        setState(() {
-          formData = {
-            "id": usuarioData["id"],
-            "nome": usuarioData["nome"] ?? "",
-            "sobrenome": usuarioData["sobrenome"] ?? "",
-            "cpf": usuarioData["cpf"] ?? "",
-            "datanascimento": usuarioData["datanascimento"] ?? usuarioData["dataNascimento"] ?? "",
-            "email": usuarioData["email"] ?? "",
-            "telefone": usuarioData["telefone"] ?? "",
-            "usuario": usuarioData["usuario"] ?? "",
-            "senha": usuarioData["senha"] ?? "",
-          };
-          loading = false;
-        });
-      } else {
-        setState(() { loading = false; });
-        if (mounted) Navigator.pushReplacementNamed(context, '/Login');
+        formData = {
+          "nome": usuarioData["nome"] ?? "",
+          "sobrenome": usuarioData["sobrenome"] ?? "",
+          "cpf": usuarioData["cpf"] ?? "",
+          "datanascimento": usuarioData["datanascimento"] ?? usuarioData["dataNascimento"] ?? "",
+          "email": usuarioData["email"] ?? "",
+          "senha": usuarioData["senha"] ?? "",
+          "telefone": usuarioData["telefone"] ?? "",
+        };
       }
-    } catch (e) {
-      setState(() { loading = false; });
-      if (mounted) Navigator.pushReplacementNamed(context, '/Login');
-    }
-  }
-
-  Future<void> _handleDelete() async {
-    final idUsuario = formData["id"];
-    if (idUsuario == null) {
-      _showDialog("Erro: ID do usuário não encontrado.");
-      return;
-    }
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text("Confirmação"),
-        content: const Text("Tem certeza que deseja excluir seu perfil?"),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text("Cancelar")),
-          TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text("Excluir")),
-        ],
-      ),
-    );
-    if (result == true) {
-      await deleteUsuarioBanco(idUsuario);
-      _showDialog("Perfil deletado com sucesso!", onClose: () {
-        Navigator.pushReplacementNamed(context, '/Login');
-      });
+      loading = false;
+    });
+    if (usuarioData == null && mounted) {
+      Navigator.pushReplacementNamed(context, '/Login');
     }
   }
 
@@ -131,16 +74,42 @@ class _PaginaPerfilState extends State<PaginaPerfil> {
   }
 
   Future<void> _handleSave(Map<String, dynamic> updatedData) async {
-    final newUser = {
-      ...formData,
-      ...updatedData,
-    };
-    await updateUsuarioBanco(newUser);
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final usuarioData = {...formData, ...updatedData};
     setState(() {
-      formData = newUser;
+      formData = usuarioData;
       modalVisible = false;
     });
+    await prefs.setString('usuario', jsonEncode(usuarioData));
     _showDialog("Perfil atualizado com sucesso!");
+  }
+  
+  Future<void> _handleDelete() async {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text("Excluir Perfil"),
+        content: const Text("Tem certeza que deseja excluir seu perfil? Esta ação não pode ser desfeita."),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text("Cancelar"),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () async {
+              Navigator.pop(ctx);
+              SharedPreferences prefs = await SharedPreferences.getInstance();
+              await prefs.remove('usuario');
+              _showDialog("Perfil excluído com sucesso!", onClose: () {
+                Navigator.pushReplacementNamed(context, '/Login');
+              });
+            },
+            child: const Text("Excluir", style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
   }
 
   void _toggleMenu() {
@@ -243,11 +212,11 @@ class _PaginaPerfilState extends State<PaginaPerfil> {
                           ),
                         ),
                         const SizedBox(width: 12),
-                        formData["usuario"] != null && formData["usuario"] != ""
+                        (formData["nome"] != null && formData["nome"].toString().isNotEmpty)
                             ? TextButton.icon(
-                                onPressed: () => Navigator.pushNamed(context, '/Perfil?tipo=${formData["usuario"]}'),
+                                onPressed: () => Navigator.pushNamed(context, '/Perfil'),
                                 icon: const Icon(Icons.account_circle),
-                                label: Text("Perfil (${formData["usuario"]})"),
+                                label: Text("Perfil (${formData["nome"]})"),
                               )
                             : Row(
                                 children: [
@@ -290,27 +259,26 @@ class _PaginaPerfilState extends State<PaginaPerfil> {
                               child: const Icon(Icons.person, size: 50, color: Colors.white),
                             ),
                             const SizedBox(height: 24),
+
+                            const SizedBox(height: 16),
                             PerfilInfo(formData: formData),
                             const SizedBox(height: 22),
-                            ElevatedButton(
-                              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF90017F)),
-                              onPressed: _handleEdit,
-                              child: const Text("Editar Perfil", style: TextStyle(color: Colors.white)),
-                            ),
-                            if (formData["usuario"] == "Desenvolvedor")
-                              Padding(
-                                padding: const EdgeInsets.only(top: 8.0),
-                                child: TextButton(
-                                  onPressed: () => Navigator.pushNamed(context, '/Criar'),
-                                  child: const Text("+ Criar Novo Jogo"),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                ElevatedButton(
+                                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF90017F)),
+                                  onPressed: _handleEdit,
+                                  child: const Text("Editar Perfil", style: TextStyle(color: Colors.white)),
                                 ),
-                              ),
-                            const SizedBox(height: 8),
-                            ElevatedButton(
-                              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                              onPressed: _handleDelete,
-                              child: const Text("Excluir Perfil", style: TextStyle(color: Colors.white)),
+                                ElevatedButton(
+                                  style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                                  onPressed: _handleDelete,
+                                  child: const Text("Excluir Perfil", style: TextStyle(color: Colors.white)),
+                                ),
+                              ],
                             ),
+                            const SizedBox(height: 8),
                           ],
                         ),
                       ),
@@ -398,10 +366,6 @@ class PerfilInfo extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text.rich(TextSpan(children: [
-          const TextSpan(text: "ID: ", style: TextStyle(fontWeight: FontWeight.bold)),
-          TextSpan(text: formData["id"]?.toString() ?? ""),
-        ])),
-        Text.rich(TextSpan(children: [
           const TextSpan(text: "Nome: ", style: TextStyle(fontWeight: FontWeight.bold)),
           TextSpan(text: formData["nome"] ?? ""),
         ])),
@@ -426,13 +390,14 @@ class PerfilInfo extends StatelessWidget {
           TextSpan(text: formData["telefone"] ?? ""),
         ])),
         Text.rich(TextSpan(children: [
-          const TextSpan(text: "Tipo de Usuário: ", style: TextStyle(fontWeight: FontWeight.bold)),
-          TextSpan(text: formData["usuario"] ?? ""),
-        ])),
-        Text.rich(TextSpan(children: [
           const TextSpan(text: "Senha: ", style: TextStyle(fontWeight: FontWeight.bold)),
           TextSpan(text: formData["senha"] ?? ""),
         ])),
+        if (formData["usuario"] != null && formData["usuario"].toString().isNotEmpty)
+          Text.rich(TextSpan(children: [
+            const TextSpan(text: "Usuário: ", style: TextStyle(fontWeight: FontWeight.bold)),
+            TextSpan(text: formData["usuario"] ?? ""),
+          ])),
       ],
     );
   }
@@ -454,72 +419,54 @@ class PerfilModal extends StatefulWidget {
 }
 
 class _PerfilModalState extends State<PerfilModal> {
-  late TextEditingController idCtrl;
   late TextEditingController nomeCtrl;
   late TextEditingController sobrenomeCtrl;
   late TextEditingController cpfCtrl;
   late TextEditingController dataNascCtrl;
   late TextEditingController emailCtrl;
-  late TextEditingController telefoneCtrl;
-  late TextEditingController usuarioCtrl;
   late TextEditingController senhaCtrl;
+  late TextEditingController telefoneCtrl;
 
   @override
   void initState() {
     super.initState();
-    idCtrl = TextEditingController(text: widget.formData["id"]?.toString() ?? "");
     nomeCtrl = TextEditingController(text: widget.formData["nome"]);
     sobrenomeCtrl = TextEditingController(text: widget.formData["sobrenome"]);
     cpfCtrl = TextEditingController(text: widget.formData["cpf"]);
     dataNascCtrl = TextEditingController(text: widget.formData["datanascimento"] ?? "");
     emailCtrl = TextEditingController(text: widget.formData["email"]);
-    telefoneCtrl = TextEditingController(text: widget.formData["telefone"]);
-    usuarioCtrl = TextEditingController(text: widget.formData["usuario"]);
     senhaCtrl = TextEditingController(text: widget.formData["senha"]);
+    telefoneCtrl = TextEditingController(text: widget.formData["telefone"]);
   }
 
   @override
   void dispose() {
-    idCtrl.dispose();
     nomeCtrl.dispose();
     sobrenomeCtrl.dispose();
     cpfCtrl.dispose();
     dataNascCtrl.dispose();
     emailCtrl.dispose();
-    telefoneCtrl.dispose();
-    usuarioCtrl.dispose();
     senhaCtrl.dispose();
+    telefoneCtrl.dispose();
     super.dispose();
   }
 
   void _handleSubmit() {
-    final idText = idCtrl.text.trim();
     final dataNascimento = dataNascCtrl.text.trim();
-    if (idText.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text("O campo ID é obrigatório."),
-      ));
-      return;
-    }
-    try {
-      if (dataNascimento.isEmpty) throw "A data de nascimento é obrigatória";
-      DateFormat('yyyy-MM-dd').parseStrict(dataNascimento);
-    } catch (_) {
+    if (dataNascimento.isEmpty || DateTime.tryParse(dataNascimento) == null) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text("A data de nascimento é obrigatória e deve estar no formato AAAA-MM-DD."),
       ));
       return;
     }
     widget.onSave({
-      "id": int.tryParse(idText) ?? idText,
       "nome": nomeCtrl.text,
       "sobrenome": sobrenomeCtrl.text,
       "cpf": cpfCtrl.text,
       "datanascimento": dataNascCtrl.text,
       "email": emailCtrl.text,
-      "telefone": telefoneCtrl.text,
-      "usuario": usuarioCtrl.text,
       "senha": senhaCtrl.text,
+      "telefone": telefoneCtrl.text,
     });
   }
 
@@ -527,7 +474,6 @@ class _PerfilModalState extends State<PerfilModal> {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        // Modal overlay
         Positioned.fill(
           child: Container(
             color: Colors.black54,
@@ -547,15 +493,13 @@ class _PerfilModalState extends State<PerfilModal> {
                 children: [
                   const Text("Editar Perfil", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
                   const SizedBox(height: 16),
-                  _inputField("ID", idCtrl, keyboardType: TextInputType.number, enabled: false),
                   _inputField("Nome", nomeCtrl),
                   _inputField("Sobrenome", sobrenomeCtrl),
                   _inputField("CPF", cpfCtrl),
                   _dateField("Data de Nascimento", dataNascCtrl),
                   _inputField("Email", emailCtrl, keyboardType: TextInputType.emailAddress),
-                  _inputField("Telefone", telefoneCtrl),
-                  _inputField("Tipo de Usuário", usuarioCtrl),
                   _inputField("Senha", senhaCtrl, obscureText: true),
+                  _inputField("Telefone", telefoneCtrl),
                   const SizedBox(height: 18),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -580,7 +524,10 @@ class _PerfilModalState extends State<PerfilModal> {
     );
   }
 
-  Widget _inputField(String label, TextEditingController ctrl, {TextInputType keyboardType = TextInputType.text, bool enabled = true, bool obscureText = false}) {
+  Widget _inputField(String label, TextEditingController ctrl,
+      {TextInputType keyboardType = TextInputType.text,
+      bool enabled = true,
+      bool obscureText = false}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: TextField(
