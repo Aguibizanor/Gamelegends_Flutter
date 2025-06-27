@@ -76,6 +76,11 @@ class _CadastroFormState extends State<CadastroForm> {
         'datanascimento': _formData['dataNascimento'],
       });
 
+      final cadastroData = json.encode({
+        ..._formData,
+        'datanascimento': _formData['dataNascimento'],
+      });
+
       try {
         final response = await http.post(
           Uri.parse('http://localhost:8080/cadastro'),
