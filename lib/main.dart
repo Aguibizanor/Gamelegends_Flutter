@@ -420,7 +420,7 @@ class _MainPrincipalState extends State<MainPrincipal> {
                               ),
                               const SizedBox(height: 12),
                               const Text(
-                                "Game Legends é uma plataforma dedicada a jogos indie, fornecendo uma maneira fácil para desenvolvedores distribuírem seus jogos e para jogadores descobrirem novas experiências.",
+                                "Game Legends é uma plataforma dedicadas a jogos indie, fornecendo uma maneira fácil para desenvolvedores distribuírem seus jogos e para jogadores descobrirem novas experiências.",
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 15,
