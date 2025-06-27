@@ -514,7 +514,7 @@ class _DescricaoEInfoState extends State<_DescricaoEInfo> {
                       '${mediaEstrelas.toStringAsFixed(1)} (${avaliacoes.length} avaliações)',
                       style: const TextStyle(color: Colors.grey),
                     ),
-                  ],
+                  ], 
                 ],
               ),
               const SizedBox(height: 12),
