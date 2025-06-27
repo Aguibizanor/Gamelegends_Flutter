@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
+
 
 // Função robusta para obter usuário logado, igual Navbar
 Future<Map<String, dynamic>?> getUsuarioLogado() async {

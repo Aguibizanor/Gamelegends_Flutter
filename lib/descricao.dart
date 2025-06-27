@@ -23,6 +23,19 @@ Future<int?> getClienteId() async {
   return prefs.getInt('clienteId');
 }
 
+// Função para obter usuário logado
+Future<Map<String, dynamic>?> getUsuarioLogado() async {
+  final prefs = await SharedPreferences.getInstance();
+  final usuarioStr = prefs.getString('usuario');
+  if (usuarioStr == null) return null;
+  try {
+    final usuarioMap = jsonDecode(usuarioStr) as Map<String, dynamic>;
+    return usuarioMap;
+  } catch (e) {
+    return {"nome": usuarioStr};
+  }
+}
+
 class PaginaDescricao extends StatefulWidget {
   const PaginaDescricao({Key? key}) : super(key: key);
 
@@ -54,33 +67,13 @@ class _PaginaDescricaoState extends State<PaginaDescricao> {
   }
 
   Future<void> buscarDadosUsuario() async {
-    idCliente = await getClienteId();
-    if (idCliente == null) {
-      setState(() {
-        usuarioLogado = false;
-        nomeUsuario = null;
-        cartoesUsuario = [];
-        cartaoSelecionadoId = null;
-      });
-      return;
-    }
-    // Buscar Cliente
-    final usuarioResp = await http.get(Uri.parse('$clienteApiUrl$idCliente'));
-    // Buscar cartões do cliente
-    final cartoesResp = await http.get(Uri.parse('$cartaoApiUrl$idCliente'));
-
-    if (usuarioResp.statusCode == 200 && cartoesResp.statusCode == 200) {
-      final usuario = jsonDecode(usuarioResp.body);
-      final cartoes = List<Map<String, dynamic>>.from(jsonDecode(cartoesResp.body));
+    final usuarioData = await getUsuarioLogado();
+    if (usuarioData != null && usuarioData['nome'] != null) {
       setState(() {
         usuarioLogado = true;
-        nomeUsuario = usuario['nome'];
-        cartoesUsuario = cartoes;
-        if (cartoesUsuario.isNotEmpty) {
-          cartaoSelecionadoId = cartoesUsuario.first['id'].toString();
-        } else {
-          cartaoSelecionadoId = null;
-        }
+        nomeUsuario = usuarioData['nome'];
+        cartoesUsuario = [];
+        cartaoSelecionadoId = null;
       });
     } else {
       setState(() {
@@ -235,6 +228,7 @@ class _PaginaDescricaoState extends State<PaginaDescricao> {
                                               abrirModalAvaliacao: usuarioLogado ? abrirModalAvaliacao : null,
                                               abrirModalDoacao: usuarioLogado ? abrirModalDoacao : null,
                                               usuarioLogado: usuarioLogado,
+                                              onAvaliacaoEnviada: () => setState(() {}),
                                             ),
                                           ),
                                         ],
@@ -277,6 +271,7 @@ class _PaginaDescricaoState extends State<PaginaDescricao> {
                                             abrirModalAvaliacao: usuarioLogado ? abrirModalAvaliacao : null,
                                             abrirModalDoacao: usuarioLogado ? abrirModalDoacao : null,
                                             usuarioLogado: usuarioLogado,
+                                            onAvaliacaoEnviada: () => setState(() {}),
                                           ),
                                         ],
                                       ),
@@ -395,16 +390,43 @@ class _PaginaDescricaoState extends State<PaginaDescricao> {
   }
 }
 
-class _DescricaoEInfo extends StatelessWidget {
+class _DescricaoEInfo extends StatefulWidget {
   final VoidCallback? abrirModalAvaliacao;
   final VoidCallback? abrirModalDoacao;
   final bool usuarioLogado;
+  final VoidCallback? onAvaliacaoEnviada;
 
   const _DescricaoEInfo({
     required this.abrirModalAvaliacao,
     required this.abrirModalDoacao,
     required this.usuarioLogado,
+    this.onAvaliacaoEnviada,
   });
+
+  @override
+  State<_DescricaoEInfo> createState() => _DescricaoEInfoState();
+}
+
+class _DescricaoEInfoState extends State<_DescricaoEInfo> {
+  List<Map<String, dynamic>> avaliacoes = [];
+  double mediaEstrelas = 0.0;
+  bool carregandoAvaliacoes = true;
+
+  @override
+  void initState() {
+    super.initState();
+    carregarAvaliacoes();
+  }
+
+  Future<void> carregarAvaliacoes() async {
+    final avaliacoesData = await buscarAvaliacoesJogo("Happy Cat Tavern");
+    final media = await buscarMediaEstrelas("Happy Cat Tavern");
+    setState(() {
+      avaliacoes = avaliacoesData;
+      mediaEstrelas = media;
+      carregandoAvaliacoes = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -458,7 +480,96 @@ class _DescricaoEInfo extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 20),
-        if (!usuarioLogado) ...[
+        
+        // Seção de Avaliações
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.grey[50],
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.grey[300]!),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Text(
+                    'Avaliações',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(width: 10),
+                  if (!carregandoAvaliacoes) ...[
+                    Row(
+                      children: List.generate(5, (index) {
+                        return Icon(
+                          index < mediaEstrelas.round() ? Icons.star : Icons.star_border,
+                          color: const Color(0xFFFFC107),
+                          size: 20,
+                        );
+                      }),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      '${mediaEstrelas.toStringAsFixed(1)} (${avaliacoes.length} avaliações)',
+                      style: const TextStyle(color: Colors.grey),
+                    ),
+                  ],
+                ],
+              ),
+              const SizedBox(height: 12),
+              if (carregandoAvaliacoes)
+                const Center(child: CircularProgressIndicator())
+              else if (avaliacoes.isEmpty)
+                const Text('Nenhuma avaliação ainda. Seja o primeiro!')
+              else
+                Column(
+                  children: avaliacoes.take(3).map((avaliacao) {
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.grey[200]!),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                avaliacao['nomeUsuario'] ?? 'Anônimo',
+                                style: const TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(width: 8),
+                              Row(
+                                children: List.generate(5, (index) {
+                                  return Icon(
+                                    index < (avaliacao['estrelas'] ?? 0) ? Icons.star : Icons.star_border,
+                                    color: const Color(0xFFFFC107),
+                                    size: 16,
+                                  );
+                                }),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            avaliacao['comentario'] ?? '',
+                            style: const TextStyle(color: Colors.black87),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
+            ],
+          ),
+        ),
+        
+        const SizedBox(height: 20),
+        if (!widget.usuarioLogado) ...[
           const Text(
             "Você precisa estar logado para avaliar ou doar.",
             style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
@@ -474,8 +585,8 @@ class _DescricaoEInfo extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               ),
-              child: const Text('Avaliações'),
-              onPressed: abrirModalAvaliacao,
+              child: const Text('Avaliar Jogo'),
+              onPressed: widget.abrirModalAvaliacao,
             ),
             const SizedBox(width: 10),
             ElevatedButton(
@@ -486,7 +597,7 @@ class _DescricaoEInfo extends StatelessWidget {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               ),
               child: const Text('Doações'),
-              onPressed: abrirModalDoacao,
+              onPressed: widget.abrirModalDoacao,
             ),
           ],
         ),
@@ -553,18 +664,45 @@ class _ModalImagem extends StatelessWidget {
 }
 
 // ENVIO DE AVALIAÇÃO
-Future<bool> enviarAvaliacaoParaBackend(int estrelas, String comentario, int? idCliente) async {
-  if (idCliente == null) return false;
+Future<bool> enviarAvaliacaoParaBackend(int estrelas, String comentario, String nomeUsuario) async {
   final response = await http.post(
     Uri.parse(avaliacaoApiUrl),
     headers: {"Content-Type": "application/json"},
     body: jsonEncode({
       "comentario": comentario,
-      "avalia": estrelas.toString(),
-      "fk_Cliente_ID": idCliente,
+      "estrelas": estrelas,
+      "nomeJogo": "Happy Cat Tavern",
+      "nomeUsuario": nomeUsuario,
+      "dataAvaliacao": DateTime.now().toIso8601String().split('T')[0],
     }),
   );
   return response.statusCode == 200 || response.statusCode == 201;
+}
+
+// BUSCAR AVALIAÇÕES DO JOGO
+Future<List<Map<String, dynamic>>> buscarAvaliacoesJogo(String nomeJogo) async {
+  try {
+    final response = await http.get(Uri.parse('$avaliacaoApiUrl/jogo/$nomeJogo'));
+    if (response.statusCode == 200) {
+      return List<Map<String, dynamic>>.from(jsonDecode(response.body));
+    }
+  } catch (e) {
+    print('Erro ao buscar avaliações: $e');
+  }
+  return [];
+}
+
+// BUSCAR MÉDIA DE ESTRELAS
+Future<double> buscarMediaEstrelas(String nomeJogo) async {
+  try {
+    final response = await http.get(Uri.parse('$avaliacaoApiUrl/media/$nomeJogo'));
+    if (response.statusCode == 200) {
+      return double.parse(response.body);
+    }
+  } catch (e) {
+    print('Erro ao buscar média: $e');
+  }
+  return 0.0;
 }
 
 // ENVIO DE DOAÇÃO
@@ -605,11 +743,11 @@ class _ModalAvaliacaoState extends State<_ModalAvaliacao> {
   final TextEditingController motivoController = TextEditingController();
 
   Future<void> enviarAvaliacao() async {
-    if (!widget.usuarioLogado || widget.idCliente == null) return;
+    if (!widget.usuarioLogado || widget.nomeUsuario == null) return;
     bool sucesso = await enviarAvaliacaoParaBackend(
       estrelasSelecionadas,
       motivoController.text.trim(),
-      widget.idCliente,
+      widget.nomeUsuario!,
     );
     setState(() {
       enviado = sucesso;
@@ -846,20 +984,19 @@ class _ModalDoacaoState extends State<_ModalDoacao> {
                                     ),
                                   ],
                                 )
-                              : DropdownButtonFormField<String>(
-                                  value: widget.cartaoSelecionadoId,
-                                  items: widget.cartoesUsuario
-                                      .map((cartao) => DropdownMenuItem(
-                                            value: cartao['id'].toString(),
-                                            child: Text(
-                                                '${cartao['bandeira'] ?? ""} - ${cartao['numC']?.toString().substring(cartao['numC'].toString().length - 4) ?? ""}'),
-                                          ))
-                                      .toList(),
-                                  onChanged: widget.onCartaoSelecionado,
-                                  decoration: const InputDecoration(
-                                    labelText: "Cartão para doação",
-                                    border: OutlineInputBorder(),
-                                    prefixIcon: Icon(Icons.credit_card),
+                              : Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    border: Border.all(color: Colors.grey),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const Text('Cartão para doação:', style: TextStyle(fontWeight: FontWeight.bold)),
+                                      const SizedBox(height: 8),
+                                      Text('Cartão Principal - ****1234'),
+                                    ],
                                   ),
                                 ),
                           const SizedBox(height: 12),
