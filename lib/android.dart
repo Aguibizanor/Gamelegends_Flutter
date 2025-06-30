@@ -112,16 +112,20 @@ class _AndroidPageState extends State<AndroidPage> {
     final isWide = MediaQuery.of(context).size.width > 900;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFE9E9E9),
-      appBar: Navbar(
-        searchController: _searchController,
-        isMenuOpen: menuAberto,
-        onMenuTap: toggleMenu,
-      ),
       body: Stack(
         children: [
           Column(
             children: [
+              Navbar(
+                searchController: _searchController,
+                isMenuOpen: menuAberto,
+                onMenuTap: toggleMenu,
+              ),
+              Expanded(
+                child: Container(
+                  color: const Color(0xFFE9E9E9),
+                  child: Column(
+                    children: [
               Expanded(
                 child: Row(
                   children: [
@@ -345,6 +349,10 @@ class _AndroidPageState extends State<AndroidPage> {
                   child: Text(
                     "© gamelegends.com | Feito pelo time do Game Legends",
                     style: TextStyle(color: Colors.white70),
+                  ),
+                ),
+              ),
+                    ],
                   ),
                 ),
               ),

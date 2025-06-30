@@ -169,18 +169,22 @@ class _MainPrincipalState extends State<MainPrincipal> {
     final isWide = MediaQuery.of(context).size.width > 900;
 
     return Scaffold(
-      appBar: Navbar(
-        isMenuOpen: menuAberto,
-        onMenuTap: () => setState(() => menuAberto = !menuAberto),
-        searchController: _searchController,
-      ),
-      backgroundColor: const Color(0xFFE9E9E9),
       body: Stack(
         children: [
-          isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : ListView(
-                  children: [
+          Column(
+            children: [
+              Navbar(
+                searchController: _searchController,
+                isMenuOpen: menuAberto,
+                onMenuTap: () => setState(() => menuAberto = !menuAberto),
+              ),
+              Expanded(
+                child: Container(
+                  color: const Color(0xFFE9E9E9),
+                  child: isLoading
+                      ? const Center(child: CircularProgressIndicator())
+                      : ListView(
+                          children: [
                     // Intro Section
                     Container(
                       padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 0),
@@ -432,8 +436,12 @@ class _MainPrincipalState extends State<MainPrincipal> {
                         ),
                       ),
                     ),
-                  ],
+                          ],
+                        ),
                 ),
+              ),
+            ],
+          ),
           // Mobile menu overlay
           if (!isWide && menuAberto)
             NavbarMobileMenu(
