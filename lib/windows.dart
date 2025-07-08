@@ -111,110 +111,112 @@ class _WindowsPageState extends State<WindowsPage> {
   @override
   Widget build(BuildContext context) {
     final isWide = MediaQuery.of(context).size.width > 900;
+    final sideBarOpen = isWide || isMobileOpen;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFE9E9E9),
-      appBar: Navbar(
-        searchController: _searchController,
-        isMenuOpen: menuAberto,
-        onMenuTap: toggleMenu,
-      ),
       body: Stack(
         children: [
           Column(
             children: [
+              Navbar(
+                searchController: _searchController,
+                isMenuOpen: menuAberto,
+                onMenuTap: toggleMenu,
+              ),
               Expanded(
-                child: Row(
-                  children: [
-                    // Barra lateral de filtros
-                    AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      width: isWide || isMobileOpen ? 260 : 0,
-                      child: isWide || isMobileOpen
-                          ? Drawer(
-                              elevation: 0,
-                              child: Container(
-                                color: Colors.white,
-                                child: ListView(
-                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
-                                  children: [
-                                    _buildSection(
-                                      "Gênero",
-                                      "genero",
-                                      [
-                                        _buildFilterLink(context, "Terror", Icons.sports_esports, "/terror"),
-                                        _buildFilterLink(context, "Esporte", Icons.sports_esports, "/esporte"),
-                                        _buildFilterLink(context, "Aventura", Icons.sports_esports, "/aventura"),
-                                        _buildFilterLink(context, "Educacional", Icons.sports_esports, "/educacional"),
-                                        _buildFilterLink(context, "Sobrevivência", Icons.sports_esports, "/sobrevivencia"),
-                                        _buildFilterLink(context, "Jogo de cartas", Icons.sports_esports, "/cartas"),
-                                      ],
-                                    ),
-                                    _buildSection(
-                                      "Plataformas",
-                                      "plataformas",
-                                      [
-                                        _buildFilterLink(context, "Windows", Icons.desktop_windows, "/windows"),
-                                        _buildFilterLink(context, "Mac OS", Icons.laptop_mac, "/macOs"),
-                                        _buildFilterLink(context, "Android", Icons.android, "/android"),
-                                        _buildFilterLink(context, "iOS", Icons.phone_iphone, "/iOS"),
-                                      ],
-                                    ),
-                                    _buildSection(
-                                      "Postagem",
-                                      "postagem",
-                                      [
-                                        _buildFilterLink(context, "Hoje", Icons.access_time, "/hoje"),
-                                        _buildFilterLink(context, "Essa semana", Icons.access_time, "/essaSemana"),
-                                        _buildFilterLink(context, "Esse mês", Icons.access_time, "/esseMes"),
-                                      ],
-                                    ),
-                                    _buildSection(
-                                      "Status",
-                                      "status",
-                                      [
-                                        _buildFilterLink(context, "Desenvolvido", Icons.flash_on, "/desenvolvido"),
-                                        _buildFilterLink(context, "Desenvolvendo", Icons.play_arrow, "/desenvolvendo"),
-                                      ],
-                                    ),
-                                  ],
+                child: Container(
+                  color: const Color(0xFFE9E9E9),
+                  child: Row(
+                    children: [
+                      // Barra lateral
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        width: sideBarOpen ? 260 : 0,
+                        child: sideBarOpen
+                            ? Drawer(
+                                elevation: 0,
+                                child: Container(
+                                  color: Colors.white,
+                                  child: ListView(
+                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+                                    children: [
+                                      _buildSection(
+                                        "Gênero",
+                                        "genero",
+                                        [
+                                          _buildFilterLink(context, "Terror", Icons.sports_esports, "/terror"),
+                                          _buildFilterLink(context, "Esporte", Icons.sports_esports, "/esporte"),
+                                          _buildFilterLink(context, "Aventura", Icons.sports_esports, "/aventura"),
+                                          _buildFilterLink(context, "Educacional", Icons.sports_esports, "/educacional"),
+                                          _buildFilterLink(context, "Sobrevivência", Icons.sports_esports, "/sobrevivencia"),
+                                          _buildFilterLink(context, "Jogo de cartas", Icons.sports_esports, "/cartas"),
+                                        ],
+                                      ),
+                                      _buildSection(
+                                        "Plataformas",
+                                        "plataformas",
+                                        [
+                                          _buildFilterLink(context, "Windows", Icons.desktop_windows, "/windows"),
+                                          _buildFilterLink(context, "Mac OS", Icons.laptop_mac, "/macOs"),
+                                          _buildFilterLink(context, "Android", Icons.android, "/android"),
+                                          _buildFilterLink(context, "iOS", Icons.phone_iphone, "/iOS"),
+                                        ],
+                                      ),
+                                      _buildSection(
+                                        "Postagem",
+                                        "postagem",
+                                        [
+                                          _buildFilterLink(context, "Hoje", Icons.access_time, "/hoje"),
+                                          _buildFilterLink(context, "Essa semana", Icons.access_time, "/essaSemana"),
+                                          _buildFilterLink(context, "Esse mês", Icons.access_time, "/esseMes"),
+                                        ],
+                                      ),
+                                      _buildSection(
+                                        "Status",
+                                        "status",
+                                        [
+                                          _buildFilterLink(context, "Desenvolvido", Icons.flash_on, "/desenvolvido"),
+                                          _buildFilterLink(context, "Desenvolvendo", Icons.play_arrow, "/desenvolvendo"),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            )
-                          : null,
-                    ),
-                    if (!isWide)
-                      Container(
-                        alignment: Alignment.topLeft,
-                        child: IconButton(
-                          icon: Icon(isMobileOpen ? Icons.chevron_left : Icons.chevron_right),
-                          onPressed: toggleMobileMenu,
+                              )
+                            : null,
+                      ),
+                      if (!isWide)
+                        Container(
+                          alignment: Alignment.topLeft,
+                          child: IconButton(
+                            icon: Icon(isMobileOpen ? Icons.chevron_left : Icons.chevron_right),
+                            onPressed: toggleMobileMenu,
+                          ),
+                        ),
+                      // Lista dos jogos do Windows
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 6),
+                          child: ListView.builder(
+                            padding: const EdgeInsets.all(10),
+                            itemCount: _windowsGames.length,
+                            itemBuilder: (context, index) {
+                              final game = _windowsGames[index];
+                              return _WindowsGameCard(
+                                img: (game.containsKey('img') && game['img'] != null) ? game['img'] as String : '',
+                                name: (game.containsKey('name') && game['name'] != null) ? game['name'] as String : '',
+                                user: (game.containsKey('user') && game['user'] != null) ? game['user'] as String : '',
+                                comments: (game['comments'] is List) ? List<String>.from(game['comments'] as List) : [],
+                                description: (game.containsKey('description') && game['description'] != null) ? game['description'] as String : '',
+                                onTap: () {},
+                                sidebarOpen: sideBarOpen,
+                              );
+                            },
+                          ),
                         ),
                       ),
-                    // Lista dos jogos do Windows no estilo dos cards de terror.dart
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 6),
-                        child: ListView.builder(
-                          padding: const EdgeInsets.all(10),
-                          itemCount: _windowsGames.length,
-                          itemBuilder: (context, index) {
-                            final game = _windowsGames[index];
-                            return _WindowsGameCard(
-                              img: (game.containsKey('img') && game['img'] != null) ? game['img'] as String : '',
-                              name: (game.containsKey('name') && game['name'] != null) ? game['name'] as String : '',
-                              user: (game.containsKey('user') && game['user'] != null) ? game['user'] as String : '',
-                              comments: (game['comments'] is List) ? List<String>.from(game['comments'] as List) : [],
-                              description: (game.containsKey('description') && game['description'] != null) ? game['description'] as String : '',
-                              onTap: () {
-                                // Pode abrir detalhes aqui
-                              },
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
               // Footer estiloso
@@ -411,7 +413,7 @@ class _WindowsPageState extends State<WindowsPage> {
   }
 }
 
-// Card customizado para Windows, com comentários e usuário (sem pai)
+// Card customizado para Windows, estilo desenvolvendo.dart
 class _WindowsGameCard extends StatelessWidget {
   final String img;
   final String name;
@@ -419,6 +421,7 @@ class _WindowsGameCard extends StatelessWidget {
   final List<String> comments;
   final String description;
   final VoidCallback onTap;
+  final bool sidebarOpen;
 
   const _WindowsGameCard({
     required this.img,
@@ -427,6 +430,7 @@ class _WindowsGameCard extends StatelessWidget {
     required this.comments,
     required this.description,
     required this.onTap,
+    required this.sidebarOpen,
   });
 
   @override

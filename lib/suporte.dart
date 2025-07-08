@@ -157,7 +157,7 @@ class _PaginaSuporteState extends State<PaginaSuporte> {
                         // Divisor
                         Container(
                           height: 1,
-                          color: Colors.white.withOpacity(0.3),
+                          color: Colors.white.withValues(alpha: 0.3),
                           margin: const EdgeInsets.symmetric(horizontal: 40),
                         ),
                         const SizedBox(height: 24),

@@ -12,7 +12,7 @@ import 'desenvolvendo.dart';
 import 'desenvolvido.dart';
 import 'educacional.dart';
 import 'esporte.dart';
-import 'essaSemana.dart';
+import 'essaSemana.dart' as essa_semana;
 import 'esseMes.dart';
 import 'hoje.dart';
 import 'macOs.dart';
@@ -50,7 +50,7 @@ class MyApp extends StatelessWidget {
         '/aventura': (context) => AventuraPage(),
         '/desenvolvendo': (context) => DesenvolvendoPage(),
         '/desenvolvido': (context) => DesenvolvidoPage(),
-        '/essaSemana': (context) => EssasemanaPage(),
+        '/essaSemana': (context) => essa_semana.EducacionalPage(),
         '/educacional': (context) => EducacionalPage(),
         '/esporte': (context) => EsportePage(),
         '/esseMes': (context) => EsseMesPage(),
@@ -65,8 +65,6 @@ class MyApp extends StatelessWidget {
         '/redefinir': (context) => PaginaRedefinirSenha(),
         '/perfil': (context) => PaginaPerfil(),
         '/descricao': (context) => PaginaDescricao(),
-        // Exemplo extra:
-        // '/descricao': (context) => const TelaDescricao(),
       },
     );
   }
@@ -89,7 +87,7 @@ class _MainPrincipalState extends State<MainPrincipal> {
   int? focusedIndex;
   Map<String, String> formData = {
     'email': "",
-    'usuario': "" // "Cliente" ou "Desenvolvedor"
+    'usuario': ""
   };
 
   @override
@@ -100,7 +98,6 @@ class _MainPrincipalState extends State<MainPrincipal> {
   }
 
   Future<void> _loadCarouselData() async {
-    // Dados dos jogos integrados conforme solicitado, com caminhos corretos!
     await Future.delayed(const Duration(milliseconds: 400));
     setState(() {
       data = [
@@ -112,7 +109,7 @@ class _MainPrincipalState extends State<MainPrincipal> {
         },
         {
           "id": 2,
-          "name": "Coop  Catacombs: Roguelike",
+          "name": "Coop Catacombs: Roguelike",
           "descricao": "Nas masmorras, acompanhando em todos os momentos e poderá presenciar os rastros de outros aventureiros.",
           "imagem": "assets/catacombs.png",
         },
@@ -185,265 +182,249 @@ class _MainPrincipalState extends State<MainPrincipal> {
                       ? const Center(child: CircularProgressIndicator())
                       : ListView(
                           children: [
-                    // Intro Section
-                    Container(
-                      padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 0),
-                      color: Colors.white,
-                      child: Center(
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 1200),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              // Texto Intro
-                              Expanded(
-                                flex: 4,
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                            Container(
+                              padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 0),
+                              color: Colors.white,
+                              child: Center(
+                                child: ConstrainedBox(
+                                  constraints: const BoxConstraints(maxWidth: 1200),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.center,
                                     children: [
-                                      const Text(
-                                        'EXPLORE O \nMUNDO\nDOS JOGOS',
-                                        style: TextStyle(
-                                          fontSize: 46,
-                                          fontWeight: FontWeight.bold,
-                                          color: Color(0xFF90017F),
-                                          height: 1.05,
+                                      Expanded(
+                                        flex: 4,
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              const Text(
+                                                'EXPLORE O \nMUNDO\nDOS JOGOS',
+                                                style: TextStyle(
+                                                  fontSize: 46,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Color(0xFF90017F),
+                                                  height: 1.05,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 18),
+                                              const Text(
+                                                'Venha conhecer \nnossa plataforma \nonde você poderá\nencontrar jogos\nda nossa comunidade.',
+                                                style: TextStyle(
+                                                  fontSize: 20,
+                                                  color: Colors.black87,
+                                                  height: 1.3,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 28),
+                                              ElevatedButton(
+                                                style: ElevatedButton.styleFrom(
+                                                  backgroundColor: const Color(0xFF90017F),
+                                                  foregroundColor: Colors.white,
+                                                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                                                  textStyle: const TextStyle(fontSize: 18),
+                                                ),
+                                                onPressed: () {
+                                                  Navigator.pushNamed(context, '/index');
+                                                },
+                                                child: const Row(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  children: [
+                                                    Text('Conheça'),
+                                                    SizedBox(width: 10),
+                                                    Icon(Icons.arrow_circle_right_outlined, size: 24),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                       ),
-                                      const SizedBox(height: 18),
-                                      const Text(
-                                        'Venha conhecer \nnossa plataforma \nonde você poderá\nencontrar jogos\nda nossa comunidade.',
-                                        style: TextStyle(
-                                          fontSize: 20,
-                                          color: Colors.black87,
-                                          height: 1.3,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 28),
-                                      ElevatedButton(
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: const Color(0xFF90017F),
-                                          foregroundColor: Colors.white,
-                                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                                          textStyle: const TextStyle(fontSize: 18),
-                                        ),
-                                        onPressed: () {
-                                          Navigator.pushNamed(context, '/');
-                                        },
-                                        child: const Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Text('Conheça'),
-                                            SizedBox(width: 10),
-                                            Icon(Icons.arrow_circle_right_outlined, size: 24),
-                                          ],
+                                      Expanded(
+                                        flex: 4,
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                                          child: Image.asset(
+                                            'assets/shadowdograu.png',
+                                            height: 380,
+                                            fit: BoxFit.contain,
+                                            errorBuilder: (c, o, s) => const FlutterLogo(size: 220),
+                                          ),
                                         ),
                                       ),
                                     ],
                                   ),
                                 ),
                               ),
-                              // Imagem
-                              Expanded(
-                                flex: 4,
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                                  child: Image.asset(
-                                    'assets/shadowdograu.png',
-                                    height: 380,
-                                    fit: BoxFit.contain,
-                                    errorBuilder: (c, o, s) => const FlutterLogo(size: 220),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    // Carrossel Section
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 30),
-                      child: Center(
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 1200),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              IconButton(
-                                iconSize: 48,
-                                onPressed: _handleLeftClick,
-                                icon: Image.asset('assets/left.png', height: 40),
-                              ),
-                              Expanded(
-                                child: SizedBox(
-                                  height: 320,
-                                  child: ScrollConfiguration(
-                                    behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
-                                    child: ListView.builder(
-                                      controller: _carouselController,
-                                      scrollDirection: Axis.horizontal,
-                                      itemCount: data.length,
-                                      itemBuilder: (context, index) {
-                                        final item = data[index];
-                                        final isFocused = index == focusedIndex;
-                                        return MouseRegion(
-                                          onEnter: (_) => _handleMouseEnter(index),
-                                          onExit: (_) => _handleMouseLeave(),
-                                          child: AnimatedContainer(
-                                            duration: const Duration(milliseconds: 180),
-                                            margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                                            width: isFocused ? 280 : 240,
-                                            decoration: BoxDecoration(
-                                              color: Colors.white,
-                                              borderRadius: BorderRadius.circular(16),
-                                              boxShadow: [
-                                                BoxShadow(
-                                                  color: Colors.black.withOpacity(isFocused ? 0.18 : 0.09),
-                                                  blurRadius: isFocused ? 24 : 10,
-                                                  spreadRadius: isFocused ? 5 : 2,
-                                                ),
-                                              ],
-                                              border: Border.all(
-                                                color: isFocused
-                                                    ? const Color(0xFF90017F)
-                                                    : Colors.transparent,
-                                                width: isFocused ? 2.4 : 1,
-                                              ),
-                                            ),
-                                            child: Column(
-                                              crossAxisAlignment: CrossAxisAlignment.center,
-                                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                              children: [
-                                                ClipRRect(
-                                                  borderRadius: BorderRadius.circular(12),
-                                                  child: Image.asset(
-                                                    item['imagem'] ?? '',
-                                                    height: 120,
-                                                    width: double.infinity,
-                                                    fit: BoxFit.cover,
-                                                    errorBuilder: (c, o, s) =>
-                                                        const FlutterLogo(size: 100),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 30),
+                              child: Center(
+                                child: ConstrainedBox(
+                                  constraints: const BoxConstraints(maxWidth: 1200),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      IconButton(
+                                        iconSize: 48,
+                                        onPressed: _handleLeftClick,
+                                        icon: const Icon(Icons.arrow_back_ios),
+                                      ),
+                                      Expanded(
+                                        child: SizedBox(
+                                          height: 320,
+                                          child: ListView.builder(
+                                            controller: _carouselController,
+                                            scrollDirection: Axis.horizontal,
+                                            itemCount: data.length,
+                                            itemBuilder: (context, index) {
+                                              final item = data[index];
+                                              final isFocused = index == focusedIndex;
+                                              return MouseRegion(
+                                                onEnter: (_) => _handleMouseEnter(index),
+                                                onExit: (_) => _handleMouseLeave(),
+                                                child: AnimatedContainer(
+                                                  duration: const Duration(milliseconds: 180),
+                                                  margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                                                  width: isFocused ? 280 : 240,
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.white,
+                                                    borderRadius: BorderRadius.circular(16),
+                                                    boxShadow: [
+                                                      BoxShadow(
+                                                        color: Colors.black.withValues(alpha: isFocused ? 0.18 : 0.09),
+                                                        blurRadius: isFocused ? 24 : 10,
+                                                        spreadRadius: isFocused ? 5 : 2,
+                                                      ),
+                                                    ],
+                                                    border: Border.all(
+                                                      color: isFocused ? const Color(0xFF90017F) : Colors.transparent,
+                                                      width: isFocused ? 2.4 : 1,
+                                                    ),
                                                   ),
-                                                ),
-                                                Padding(
-                                                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
                                                   child: Column(
-                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                                     children: [
-                                                      AnimatedDefaultTextStyle(
-                                                        duration: const Duration(milliseconds: 180),
-                                                        style: TextStyle(
-                                                          fontWeight: FontWeight.bold,
-                                                          fontSize: isFocused ? 20 : 18,
-                                                          color: const Color(0xFF90017F),
+                                                      ClipRRect(
+                                                        borderRadius: BorderRadius.circular(12),
+                                                        child: Image.asset(
+                                                          item['imagem'] ?? '',
+                                                          height: 120,
+                                                          width: double.infinity,
+                                                          fit: BoxFit.cover,
+                                                          errorBuilder: (c, o, s) => const FlutterLogo(size: 100),
                                                         ),
-                                                        child: Text(item['name'] ?? ''),
                                                       ),
-                                                      const SizedBox(height: 6),
-                                                      AnimatedDefaultTextStyle(
-                                                        duration: const Duration(milliseconds: 180),
-                                                        style: TextStyle(
-                                                          fontSize: isFocused ? 12 : 12,
-                                                          color: Colors.black87,
-                                                        ),
-                                                        child: Text(item['descricao'] ?? ''),
-                                                      ),
- 
-                                                      const SizedBox(height: 10),
-                                                      GestureDetector(
-                                                        onTap: () {
-                                                          Navigator.pushNamed(context, '/descricao');
-                                                        },
-                                                        child: Container(
-                                                          padding: const EdgeInsets.symmetric(
-                                                              horizontal: 16, vertical: 6),
-                                                          decoration: BoxDecoration(
-                                                            color: const Color(0xFF007BFF),
-                                                            borderRadius: BorderRadius.circular(8),
-                                                          ),
-                                                          child: const Row(
-                                                            mainAxisSize: MainAxisSize.min,
-                                                            children: [
-                                                              Text(
-                                                                'Veja Mais',
-                                                                style: TextStyle(
-                                                                    color: Colors.white,
-                                                                    fontWeight: FontWeight.w500),
+                                                      Padding(
+                                                        padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                                                        child: Column(
+                                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                                          children: [
+                                                            Text(
+                                                              item['name'] ?? '',
+                                                              style: TextStyle(
+                                                                fontWeight: FontWeight.bold,
+                                                                fontSize: isFocused ? 20 : 18,
+                                                                color: const Color(0xFF90017F),
                                                               ),
-                                                              SizedBox(width: 8),
-                                                              Icon(Icons.arrow_circle_right_outlined,
-                                                                  color: Colors.white, size: 20),
-                                                            ],
-                                                          ),
+                                                            ),
+                                                            const SizedBox(height: 6),
+                                                            Text(
+                                                              item['descricao'] ?? '',
+                                                              style: const TextStyle(
+                                                                fontSize: 12,
+                                                                color: Colors.black87,
+                                                              ),
+                                                            ),
+                                                            const SizedBox(height: 10),
+                                                            GestureDetector(
+                                                              onTap: () {
+                                                                Navigator.pushNamed(context, '/descricao');
+                                                              },
+                                                              child: Container(
+                                                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                                                                decoration: BoxDecoration(
+                                                                  color: const Color(0xFF007BFF),
+                                                                  borderRadius: BorderRadius.circular(8),
+                                                                ),
+                                                                child: const Row(
+                                                                  mainAxisSize: MainAxisSize.min,
+                                                                  children: [
+                                                                    Text(
+                                                                      'Veja Mais',
+                                                                      style: TextStyle(
+                                                                        color: Colors.white,
+                                                                        fontWeight: FontWeight.w500,
+                                                                      ),
+                                                                    ),
+                                                                    SizedBox(width: 8),
+                                                                    Icon(Icons.arrow_circle_right_outlined, color: Colors.white, size: 20),
+                                                                  ],
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ],
                                                         ),
                                                       ),
                                                     ],
                                                   ),
                                                 ),
-                                              ],
-                                            ),
+                                              );
+                                            },
                                           ),
-                                        );
-                                      },
-                                    ),
+                                        ),
+                                      ),
+                                      IconButton(
+                                        iconSize: 48,
+                                        onPressed: _handleRightClick,
+                                        icon: const Icon(Icons.arrow_forward_ios),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ),
-                              IconButton(
-                                iconSize: 48,
-                                onPressed: _handleRightClick,
-                                icon: Image.asset('assets/right.png', height: 40),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    // Footer
-                    Container(
-                      color: const Color(0xFF90017F),
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 0),
-                      child: Center(
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 1200),
-                          child: Column(
-                            children: [
-                              const Text(
-                                "GameLegends",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 32,
+                            ),
+                            Container(
+                              color: const Color(0xFF90017F),
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 0),
+                              child: Center(
+                                child: ConstrainedBox(
+                                  constraints: const BoxConstraints(maxWidth: 1200),
+                                  child: const Column(
+                                    children: [
+                                      Text(
+                                        "GameLegends",
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 32,
+                                        ),
+                                      ),
+                                      SizedBox(height: 12),
+                                      Text(
+                                        "Game Legends é uma plataforma dedicadas a jogos indie, fornecendo uma maneira fácil para desenvolvedores distribuírem seus jogos e para jogadores descobrirem novas experiências.",
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 15,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
-                              const SizedBox(height: 12),
-                              const Text(
-                                "Game Legends é uma plataforma dedicadas a jogos indie, fornecendo uma maneira fácil para desenvolvedores distribuírem seus jogos e para jogadores descobrirem novas experiências.",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 15,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
+                            ),
                           ],
                         ),
                 ),
               ),
             ],
           ),
-          // Mobile menu overlay
-          if (!isWide && menuAberto)
+          if (!isWide && menuAberto)   
             NavbarMobileMenu(
               closeMenu: () => setState(() => menuAberto = false),
               searchController: _searchController,

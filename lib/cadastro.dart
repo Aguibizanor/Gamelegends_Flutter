@@ -121,7 +121,7 @@ class _CadastroFormState extends State<CadastroForm> {
               borderRadius: BorderRadius.circular(10),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withValues(alpha: 0.1),
                   blurRadius: 10,
                   spreadRadius: 5,
                 ),
@@ -277,7 +277,7 @@ class _CadastroFormState extends State<CadastroForm> {
                             SizedBox(height: 24),
                             Container(
                               height: 1,
-                              color: Colors.white.withOpacity(0.3),
+                              color: Colors.white.withValues(alpha: 0.3),
                               margin: EdgeInsets.symmetric(horizontal: 40),
                             ),
                             SizedBox(height: 24),

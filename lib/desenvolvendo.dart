@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'navbar.dart';
 
 // Lista dos jogos para a categoria "Desenvolvendo" (agora com usuário, descrição e comentários!)
-// Removido o campo "pai"
 final _desenvolvendoGames = [
   {
     "img": "assets/insetin.png",
@@ -111,110 +110,115 @@ class _DesenvolvendoPageState extends State<DesenvolvendoPage> {
   @override
   Widget build(BuildContext context) {
     final isWide = MediaQuery.of(context).size.width > 900;
+    final sideBarOpen = isWide || isMobileOpen;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFE9E9E9),
-      appBar: Navbar(
-        searchController: _searchController,
-        isMenuOpen: menuAberto,
-        onMenuTap: toggleMenu,
-      ),
       body: Stack(
         children: [
           Column(
             children: [
+              Navbar(
+                searchController: _searchController,
+                isMenuOpen: menuAberto,
+                onMenuTap: toggleMenu,
+              ),
               Expanded(
-                child: Row(
-                  children: [
-                    // Barra lateral
-                    AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      width: isWide || isMobileOpen ? 260 : 0,
-                      child: isWide || isMobileOpen
-                          ? Drawer(
-                              elevation: 0,
-                              child: Container(
-                                color: Colors.white,
-                                child: ListView(
-                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
-                                  children: [
-                                    _buildSection(
-                                      "Gênero",
-                                      "genero",
-                                      [
-                                        _buildFilterLink(context, "Terror", Icons.sports_esports, "/terror"),
-                                        _buildFilterLink(context, "Esporte", Icons.sports_esports, "/esporte"),
-                                        _buildFilterLink(context, "Aventura", Icons.sports_esports, "/aventura"),
-                                        _buildFilterLink(context, "Educacional", Icons.sports_esports, "/educacional"),
-                                        _buildFilterLink(context, "Sobrevivência", Icons.sports_esports, "/sobrevivencia"),
-                                        _buildFilterLink(context, "Jogo de cartas", Icons.sports_esports, "/cartas"),
-                                      ],
-                                    ),
-                                    _buildSection(
-                                      "Plataformas",
-                                      "plataformas",
-                                      [
-                                        _buildFilterLink(context, "Windows", Icons.desktop_windows, "/windows"),
-                                        _buildFilterLink(context, "Mac OS", Icons.laptop_mac, "/macOs"),
-                                        _buildFilterLink(context, "Android", Icons.android, "/android"),
-                                        _buildFilterLink(context, "iOS", Icons.phone_iphone, "/iOS"),
-                                      ],
-                                    ),
-                                    _buildSection(
-                                      "Postagem",
-                                      "postagem",
-                                      [
-                                        _buildFilterLink(context, "Hoje", Icons.access_time, "/hoje"),
-                                        _buildFilterLink(context, "Essa semana", Icons.access_time, "/essaSemana"),
-                                        _buildFilterLink(context, "Esse mês", Icons.access_time, "/esseMes"),
-                                      ],
-                                    ),
-                                    _buildSection(
-                                      "Status",
-                                      "status",
-                                      [
-                                        _buildFilterLink(context, "Desenvolvido", Icons.flash_on, "/desenvolvido"),
-                                        _buildFilterLink(context, "Desenvolvendo", Icons.play_arrow, "/desenvolvendo"),
-                                      ],
-                                    ),
-                                  ],
+                child: Container(
+                  color: const Color(0xFFE9E9E9),
+                  child: Row(
+                    children: [
+                      // Barra lateral
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        width: sideBarOpen ? 260 : 0,
+                        child: sideBarOpen
+                            ? Drawer(
+                                elevation: 0,
+                                child: Container(
+                                  color: Colors.white,
+                                  child: ListView(
+                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+                                    children: [
+                                      _buildSection(
+                                        "Gênero",
+                                        "genero",
+                                        [
+                                          _buildFilterLink(context, "Terror", Icons.sports_esports, "/terror"),
+                                          _buildFilterLink(context, "Esporte", Icons.sports_esports, "/esporte"),
+                                          _buildFilterLink(context, "Aventura", Icons.sports_esports, "/aventura"),
+                                          _buildFilterLink(context, "Educacional", Icons.sports_esports, "/educacional"),
+                                          _buildFilterLink(context, "Sobrevivência", Icons.sports_esports, "/sobrevivencia"),
+                                          _buildFilterLink(context, "Jogo de cartas", Icons.sports_esports, "/cartas"),
+                                        ],
+                                      ),
+                                      _buildSection(
+                                        "Plataformas",
+                                        "plataformas",
+                                        [
+                                          _buildFilterLink(context, "Windows", Icons.desktop_windows, "/windows"),
+                                          _buildFilterLink(context, "Mac OS", Icons.laptop_mac, "/macOs"),
+                                          _buildFilterLink(context, "Android", Icons.android, "/android"),
+                                          _buildFilterLink(context, "iOS", Icons.phone_iphone, "/iOS"),
+                                        ],
+                                      ),
+                                      _buildSection(
+                                        "Postagem",
+                                        "postagem",
+                                        [
+                                          _buildFilterLink(context, "Hoje", Icons.access_time, "/hoje"),
+                                          _buildFilterLink(context, "Essa semana", Icons.access_time, "/essaSemana"),
+                                          _buildFilterLink(context, "Esse mês", Icons.access_time, "/esseMes"),
+                                        ],
+                                      ),
+                                      _buildSection(
+                                        "Status",
+                                        "status",
+                                        [
+                                          _buildFilterLink(context, "Desenvolvido", Icons.flash_on, "/desenvolvido"),
+                                          _buildFilterLink(context, "Desenvolvendo", Icons.play_arrow, "/desenvolvendo"),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            )
-                          : null,
-                    ),
-                    if (!isWide)
-                      Container(
-                        alignment: Alignment.topLeft,
-                        child: IconButton(
-                          icon: Icon(isMobileOpen ? Icons.chevron_left : Icons.chevron_right),
-                          onPressed: toggleMobileMenu,
+                              )
+                            : null,
+                      ),
+                      // Botão hamburguer mobile lateral
+                      if (!isWide)
+                        Container(
+                          alignment: Alignment.topLeft,
+                          child: IconButton(
+                            icon: Icon(isMobileOpen ? Icons.chevron_left : Icons.chevron_right),
+                            onPressed: toggleMobileMenu,
+                          ),
+                        ),
+                      // Lista dos jogos em desenvolvimento (com usuário, descrição e comentários)
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 6),
+                          child: ListView.builder(
+                            padding: const EdgeInsets.all(10),
+                            itemCount: _desenvolvendoGames.length,
+                            itemBuilder: (context, index) {
+                              final game = _desenvolvendoGames[index];
+                              return _DesenvolvendoGameCard(
+                                img: (game.containsKey('img') && game['img'] != null) ? game['img'] as String : '',
+                                name: (game.containsKey('name') && game['name'] != null) ? game['name'] as String : '',
+                                user: (game.containsKey('user') && game['user'] != null) ? game['user'] as String : '',
+                                comments: (game['comments'] is List) ? List<String>.from(game['comments'] as List) : [],
+                                description: (game.containsKey('description') && game['description'] != null) ? game['description'] as String : '',
+                                onTap: () {
+                                  // Navegue para a descrição se desejar
+                                },
+                                sidebarOpen: sideBarOpen,
+                              );
+                            },
+                          ),
                         ),
                       ),
-                    // Lista dos jogos em desenvolvimento (com usuário, descrição e comentários)
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 6),
-                        child: ListView.builder(
-                          padding: const EdgeInsets.all(10),
-                          itemCount: _desenvolvendoGames.length,
-                          itemBuilder: (context, index) {
-                            final game = _desenvolvendoGames[index];
-                            return _DesenvolvendoGameCard(
-                              img: (game.containsKey('img') && game['img'] != null) ? game['img'] as String : '',
-                              name: (game.containsKey('name') && game['name'] != null) ? game['name'] as String : '',
-                              user: (game.containsKey('user') && game['user'] != null) ? game['user'] as String : '',
-                              comments: (game['comments'] is List) ? List<String>.from(game['comments'] as List) : [],
-                              description: (game.containsKey('description') && game['description'] != null) ? game['description'] as String : '',
-                              onTap: () {
-                                // Navegue para a descrição se desejar
-                              },
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
               // Footer padrão estiloso
@@ -418,6 +422,7 @@ class _DesenvolvendoGameCard extends StatelessWidget {
   final List<String> comments;
   final String description;
   final VoidCallback onTap;
+  final bool sidebarOpen;
 
   const _DesenvolvendoGameCard({
     required this.img,
@@ -426,10 +431,56 @@ class _DesenvolvendoGameCard extends StatelessWidget {
     required this.comments,
     required this.description,
     required this.onTap,
+    required this.sidebarOpen,
   });
 
   @override
   Widget build(BuildContext context) {
+    if (sidebarOpen) {
+      // Apenas imagem grande e nome do jogo centralizado
+      return Center(
+        child: Card(
+          margin: const EdgeInsets.only(bottom: 20),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          elevation: 5,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(18),
+                  child: Image.asset(
+                    img,
+                    width: 180,
+                    height: 180,
+                    fit: BoxFit.cover,
+                    errorBuilder: (c, o, s) => Container(
+                      width: 180,
+                      height: 180,
+                      color: Colors.grey[200],
+                      alignment: Alignment.center,
+                      child: const Text("sem imagem", style: TextStyle(color: Colors.black38)),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  name,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 18,
+                    color: Color(0xFF90017F),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+    // Card completo com usuário, descrição e comentários
     return Card(
       margin: const EdgeInsets.only(bottom: 20),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
@@ -497,7 +548,6 @@ class _DesenvolvendoGameCard extends StatelessWidget {
                 ],
               ),
             ),
-            // Usuário e comentários (igual ao terror.dart, sem pai)
             if (user.isNotEmpty)
               Container(
                 margin: const EdgeInsets.only(left: 18, top: 2),
