@@ -227,7 +227,7 @@ class _MainPrincipalState extends State<MainPrincipal> {
                                                   textStyle: const TextStyle(fontSize: 18),
                                                 ),
                                                 onPressed: () {
-                                                  Navigator.pushNamed(context, '/index');
+                                                  Navigator.pushNamed(context, '/terror');
                                                 },
                                                 child: const Row(
                                                   mainAxisSize: MainAxisSize.min,
