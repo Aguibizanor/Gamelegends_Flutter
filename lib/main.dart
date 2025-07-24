@@ -50,7 +50,7 @@ class MyApp extends StatelessWidget {
         '/aventura': (context) => AventuraPage(),
         '/desenvolvendo': (context) => DesenvolvendoPage(),
         '/desenvolvido': (context) => DesenvolvidoPage(),
-        '/essaSemana': (context) => essa_semana.EducacionalPage(),
+        '/essaSemana': (context) => essa_semana.EssaSemanaPage(),
         '/educacional': (context) => EducacionalPage(),
         '/esporte': (context) => EsportePage(),
         '/esseMes': (context) => EsseMesPage(),
