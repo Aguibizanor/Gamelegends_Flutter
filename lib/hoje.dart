@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'navbar.dart';
 
 // Lista dos jogos para a categoria "Hoje" (agora com usuário, descrição e comentários!)
@@ -261,7 +262,7 @@ class _HojePageState extends State<HojePage> {
                                               children: [
                                                 IconButton(
                                                   icon: const Icon(Icons.facebook, color: Colors.white),
-                                                  onPressed: () {},
+                                                  onPressed: () => launchUrl(Uri.parse('https://www.facebook.com/profile.php?id=61578797307500')),
                                                 ),
                                                 IconButton(
                                                   icon: const Icon(Icons.camera_alt, color: Colors.white),
@@ -269,7 +270,7 @@ class _HojePageState extends State<HojePage> {
                                                 ),
                                                 IconButton(
                                                   icon: const Icon(Icons.alternate_email, color: Colors.white),
-                                                  onPressed: () {},
+                                                  onPressed: () => launchUrl(Uri.parse('https://www.instagram.com/game._legends/')),
                                                 ),
                                                 IconButton(
                                                   icon: const Icon(Icons.business, color: Colors.white),
@@ -277,41 +278,22 @@ class _HojePageState extends State<HojePage> {
                                                 ),
                                               ],
                                             ),
-                                          ],
-                                        ),
-                                      ),
-                                      // Links rápidos
-                                      SizedBox(
-                                        width: 220,
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            const Text("Links Rápidos",
+                                            const SizedBox(height: 16),
+                                            InkWell(
+                                              onTap: () => Navigator.pushNamed(context, '/privacidade'),
+                                              child: const Text(
+                                                "Conheça nossa política de privacidade",
                                                 style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 18)),
-                                            const SizedBox(height: 10),
-                                            ...[
-                                              "Eventos",
-                                              "Equipe",
-                                              "Missão",
-                                              "Serviços",
-                                              "Afiliados"
-                                            ].map((txt) => Padding(
-                                                  padding: const EdgeInsets.symmetric(vertical: 2),
-                                                  child: InkWell(
-                                                    onTap: () {},
-                                                    child: Text(
-                                                      txt,
-                                                      style: const TextStyle(
-                                                          color: Colors.white70, fontSize: 15),
-                                                    ),
-                                                  ),
-                                                )),
+                                                  color: Colors.white70,
+                                                  fontSize: 14,
+                                                  decoration: TextDecoration.underline,
+                                                ),
+                                              ),
+                                            ),
                                           ],
                                         ),
                                       ),
+
                                     ],
                                   ),
                                 ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'navbar.dart';
 import 'suporte.dart';
 import 'login.dart';
@@ -25,6 +26,7 @@ import 'mandaremail.dart';
 import 'redefinir.dart';
 import 'perfil.dart';
 import 'descricao.dart';
+import 'privacidade.dart';
 
 void main() {
   runApp(const MyApp());
@@ -65,6 +67,7 @@ class MyApp extends StatelessWidget {
         '/redefinir': (context) => PaginaRedefinirSenha(),
         '/perfil': (context) => PaginaPerfil(),
         '/descricao': (context) => PaginaDescricao(),
+        '/privacidade': (context) => PrivacidadePage(),
       },
     );
   }
@@ -388,33 +391,112 @@ class _MainPrincipalState extends State<MainPrincipal> {
                               ),
                             ),
                             Container(
-                              color: const Color(0xFF90017F),
                               width: double.infinity,
+                              color: const Color(0xFF90017F),
                               padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 0),
                               child: Center(
                                 child: ConstrainedBox(
                                   constraints: const BoxConstraints(maxWidth: 1200),
-                                  child: const Column(
+                                  child: Wrap(
+                                    runSpacing: 24,
+                                    spacing: 50,
                                     children: [
-                                      Text(
-                                        "GameLegends",
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 32,
+                                      // Sobre a plataforma
+                                      SizedBox(
+                                        width: 350,
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            const Text.rich(
+                                              TextSpan(
+                                                children: [
+                                                  TextSpan(
+                                                    text: "Game",
+                                                    style: TextStyle(fontWeight: FontWeight.bold),
+                                                  ),
+                                                  TextSpan(text: "Legends"),
+                                                ],
+                                              ),
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 26,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 10),
+                                            const Text(
+                                              "Game Legends é uma plataforma dedicada a jogos indie, fornecendo uma maneira fácil para desenvolvedores distribuírem seus jogos e para jogadores descobrirem novas experiências.",
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 15,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 16),
+                                            Row(
+                                              children: const [
+                                                Icon(Icons.phone, color: Colors.white70, size: 18),
+                                                SizedBox(width: 6),
+                                                Text(
+                                                  "(99) 99999-9999",
+                                                  style: TextStyle(color: Colors.white70),
+                                                ),
+                                                SizedBox(width: 18),
+                                                Icon(Icons.email, color: Colors.white70, size: 18),
+                                                SizedBox(width: 6),
+                                                Text(
+                                                  "info@gamelegends.com",
+                                                  style: TextStyle(color: Colors.white70),
+                                                ),
+                                              ],
+                                            ),
+                                            const SizedBox(height: 18),
+                                            Row(
+                                              children: [
+                                                IconButton(
+                                                  icon: const Icon(Icons.facebook, color: Colors.white),
+                                                  onPressed: () => launchUrl(Uri.parse('https://www.facebook.com/profile.php?id=61578797307500')),
+                                                ),
+                                                IconButton(
+                                                  icon: const Icon(Icons.camera_alt, color: Colors.white),
+                                                  onPressed: () {},
+                                                ),
+                                                IconButton(
+                                                  icon: const Icon(Icons.alternate_email, color: Colors.white),
+                                                  onPressed: () => launchUrl(Uri.parse('https://www.instagram.com/game._legends/')),
+                                                ),
+                                                IconButton(
+                                                  icon: const Icon(Icons.business, color: Colors.white),
+                                                  onPressed: () {},
+                                                ),
+                                              ],
+                                            ),
+                                            const SizedBox(height: 16),
+                                            InkWell(
+                                              onTap: () => Navigator.pushNamed(context, '/privacidade'),
+                                              child: const Text(
+                                                "Conheça nossa política de privacidade",
+                                                style: TextStyle(
+                                                  color: Colors.white70,
+                                                  fontSize: 14,
+                                                  decoration: TextDecoration.underline,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                      ),
-                                      SizedBox(height: 12),
-                                      Text(
-                                        "Game Legends é uma plataforma dedicadas a jogos indie, fornecendo uma maneira fácil para desenvolvedores distribuírem seus jogos e para jogadores descobrirem novas experiências.",
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 15,
-                                        ),
-                                        textAlign: TextAlign.center,
                                       ),
                                     ],
                                   ),
+                                ),
+                              ),
+                            ),
+                            Container(
+                              width: double.infinity,
+                              color: const Color(0xFF90017F),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              child: const Center(
+                                child: Text(
+                                  "© gamelegends.com | Feito pelo time do Game Legends",
+                                  style: TextStyle(color: Colors.white70),
                                 ),
                               ),
                             ),

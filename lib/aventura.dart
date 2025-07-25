@@ -276,37 +276,21 @@ class _AventuraPageState extends State<AventuraPage> {
                                     color: Colors.white.withOpacity(0.3),
                                     margin: const EdgeInsets.symmetric(horizontal: 40),
                                   ),
-                                  const SizedBox(height: 24),
-
-                                  // Links Rápidos
-                                  const Text(
-                                    "Links Rápidos",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
+                                  const SizedBox(height: 16),
+                                  InkWell(
+                                    onTap: () => Navigator.pushNamed(context, '/privacidade'),
+                                    child: const Text(
+                                      "Conheça nossa política de privacidade",
+                                      style: TextStyle(
+                                        color: Colors.white70,
+                                        fontSize: 14,
+                                        decoration: TextDecoration.underline,
+                                      ),
                                     ),
                                   ),
-                                  const SizedBox(height: 12),
+                                  const SizedBox(height: 24),
 
-                                  Column(
-                                    children: [
-                                      "Eventos",
-                                      "Equipe",
-                                      "Missão",
-                                      "Serviços",
-                                      "Afiliados"
-                                    ].map((txt) => Padding(
-                                      padding: const EdgeInsets.symmetric(vertical: 4),
-                                      child: Text(
-                                        txt,
-                                        style: const TextStyle(
-                                          color: Colors.white70,
-                                          fontSize: 15,
-                                        ),
-                                      ),
-                                    )).toList(),
-                                  ),
+
                                 ],
                               ),
                             ),

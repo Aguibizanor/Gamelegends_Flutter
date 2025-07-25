@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:url_launcher/url_launcher.dart';
 import 'navbar.dart';
 
 class PaginaLogin extends StatefulWidget {
@@ -90,6 +91,10 @@ class _PaginaLoginState extends State<PaginaLogin> {
   void toggleMenu() => setState(() => menuAberto = !menuAberto);
   void closeMenu() => setState(() => menuAberto = false);
 
+  Future<void> salvarUsuarioLogado({required String nome, required String tipo}) async {
+    print('Usuário logado: $nome, Tipo: $tipo');
+  }
+
   @override
   void dispose() {
     emailController.dispose();
@@ -111,243 +116,261 @@ class _PaginaLoginState extends State<PaginaLogin> {
                 onMenuTap: toggleMenu,
               ),
               Expanded(
-                child: SingleChildScrollView(
-                  child: Container(
-                    padding: EdgeInsets.symmetric(vertical: 40, horizontal: 8),
-                    child: Center(
-                      child: Container(
-                        constraints: BoxConstraints(maxWidth: 700),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            if (MediaQuery.of(context).size.width > 700)
-                              Expanded(
-                                child: Padding(
-                                  padding: const EdgeInsets.only(right: 16.0),
-                                  child: Image.asset(
-                                    'assets/stardew.png',
-                                    width: 120,
-                                    height: 120,
+                child: ListView(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.symmetric(vertical: 40, horizontal: 8),
+                      child: Center(
+                        child: Container(
+                          constraints: BoxConstraints(maxWidth: 700),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              if (MediaQuery.of(context).size.width > 700)
+                                Expanded(
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(right: 16.0),
+                                    child: Image.asset(
+                                      'assets/stardew.png',
+                                      width: 120,
+                                      height: 120,
+                                    ),
                                   ),
                                 ),
-                              ),
-                            Expanded(
-                              flex: 2,
-                              child: Container(
-                                padding: EdgeInsets.all(24),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(10),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black12,
-                                      blurRadius: 8,
-                                      offset: Offset(0, 2),
-                                    )
-                                  ],
-                                ),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      "Login",
-                                      style: TextStyle(
-                                        fontSize: 28,
-                                        fontWeight: FontWeight.bold,
-                                        foreground: Paint()
-                                          ..shader = LinearGradient(
-                                            colors: [
-                                              Color(0xFF90017F),
-                                              Color(0xFF05B7E7)
-                                            ],
-                                          ).createShader(
-                                            Rect.fromLTWH(0, 0, 200, 70)),
-                                      ),
-                                    ),
-                                    SizedBox(height: 24),
-                                    TextField(
-                                      controller: emailController,
-                                      keyboardType: TextInputType.emailAddress,
-                                      decoration: InputDecoration(
-                                        labelText: "Email",
-                                        border: OutlineInputBorder(),
-                                        hintText: "Ex: exemplo@yahoo.com",
-                                      ),
-                                    ),
-                                    SizedBox(height: 16),
-                                    TextField(
-                                      controller: senhaController,
-                                      obscureText: true,
-                                      decoration: InputDecoration(
-                                        labelText: "Senha",
-                                        border: OutlineInputBorder(),
-                                        hintText: "Senha",
-                                      ),
-                                    ),
-                                    if (errorMessage != null)
-                                      Padding(
-                                        padding: const EdgeInsets.symmetric(vertical: 12),
-                                        child: Text(
-                                          errorMessage!,
-                                          style: TextStyle(color: Colors.red),
+                              Expanded(
+                                flex: 2,
+                                child: Container(
+                                  padding: EdgeInsets.all(24),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(10),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black12,
+                                        blurRadius: 8,
+                                        offset: Offset(0, 2),
+                                      )
+                                    ],
+                                  ),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        "Login",
+                                        style: TextStyle(
+                                          fontSize: 28,
+                                          fontWeight: FontWeight.bold,
+                                          foreground: Paint()
+                                            ..shader = LinearGradient(
+                                              colors: [
+                                                Color(0xFF90017F),
+                                                Color(0xFF05B7E7)
+                                              ],
+                                            ).createShader(
+                                              Rect.fromLTWH(0, 0, 200, 70)),
                                         ),
                                       ),
-                                    SizedBox(height: 16),
-                                    loading
-                                        ? CircularProgressIndicator(
-                                            color: Color(0xFF90017F),
-                                          )
-                                        : SizedBox(
-                                            width: double.infinity,
-                                            child: ElevatedButton(
-                                              onPressed: loading
-                                                  ? null
-                                                  : () => handleLogin(context),
-                                              style: ElevatedButton.styleFrom(
-                                                backgroundColor: Color(0xFF90017F),
-                                                padding: EdgeInsets.symmetric(vertical: 14),
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius: BorderRadius.circular(50),
+                                      SizedBox(height: 24),
+                                      TextField(
+                                        controller: emailController,
+                                        keyboardType: TextInputType.emailAddress,
+                                        decoration: InputDecoration(
+                                          labelText: "Email",
+                                          border: OutlineInputBorder(),
+                                          hintText: "Ex: exemplo@yahoo.com",
+                                        ),
+                                      ),
+                                      SizedBox(height: 16),
+                                      TextField(
+                                        controller: senhaController,
+                                        obscureText: true,
+                                        decoration: InputDecoration(
+                                          labelText: "Senha",
+                                          border: OutlineInputBorder(),
+                                          hintText: "Senha",
+                                        ),
+                                      ),
+                                      if (errorMessage != null)
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(vertical: 12),
+                                          child: Text(
+                                            errorMessage!,
+                                            style: TextStyle(color: Colors.red),
+                                          ),
+                                        ),
+                                      SizedBox(height: 16),
+                                      loading
+                                          ? CircularProgressIndicator(
+                                              color: Color(0xFF90017F),
+                                            )
+                                          : SizedBox(
+                                              width: double.infinity,
+                                              child: ElevatedButton(
+                                                onPressed: loading
+                                                    ? null
+                                                    : () => handleLogin(context),
+                                                style: ElevatedButton.styleFrom(
+                                                  backgroundColor: Color(0xFF90017F),
+                                                  padding: EdgeInsets.symmetric(vertical: 14),
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius: BorderRadius.circular(50),
+                                                  ),
+                                                ),
+                                                child: Text(
+                                                  "LOGIN",
+                                                  style: TextStyle(
+                                                      fontWeight: FontWeight.bold,
+                                                      fontSize: 16,
+                                                      color: Colors.white),
                                                 ),
                                               ),
-                                              child: Text(
-                                                "LOGIN",
-                                                style: TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 16),
-                                              ),
                                             ),
-                                          ),
-                                    SizedBox(height: 8),
-                                    TextButton(
-                                      onPressed: () =>
-                                          Navigator.pushNamed(context, '/cadastro'),
-                                      child: Text(
-                                        "Ainda não tem conta? Cadastre-se",
-                                        style: TextStyle(color: Colors.blue),
+                                      SizedBox(height: 8),
+                                      TextButton(
+                                        onPressed: () =>
+                                            Navigator.pushNamed(context, '/cadastro'),
+                                        child: Text(
+                                          "Ainda não tem conta? Cadastre-se",
+                                          style: TextStyle(color: Colors.blue),
+                                        ),
                                       ),
-                                    ),
-                                    TextButton(
-                                      onPressed: () =>
-                                          Navigator.pushNamed(context, '/mandaremail'),
-                                      child: Text(
-                                        "Esqueceu a senha? Redefinir senha",
-                                        style: TextStyle(color: Colors.blue),
+                                      TextButton(
+                                        onPressed: () =>
+                                            Navigator.pushNamed(context, '/mandaremail'),
+                                        child: Text(
+                                          "Esqueceu a senha? Redefinir senha",
+                                          style: TextStyle(color: Colors.blue),
+                                        ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            if (MediaQuery.of(context).size.width > 700)
-                              Expanded(
-                                child: Padding(
-                                  padding: const EdgeInsets.only(left: 16.0),
-                                  child: Image.asset(
-                                    'assets/stardew.png',
-                                    width: 120,
-                                    height: 120,
+                                    ],
                                   ),
                                 ),
                               ),
-                          ],
+                              if (MediaQuery.of(context).size.width > 700)
+                                Expanded(
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(left: 16.0),
+                                    child: Image.asset(
+                                      'assets/stardew.png',
+                                      width: 120,
+                                      height: 120,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ),
-              ),
-              // Rodapé igual ao seu
-              Container(
-                color: Color(0xFF90017F),
-                padding: EdgeInsets.symmetric(vertical: 28, horizontal: 8),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                    const SizedBox(height: 30),
+                    Container(
+                      width: double.infinity,
+                      color: const Color(0xFF90017F),
+                      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 0),
+                      child: Center(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 1200),
+                          child: Wrap(
+                            runSpacing: 24,
+                            spacing: 50,
                             children: [
-                              Text.rich(
-                                TextSpan(
+                              SizedBox(
+                                width: 350,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    TextSpan(
-                                      text: "Game",
+                                    const Text.rich(
+                                      TextSpan(
+                                        children: [
+                                          TextSpan(
+                                            text: "Game",
+                                            style: TextStyle(fontWeight: FontWeight.bold),
+                                          ),
+                                          TextSpan(text: "Legends"),
+                                        ],
+                                      ),
                                       style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 24,
-                                          color: Colors.white),
+                                        color: Colors.white,
+                                        fontSize: 26,
+                                      ),
                                     ),
-                                    TextSpan(
-                                      text: "Legends",
+                                    const SizedBox(height: 10),
+                                    const Text(
+                                      "Game Legends é uma plataforma dedicada a jogos indie, fornecendo uma maneira fácil para desenvolvedores distribuírem seus jogos e para jogadores descobrirem novas experiências.",
                                       style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 24,
-                                          color: Color(0xFF05B7E7)),
+                                        color: Colors.white,
+                                        fontSize: 15,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 16),
+                                    Row(
+                                      children: const [
+                                        Icon(Icons.phone, color: Colors.white70, size: 18),
+                                        SizedBox(width: 6),
+                                        Text(
+                                          "(99) 99999-9999",
+                                          style: TextStyle(color: Colors.white70),
+                                        ),
+                                        SizedBox(width: 18),
+                                        Icon(Icons.email, color: Colors.white70, size: 18),
+                                        SizedBox(width: 6),
+                                        Text(
+                                          "info@gamelegends.com",
+                                          style: TextStyle(color: Colors.white70),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 18),
+                                    Row(
+                                      children: [
+                                        IconButton(
+                                          icon: const Icon(Icons.facebook, color: Colors.white),
+                                          onPressed: () => launchUrl(Uri.parse('https://www.facebook.com/profile.php?id=61578797307500')),
+                                        ),
+                                        IconButton(
+                                          icon: const Icon(Icons.camera_alt, color: Colors.white),
+                                          onPressed: () {},
+                                        ),
+                                        IconButton(
+                                          icon: const Icon(Icons.alternate_email, color: Colors.white),
+                                          onPressed: () => launchUrl(Uri.parse('https://www.instagram.com/game._legends/')),
+                                        ),
+                                        IconButton(
+                                          icon: const Icon(Icons.business, color: Colors.white),
+                                          onPressed: () {},
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 16),
+                                    InkWell(
+                                      onTap: () => Navigator.pushNamed(context, '/privacidade'),
+                                      child: const Text(
+                                        "Conheça nossa política de privacidade",
+                                        style: TextStyle(
+                                          color: Colors.white70,
+                                          fontSize: 14,
+                                          decoration: TextDecoration.underline,
+                                        ),
+                                      ),
                                     ),
                                   ],
                                 ),
                               ),
-                              SizedBox(height: 8),
-                              Text(
-                                "Game Legends é uma plataforma dedicada a jogos indie, fornecendo uma maneira fácil para desenvolvedores distribuírem seus jogos e para jogadores descobrirem novas experiências.",
-                                style: TextStyle(color: Colors.white),
-                              ),
-                              SizedBox(height: 10),
-                              Row(
-                                children: [
-                                  Icon(Icons.phone, color: Colors.white, size: 16),
-                                  SizedBox(width: 4),
-                                  Text("(99) 99999-9999", style: TextStyle(color: Colors.white)),
-                                  SizedBox(width: 14),
-                                  Icon(Icons.email, color: Colors.white, size: 16),
-                                  SizedBox(width: 4),
-                                  Text("info@gamelegends.com", style: TextStyle(color: Colors.white)),
-                                ],
-                              ),
-                              SizedBox(height: 12),
-                              Row(
-                                children: [
-                                  Icon(Icons.facebook, color: Colors.white),
-                                  SizedBox(width: 8),
-                                  Icon(Icons.camera, color: Colors.white),
-                                  SizedBox(width: 8),
-                                  Icon(Icons.alternate_email, color: Colors.white),
-                                  SizedBox(width: 8),
-                                  Icon(Icons.linked_camera, color: Colors.white),
-                                ],
-                              ),
                             ],
                           ),
                         ),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text("Links Rápidos",
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 18)),
-                              SizedBox(height: 8),
-                              Text("Eventos", style: TextStyle(color: Colors.white)),
-                              Text("Equipe", style: TextStyle(color: Colors.white)),
-                              Text("Missão", style: TextStyle(color: Colors.white)),
-                              Text("Serviços", style: TextStyle(color: Colors.white)),
-                              Text("Afiliados", style: TextStyle(color: Colors.white)),
-                            ],
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
-                    SizedBox(height: 16),
-                    Divider(color: Colors.white54),
-                    SizedBox(height: 8),
-                    Text(
-                      "© gamelegends.com | Feito pelo time do Game Legends",
-                      style: TextStyle(color: Colors.white70),
-                      textAlign: TextAlign.center,
+                    Container(
+                      width: double.infinity,
+                      color: const Color(0xFF90017F),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: const Center(
+                        child: Text(
+                          "© gamelegends.com | Feito pelo time do Game Legends",
+                          style: TextStyle(color: Colors.white70),
+                        ),
+                      ),
                     ),
                   ],
                 ),
