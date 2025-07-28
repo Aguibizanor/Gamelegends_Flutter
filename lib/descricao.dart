@@ -23,6 +23,8 @@ Future<int?> getClienteId() async {
   return prefs.getInt('clienteId');
 }
 
+
+
 class PaginaDescricao extends StatefulWidget {
   const PaginaDescricao({Key? key}) : super(key: key);
 
@@ -486,7 +488,7 @@ class _DescricaoEInfoState extends State<_DescricaoEInfo> {
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(width: 10),
-                  if (!carregandoAvaliacoes) ..[
+                  if (!carregandoAvaliacoes) ...[
                     Row(
                       children: List.generate(5, (index) {
                         return Icon(

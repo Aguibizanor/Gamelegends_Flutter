@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'navbar.dart';
 
 /// Função para buscar o id do cliente do storage (caso precise associar o cartão ao cliente)
 Future<int?> getClienteId() async {
@@ -19,7 +18,6 @@ Future<bool> cadastrarCartao({
   required String bandeira,
 }) async {
   const String baseUrl = "http://10.0.2.2:8080"; // Troque para seu IP se for no celular real
-  final idCliente = await getClienteId(); // Se quiser associar ao cliente
 
   // Se o backend espera o id do cliente no JSON, descomente e envie "fk_Cliente_ID": idCliente
   final Map<String, dynamic> data = {

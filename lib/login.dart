@@ -50,9 +50,10 @@ class _PaginaLoginState extends State<PaginaLogin> {
       if (response.statusCode == 200) {
         final responseMap = jsonDecode(response.body);
 
+        // Salvar dados completos do usuário
         await salvarUsuarioLogado(
           nome: responseMap['nome'] ?? '',
-          tipo: responseMap['tipo'] ?? '',
+          tipo: responseMap['usuario'] ?? responseMap['tipo'] ?? 'Cliente',
         );
 
         if (!mounted) return;
@@ -91,9 +92,7 @@ class _PaginaLoginState extends State<PaginaLogin> {
   void toggleMenu() => setState(() => menuAberto = !menuAberto);
   void closeMenu() => setState(() => menuAberto = false);
 
-  Future<void> salvarUsuarioLogado({required String nome, required String tipo}) async {
-    print('Usuário logado: $nome, Tipo: $tipo');
-  }
+
 
   @override
   void dispose() {

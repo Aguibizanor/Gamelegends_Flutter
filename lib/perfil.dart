@@ -85,6 +85,14 @@ class _PaginaPerfilState extends State<PaginaPerfil> {
     _showDialog("Perfil atualizado com sucesso!");
   }
   
+  Future<void> _handleLogout() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('usuario');
+    _showDialog("Logout realizado com sucesso!", onClose: () {
+      Navigator.pushReplacementNamed(context, '/');
+    });
+  }
+
   Future<void> _handleDelete() async {
     showDialog(
       context: context,
@@ -103,7 +111,7 @@ class _PaginaPerfilState extends State<PaginaPerfil> {
               SharedPreferences prefs = await SharedPreferences.getInstance();
               await prefs.remove('usuario');
               _showDialog("Perfil excluído com sucesso!", onClose: () {
-                Navigator.pushReplacementNamed(context, '/Login');
+                Navigator.pushReplacementNamed(context, '/login');
               });
             },
             child: const Text("Excluir", style: TextStyle(color: Colors.white)),
@@ -276,6 +284,11 @@ class _PaginaPerfilState extends State<PaginaPerfil> {
                                   style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF90017F)),
                                   onPressed: _handleEdit,
                                   child: const Text("Editar Perfil", style: TextStyle(color: Colors.white)),
+                                ),
+                                ElevatedButton(
+                                  style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+                                  onPressed: _handleLogout,
+                                  child: const Text("Logout", style: TextStyle(color: Colors.white)),
                                 ),
                                 ElevatedButton(
                                   style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
