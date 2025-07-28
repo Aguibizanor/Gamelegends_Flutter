@@ -35,14 +35,17 @@ class _PaginaSobreState extends State<PaginaSobre> {
 
     return Scaffold(
       backgroundColor: const Color(0xFFE9E9E9),
-      appBar: Navbar(
-        searchController: _searchController,
-        isMenuOpen: menuAberto,
-        onMenuTap: toggleMenu,
-      ),
       body: Stack(
         children: [
-          ListView(
+          Column(
+            children: [
+              Navbar(
+                searchController: _searchController,
+                isMenuOpen: menuAberto,
+                onMenuTap: toggleMenu,
+              ),
+              Expanded(
+                child: ListView(
             children: [
               // Header visual (equivalente ao background com Pessoas.png)
               Container(
@@ -268,6 +271,9 @@ class _PaginaSobreState extends State<PaginaSobre> {
                     style: TextStyle(color: Colors.white70),
                   ),
                 ),
+              ),
+            ],
+          ),
               ),
             ],
           ),

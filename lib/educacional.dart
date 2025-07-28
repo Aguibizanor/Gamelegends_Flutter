@@ -115,13 +115,15 @@ class _EducacionalPageState extends State<EducacionalPage> {
     final sideBarOpen = isWide || isMobileOpen;
 
     return Scaffold(
-      body: Column(
+      body: Stack(
         children: [
-          Navbar(
-            searchController: _searchController,
-            isMenuOpen: menuAberto,
-            onMenuTap: toggleMenu,
-          ),
+          Column(
+            children: [
+              Navbar(
+                searchController: _searchController,
+                isMenuOpen: menuAberto,
+                onMenuTap: toggleMenu,
+              ),
           Expanded(
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -335,16 +337,15 @@ class _EducacionalPageState extends State<EducacionalPage> {
               ],
             ),
           ),
-        ],
-      ),
-      
-      // Menu mobile overlay do topo
-      endDrawer: !isWide && menuAberto
-          ? NavbarMobileMenu(
+            ],
+          ),
+          if (!isWide && menuAberto)
+            NavbarMobileMenu(
               closeMenu: () => setState(() => menuAberto = false),
               searchController: _searchController,
-            )
-          : null,
+            ),
+        ],
+      ),
     );
   }
 

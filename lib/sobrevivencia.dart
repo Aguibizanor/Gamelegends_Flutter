@@ -116,13 +116,15 @@ class _SobrevivenciaPageState extends State<SobrevivenciaPage> {
     final sideBarOpen = isWide || isMobileOpen;
 
     return Scaffold(
-      body: Column(
+      body: Stack(
         children: [
-          Navbar(
-            searchController: _searchController,
-            isMenuOpen: menuAberto,
-            onMenuTap: toggleMenu,
-          ),
+          Column(
+            children: [
+              Navbar(
+                searchController: _searchController,
+                isMenuOpen: menuAberto,
+                onMenuTap: toggleMenu,
+              ),
           Expanded(
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -337,16 +339,15 @@ class _SobrevivenciaPageState extends State<SobrevivenciaPage> {
               ],
             ),
           ),
-        ],
-      ),
-      
-      // Menu mobile overlay do topo (hambúrguer)
-      endDrawer: !isWide && menuAberto
-          ? NavbarMobileMenu(
+            ],
+          ),
+          if (!isWide && menuAberto)
+            NavbarMobileMenu(
               closeMenu: () => setState(() => menuAberto = false),
               searchController: _searchController,
-            )
-          : null,
+            ),
+        ],
+      ),
     );
   }
 
@@ -421,6 +422,49 @@ class _SobrevivenciaGameCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (sidebarOpen) {
+      return Center(
+        child: Card(
+          margin: const EdgeInsets.only(bottom: 20),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          elevation: 5,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(18),
+                  child: Image.asset(
+                    img,
+                    width: 180,
+                    height: 180,
+                    fit: BoxFit.cover,
+                    errorBuilder: (c, o, s) => Container(
+                      width: 180,
+                      height: 180,
+                      color: Colors.grey[200],
+                      alignment: Alignment.center,
+                      child: const Text("sem imagem", style: TextStyle(color: Colors.black38)),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  name,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 18,
+                    color: Color(0xFF90017F),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
     return Card(
       margin: const EdgeInsets.only(bottom: 20),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),

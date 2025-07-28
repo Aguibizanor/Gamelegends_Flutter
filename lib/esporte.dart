@@ -116,13 +116,15 @@ class _EsportePageState extends State<EsportePage> {
     final sideBarOpen = isWide || isMobileOpen;
 
     return Scaffold(
-      body: Column(
+      body: Stack(
         children: [
-          Navbar(
-            searchController: _searchController,
-            isMenuOpen: menuAberto,
-            onMenuTap: toggleMenu,
-          ),
+          Column(
+            children: [
+              Navbar(
+                searchController: _searchController,
+                isMenuOpen: menuAberto,
+                onMenuTap: toggleMenu,
+              ),
           Expanded(
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -337,16 +339,15 @@ class _EsportePageState extends State<EsportePage> {
               ],
             ),
           ),
-        ],
-      ),
-      
-      // Menu mobile overlay do topo (hambúrguer)
-      endDrawer: !isWide && menuAberto
-          ? NavbarMobileMenu(
+            ],
+          ),
+          if (!isWide && menuAberto)
+            NavbarMobileMenu(
               closeMenu: () => setState(() => menuAberto = false),
               searchController: _searchController,
-            )
-          : null,
+            ),
+        ],
+      ),
     );
   }
 

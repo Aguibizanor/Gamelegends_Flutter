@@ -63,14 +63,17 @@ class _PaginaSuporteState extends State<PaginaSuporte> {
  
     return Scaffold(
       backgroundColor: const Color(0xFFE9E9E9),
-      appBar: Navbar(
-        isMenuOpen: menuAberto,
-        onMenuTap: () => setState(() => menuAberto = !menuAberto),
-        searchController: _searchController,
-      ),
       body: Stack(
         children: [
-          ListView(
+          Column(
+            children: [
+              Navbar(
+                isMenuOpen: menuAberto,
+                onMenuTap: () => setState(() => menuAberto = !menuAberto),
+                searchController: _searchController,
+              ),
+              Expanded(
+                child: ListView(
             children: [
               // FAQ Section
               Container(
@@ -210,6 +213,9 @@ class _PaginaSuporteState extends State<PaginaSuporte> {
                     style: TextStyle(color: Colors.white70),
                   ),
                 ),
+              ),
+            ],
+          ),
               ),
             ],
           ),

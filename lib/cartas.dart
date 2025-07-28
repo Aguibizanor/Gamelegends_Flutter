@@ -116,17 +116,19 @@ class _CartasPageState extends State<CartasPage> {
     final sideBarOpen = isWide || isMobileOpen;
 
     return Scaffold(
-      body: Column(
+      body: Stack(
         children: [
-          Navbar(
-            searchController: _searchController,
-            isMenuOpen: menuAberto,
-            onMenuTap: toggleMenu,
-          ),
-          Expanded(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+          Column(
+            children: [
+              Navbar(
+                searchController: _searchController,
+                isMenuOpen: menuAberto,
+                onMenuTap: toggleMenu,
+              ),
+              Expanded(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                 // Barra lateral
                 if (sideBarOpen)
                   SizedBox(
@@ -333,9 +335,16 @@ class _CartasPageState extends State<CartasPage> {
                     ),
                   ),
                 ),
-              ],
-            ),
+                  ],
+                ),
+              ),
+            ],
           ),
+          if (!isWide && menuAberto)
+            NavbarMobileMenu(
+              closeMenu: () => setState(() => menuAberto = false),
+              searchController: _searchController,
+            ),
         ],
       ),
       
