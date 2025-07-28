@@ -23,32 +23,6 @@ Future<int?> getClienteId() async {
   return prefs.getInt('clienteId');
 }
 
-// Função para obter usuário logado
-Future<Map<String, dynamic>?> getUsuarioLogado() async {
-  final prefs = await SharedPreferences.getInstance();
-  final usuarioStr = prefs.getString('usuario');
-  if (usuarioStr == null) return null;
-  try {
-    final usuarioMap = jsonDecode(usuarioStr) as Map<String, dynamic>;
-    return usuarioMap;
-  } catch (e) {
-    return {"nome": usuarioStr};
-  }
-}
-
-// Função para buscar cartões do cliente
-Future<List<Map<String, dynamic>>> buscarCartoesCliente(int clienteId) async {
-  try {
-    final response = await http.get(Uri.parse('${cartaoApiUrl}$clienteId'));
-    if (response.statusCode == 200) {
-      return List<Map<String, dynamic>>.from(jsonDecode(response.body));
-    }
-  } catch (e) {
-    print('Erro ao buscar cartões: $e');
-  }
-  return [];
-}
-
 class PaginaDescricao extends StatefulWidget {
   const PaginaDescricao({Key? key}) : super(key: key);
 
@@ -82,20 +56,16 @@ class _PaginaDescricaoState extends State<PaginaDescricao> {
   Future<void> buscarDadosUsuario() async {
     final usuarioData = await getUsuarioLogado();
     if (usuarioData != null && usuarioData['nome'] != null) {
-      final clienteIdValue = usuarioData['id'] ?? await getClienteId();
-      final cartoes = clienteIdValue != null ? await buscarCartoesCliente(clienteIdValue) : <Map<String, dynamic>>[];
       setState(() {
         usuarioLogado = true;
         nomeUsuario = usuarioData['nome'];
-        idCliente = clienteIdValue;
-        cartoesUsuario = cartoes;
-        cartaoSelecionadoId = cartoes.isNotEmpty ? cartoes.first['id'].toString() : null;
+        cartoesUsuario = [];
+        cartaoSelecionadoId = null;
       });
     } else {
       setState(() {
         usuarioLogado = false;
         nomeUsuario = null;
-        idCliente = null;
         cartoesUsuario = [];
         cartaoSelecionadoId = null;
       });
@@ -157,16 +127,12 @@ class _PaginaDescricaoState extends State<PaginaDescricao> {
     });
   }
 
-  void onCadastrarCartao() {
-    showDialog(
-      context: context,
-      builder: (context) => _ModalCadastroCartao(
-        onCartaoCadastrado: () async {
-          Navigator.pop(context);
-          await buscarDadosUsuario();
-        },
-      ),
+  void onCadastrarCartao() async {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Implementar tela de cadastro de cartão!')),
     );
+    await Future.delayed(const Duration(seconds: 2));
+    await buscarDadosUsuario();
   }
 
   void onCartaoSelecionado(String? id) {
@@ -520,7 +486,7 @@ class _DescricaoEInfoState extends State<_DescricaoEInfo> {
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(width: 10),
-                  if (!carregandoAvaliacoes) ...[
+                  if (!carregandoAvaliacoes) ..[
                     Row(
                       children: List.generate(5, (index) {
                         return Icon(
@@ -535,7 +501,7 @@ class _DescricaoEInfoState extends State<_DescricaoEInfo> {
                       '${mediaEstrelas.toStringAsFixed(1)} (${avaliacoes.length} avaliações)',
                       style: const TextStyle(color: Colors.grey),
                     ),
-                  ], 
+                  ],
                 ],
               ),
               const SizedBox(height: 12),
@@ -544,51 +510,46 @@ class _DescricaoEInfoState extends State<_DescricaoEInfo> {
               else if (avaliacoes.isEmpty)
                 const Text('Nenhuma avaliação ainda. Seja o primeiro!')
               else
-                SizedBox(
-                  height: 200,
-                  child: ListView.builder(
-                    itemCount: avaliacoes.length,
-                    itemBuilder: (context, index) {
-                      final avaliacao = avaliacoes[index];
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: 8),
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.grey[200]!),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Text(
-                                  avaliacao['nomeUsuario'] ?? 'Anônimo',
-                                  style: const TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                                const SizedBox(width: 8),
-                                Row(
-                                  children: List.generate(5, (index) {
-                                    return Icon(
-                                      index < (avaliacao['estrelas'] ?? 0) ? Icons.star : Icons.star_border,
-                                      color: const Color(0xFFFFC107),
-                                      size: 16,
-                                    );
-                                  }),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              avaliacao['comentario'] ?? '',
-                              style: const TextStyle(color: Colors.black87),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
+                Column(
+                  children: avaliacoes.take(3).map((avaliacao) {
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.grey[200]!),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                avaliacao['nomeUsuario'] ?? 'Anônimo',
+                                style: const TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(width: 8),
+                              Row(
+                                children: List.generate(5, (index) {
+                                  return Icon(
+                                    index < (avaliacao['estrelas'] ?? 0) ? Icons.star : Icons.star_border,
+                                    color: const Color(0xFFFFC107),
+                                    size: 16,
+                                  );
+                                }),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            avaliacao['comentario'] ?? '',
+                            style: const TextStyle(color: Colors.black87),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
                 ),
             ],
           ),
@@ -1012,23 +973,16 @@ class _ModalDoacaoState extends State<_ModalDoacao> {
                                 )
                               : DropdownButtonFormField<String>(
                                   value: widget.cartaoSelecionadoId,
-                                  items: widget.cartoesUsuario.map((cartao) {
-                                    final numero = cartao['numC'].toString();
-                                    final ultimos4 = numero.length >= 4 ? numero.substring(numero.length - 4) : numero;
-                                    return DropdownMenuItem<String>(
-                                      value: cartao['id'].toString(),
-                                      child: Row(
-                                        children: [
-                                          Icon(_getCardIcon(cartao['bandeira'] ?? ''), size: 24),
-                                          const SizedBox(width: 8),
-                                          Text('${cartao['bandeira'] ?? ''} ****$ultimos4'),
-                                        ],
-                                      ),
-                                    );
-                                  }).toList(),
+                                  items: widget.cartoesUsuario
+                                      .map((cartao) => DropdownMenuItem(
+                                            value: cartao['id'].toString(),
+                                            child: Text(
+                                                '${cartao['bandeira'] ?? ""} - ${cartao['numC']?.toString().substring(cartao['numC'].toString().length - 4) ?? ""}'),
+                                          ))
+                                      .toList(),
                                   onChanged: widget.onCartaoSelecionado,
                                   decoration: const InputDecoration(
-                                    labelText: 'Cartão para doação',
+                                    labelText: "Cartão para doação",
                                     border: OutlineInputBorder(),
                                     prefixIcon: Icon(Icons.credit_card),
                                   ),
@@ -1057,139 +1011,6 @@ class _ModalDoacaoState extends State<_ModalDoacao> {
           ),
         ),
       ),
-    );
-  }
-}
-
-// Função para obter ícone do cartão
-IconData _getCardIcon(String bandeira) {
-  switch (bandeira.toLowerCase()) {
-    case 'visa':
-      return Icons.credit_card;
-    case 'mastercard':
-      return Icons.credit_card;
-    case 'elo':
-      return Icons.credit_card;
-    default:
-      return Icons.credit_card;
-  }
-}
-
-// MODAL DE CADASTRO DE CARTÃO
-class _ModalCadastroCartao extends StatefulWidget {
-  final VoidCallback onCartaoCadastrado;
-  
-  const _ModalCadastroCartao({required this.onCartaoCadastrado});
-  
-  @override
-  State<_ModalCadastroCartao> createState() => _ModalCadastroCartaoState();
-}
-
-class _ModalCadastroCartaoState extends State<_ModalCadastroCartao> {
-  final _numeroController = TextEditingController();
-  final _nomeController = TextEditingController();
-  final _validadeController = TextEditingController();
-  final _cvvController = TextEditingController();
-  String _bandeira = 'Visa';
-  bool _salvando = false;
-  
-  Future<void> _salvarCartao() async {
-    if (_numeroController.text.isEmpty || _nomeController.text.isEmpty ||
-        _validadeController.text.isEmpty || _cvvController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Preencha todos os campos')),
-      );
-      return;
-    }
-    
-    setState(() => _salvando = true);
-    
-    try {
-      final usuarioData = await getUsuarioLogado();
-      final clienteId = usuarioData?['id'] ?? await getClienteId();
-      if (clienteId == null) throw Exception('Cliente não encontrado');
-      final response = await http.post(
-        Uri.parse('${cartaoApiUrl}$clienteId'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'numC': _numeroController.text,
-          'nomeC': _nomeController.text,
-          'validadeC': _validadeController.text,
-          'cvvC': _cvvController.text,
-          'bandeira': _bandeira,
-        }),
-      );
-      
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Cartão cadastrado com sucesso!')),
-        );
-        widget.onCartaoCadastrado();
-      } else {
-        throw Exception('Erro ao cadastrar cartão');
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Erro ao cadastrar cartão')),
-      );
-    } finally {
-      setState(() => _salvando = false);
-    }
-  }
-  
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Cadastrar Cartão'),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: _numeroController,
-              decoration: const InputDecoration(labelText: 'Número do Cartão'),
-              keyboardType: TextInputType.number,
-            ),
-            TextField(
-              controller: _nomeController,
-              decoration: const InputDecoration(labelText: 'Nome no Cartão'),
-            ),
-            TextField(
-              controller: _validadeController,
-              decoration: const InputDecoration(labelText: 'Validade (MM/AA)'),
-            ),
-            TextField(
-              controller: _cvvController,
-              decoration: const InputDecoration(labelText: 'CVV'),
-              keyboardType: TextInputType.number,
-            ),
-            const SizedBox(height: 16),
-            DropdownButtonFormField<String>(
-              value: _bandeira,
-              items: ['Visa', 'Mastercard', 'Elo'].map((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
-              onChanged: (value) => setState(() => _bandeira = value!),
-              decoration: const InputDecoration(labelText: 'Bandeira'),
-            ),
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cancelar'),
-        ),
-        ElevatedButton(
-          onPressed: _salvando ? null : _salvarCartao,
-          child: _salvando
-              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-              : const Text('Salvar'),
-        ),
-      ],
     );
   }
 }
