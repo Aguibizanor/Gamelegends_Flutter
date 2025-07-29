@@ -347,14 +347,6 @@ class _CartasPageState extends State<CartasPage> {
             ),
         ],
       ),
-      
-      // Menu mobile overlay do topo
-      endDrawer: !isWide && menuAberto
-          ? NavbarMobileMenu(
-              closeMenu: () => setState(() => menuAberto = false),
-              searchController: _searchController,
-            )
-          : null,
     );
   }
 

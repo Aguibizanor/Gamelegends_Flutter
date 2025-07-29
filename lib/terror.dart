@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'navbar.dart';
 
-// Lista dos jogos para a categoria "Terror" (agora com usuário, descrição e comentários!)
-// Removido o campo "pai"
+// Lista dos jogos para a categoria "Terror"
 final _terrorGames = [
   {
     "img": "assets/tomate.png",
@@ -128,7 +127,6 @@ class _TerrorPageState extends State<TerrorPage> {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Barra lateral
                     if (sideBarOpen)
                       SizedBox(
                         width: 260,
@@ -183,21 +181,16 @@ class _TerrorPageState extends State<TerrorPage> {
                           ),
                         ),
                       ),
-                    
-                    // Botão hamburguer mobile lateral
                     if (!isWide && !sideBarOpen)
                       IconButton(
                         icon: const Icon(Icons.chevron_right),
                         onPressed: toggleMobileMenu,
                       ),
-                    
                     if (!isWide && sideBarOpen)
                       IconButton(
                         icon: const Icon(Icons.chevron_left),
                         onPressed: toggleMobileMenu,
                       ),
-                    
-                    // Lista dos jogos de terror
                     Expanded(
                       child: Container(
                         color: const Color(0xFFE9E9E9),
@@ -205,7 +198,6 @@ class _TerrorPageState extends State<TerrorPage> {
                           controller: _scrollController,
                           padding: const EdgeInsets.all(10),
                           children: [
-                            // Lista de jogos
                             ..._terrorGames.map((game) => _TerrorGameCard(
                               img: (game.containsKey('img') && game['img'] != null) ? game['img'] as String : '',
                               name: (game.containsKey('name') && game['name'] != null) ? game['name'] as String : '',
@@ -215,121 +207,140 @@ class _TerrorPageState extends State<TerrorPage> {
                               onTap: () {},
                               sidebarOpen: sideBarOpen,
                             )),
-                            
-                            // Espaço antes do footer
                             const SizedBox(height: 30),
-                            
-                            // Footer
-                            Container(
-                              width: double.infinity,
-                              color: const Color(0xFF90017F),
-                              padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 0),
-                              child: Center(
-                                child: ConstrainedBox(
-                                  constraints: const BoxConstraints(maxWidth: 1200),
-                                  child: Wrap(
-                                    runSpacing: 24,
-                                    spacing: 50,
-                                    children: [
-                                      // Sobre a plataforma
-                                      SizedBox(
-                                        width: 350,
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            const Text.rich(
-                                              TextSpan(
-                                                children: [
-                                                  TextSpan(
-                                                    text: "Game",
-                                                    style: TextStyle(fontWeight: FontWeight.bold),
-                                                  ),
-                                                  TextSpan(text: "Legends"),
-                                                ],
+                            // ======= RODAPÉ RESPONSIVO =========
+                            LayoutBuilder(
+                              builder: (context, constraints) {
+                                final isWideFooter = constraints.maxWidth > 700;
+                                return Column(
+                                  children: [
+                                    Container(
+                                      width: double.infinity,
+                                      color: const Color(0xFF90017F),
+                                      padding: EdgeInsets.symmetric(
+                                          vertical: 24,
+                                          horizontal: isWideFooter ? 0 : 18),
+                                      child: Center(
+                                        child: ConstrainedBox(
+                                          constraints: const BoxConstraints(maxWidth: 1200),
+                                          child: Flex(
+                                            direction: isWideFooter ? Axis.horizontal : Axis.vertical,
+                                            mainAxisAlignment:
+                                              isWideFooter ? MainAxisAlignment.start : MainAxisAlignment.center,
+                                            crossAxisAlignment:
+                                              isWideFooter ? CrossAxisAlignment.start : CrossAxisAlignment.center,
+                                            children: [
+                                              SizedBox(
+                                                width: isWideFooter ? 350 : double.infinity,
+                                                child: Column(
+                                                  crossAxisAlignment: isWideFooter
+                                                      ? CrossAxisAlignment.start
+                                                      : CrossAxisAlignment.center,
+                                                  children: [
+                                                    const Text.rich(
+                                                      TextSpan(
+                                                        children: [
+                                                          TextSpan(
+                                                            text: "Game",
+                                                            style: TextStyle(fontWeight: FontWeight.bold),
+                                                          ),
+                                                          TextSpan(text: "Legends"),
+                                                        ],
+                                                      ),
+                                                      style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontSize: 26,
+                                                      ),
+                                                      textAlign: TextAlign.center,
+                                                    ),
+                                                    const SizedBox(height: 10),
+                                                    const Text(
+                                                      "Game Legends é uma plataforma dedicada a jogos indie, fornecendo uma maneira fácil para desenvolvedores distribuírem seus jogos e para jogadores descobrirem novas experiências.",
+                                                      style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontSize: 15,
+                                                      ),
+                                                      textAlign: TextAlign.center,
+                                                    ),
+                                                    const SizedBox(height: 16),
+                                                    Row(
+                                                      mainAxisAlignment: isWideFooter
+                                                          ? MainAxisAlignment.start
+                                                          : MainAxisAlignment.center,
+                                                      children: const [
+                                                        Icon(Icons.phone, color: Colors.white70, size: 18),
+                                                        SizedBox(width: 6),
+                                                        Text(
+                                                          "(99) 99999-9999",
+                                                          style: TextStyle(color: Colors.white70),
+                                                        ),
+                                                        SizedBox(width: 18),
+                                                        Icon(Icons.email, color: Colors.white70, size: 18),
+                                                        SizedBox(width: 6),
+                                                        Text(
+                                                          "info@gamelegends.com",
+                                                          style: TextStyle(color: Colors.white70),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    const SizedBox(height: 18),
+                                                    Row(
+                                                      mainAxisAlignment: isWideFooter
+                                                          ? MainAxisAlignment.start
+                                                          : MainAxisAlignment.center,
+                                                      children: [
+                                                        IconButton(
+                                                          icon: const Icon(Icons.facebook, color: Colors.white),
+                                                          onPressed: () => launchUrl(Uri.parse('https://www.facebook.com/profile.php?id=61578797307500')),
+                                                        ),
+                                                        IconButton(
+                                                          icon: const Icon(Icons.camera_alt, color: Colors.white),
+                                                          onPressed: () {},
+                                                        ),
+                                                        IconButton(
+                                                          icon: const Icon(Icons.alternate_email, color: Colors.white),
+                                                          onPressed: () => launchUrl(Uri.parse('https://www.instagram.com/game._legends/')),
+                                                        ),
+                                                        IconButton(
+                                                          icon: const Icon(Icons.business, color: Colors.white),
+                                                          onPressed: () {},
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    const SizedBox(height: 16),
+                                                    InkWell(
+                                                      onTap: () => Navigator.pushNamed(context, '/privacidade'),
+                                                      child: const Text(
+                                                        "Conheça nossa política de privacidade",
+                                                        style: TextStyle(
+                                                          color: Colors.white70,
+                                                          fontSize: 14,
+                                                          decoration: TextDecoration.underline,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
                                               ),
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 26,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 10),
-                                            const Text(
-                                              "Game Legends é uma plataforma dedicada a jogos indie, fornecendo uma maneira fácil para desenvolvedores distribuírem seus jogos e para jogadores descobrirem novas experiências.",
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 15,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 16),
-                                            Row(
-                                              children: const [
-                                                Icon(Icons.phone, color: Colors.white70, size: 18),
-                                                SizedBox(width: 6),
-                                                Text(
-                                                  "(99) 99999-9999",
-                                                  style: TextStyle(color: Colors.white70),
-                                                ),
-                                                SizedBox(width: 18),
-                                                Icon(Icons.email, color: Colors.white70, size: 18),
-                                                SizedBox(width: 6),
-                                                Text(
-                                                  "info@gamelegends.com",
-                                                  style: TextStyle(color: Colors.white70),
-                                                ),
-                                              ],
-                                            ),
-                                            const SizedBox(height: 18),
-                                            Row(
-                                              children: [
-                                                IconButton(
-                                                  icon: const Icon(Icons.facebook, color: Colors.white),
-                                                  onPressed: () => launchUrl(Uri.parse('https://www.facebook.com/profile.php?id=61578797307500')),
-                                                ),
-                                                IconButton(
-                                                  icon: const Icon(Icons.camera_alt, color: Colors.white),
-                                                  onPressed: () {},
-                                                ),
-                                                IconButton(
-                                                  icon: const Icon(Icons.alternate_email, color: Colors.white),
-                                                  onPressed: () => launchUrl(Uri.parse('https://www.instagram.com/game._legends/')),
-                                                ),
-                                                IconButton(
-                                                  icon: const Icon(Icons.business, color: Colors.white),
-                                                  onPressed: () {},
-                                                ),
-                                              ],
-                                            ),
-                                            const SizedBox(height: 16),
-                                            InkWell(
-                                              onTap: () => Navigator.pushNamed(context, '/privacidade'),
-                                              child: const Text(
-                                                "Conheça nossa política de privacidade",
-                                                style: TextStyle(
-                                                  color: Colors.white70,
-                                                  fontSize: 14,
-                                                  decoration: TextDecoration.underline,
-                                                ),
-                                              ),
-                                            ),
-                                          ],
+                                            ],
+                                          ),
                                         ),
                                       ),
-
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Container(
-                              width: double.infinity,
-                              color: const Color(0xFF90017F),
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              child: const Center(
-                                child: Text(
-                                  "© gamelegends.com | Feito pelo time do Game Legends",
-                                  style: TextStyle(color: Colors.white70),
-                                ),
-                              ),
+                                    ),
+                                    Container(
+                                      width: double.infinity,
+                                      color: const Color(0xFF90017F),
+                                      padding: const EdgeInsets.symmetric(vertical: 12),
+                                      child: const Center(
+                                        child: Text(
+                                          "© gamelegends.com | Feito pelo time do Game Legends",
+                                          style: TextStyle(color: Colors.white70),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
                             ),
                           ],
                         ),
@@ -399,7 +410,7 @@ class _TerrorPageState extends State<TerrorPage> {
   }
 }
 
-// Card customizado para Terror, estilo desenvolvendo.dart
+// Card customizado para Terror
 class _TerrorGameCard extends StatelessWidget {
   final String img;
   final String name;
