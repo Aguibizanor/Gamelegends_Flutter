@@ -297,7 +297,7 @@ class _MainPrincipalState extends State<MainPrincipal> {
                                                     borderRadius: BorderRadius.circular(16),
                                                     boxShadow: [
                                                       BoxShadow(
-                                                        color: Colors.black.withValues(alpha: isFocused ? 0.18 : 0.09),
+                                                        color: Colors.black.withOpacity(isFocused ? 0.18 : 0.09),
                                                         blurRadius: isFocused ? 24 : 10,
                                                         spreadRadius: isFocused ? 5 : 2,
                                                       ),

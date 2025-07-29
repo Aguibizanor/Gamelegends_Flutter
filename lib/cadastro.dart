@@ -118,7 +118,7 @@ class _CadastroFormState extends State<CadastroForm> {
                 borderRadius: BorderRadius.circular(10),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
+                    color: Colors.black.withOpacity(0.1),
                     blurRadius: 10,
                     spreadRadius: 5,
                   ),

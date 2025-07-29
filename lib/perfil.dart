@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'dart:convert';
+import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'cartoes_perfil.dart';
-
-
-// Função robusta para obter usuário logado, igual Navbar
+import 'navbar.dart';
+ 
 Future<Map<String, dynamic>?> getUsuarioLogado() async {
   final prefs = await SharedPreferences.getInstance();
   final usuarioStr = prefs.getString('usuario');
@@ -14,18 +13,17 @@ Future<Map<String, dynamic>?> getUsuarioLogado() async {
     final usuarioMap = jsonDecode(usuarioStr) as Map<String, dynamic>;
     return usuarioMap;
   } catch (e) {
-    // Caso seja só uma string antiga, retorna como tipo
     return {"nome": usuarioStr};
   }
 }
-
+ 
 class PaginaPerfil extends StatefulWidget {
   const PaginaPerfil({Key? key}) : super(key: key);
-
+ 
   @override
   State<PaginaPerfil> createState() => _PaginaPerfilState();
 }
-
+ 
 class _PaginaPerfilState extends State<PaginaPerfil> {
   Map<String, dynamic> formData = {
     "nome": "",
@@ -35,29 +33,38 @@ class _PaginaPerfilState extends State<PaginaPerfil> {
     "email": "",
     "senha": "",
     "telefone": "",
-    // "usuario": "" // tipo/usuario removido conforme pedido
+    "foto": "assets/foto.png",
   };
   bool loading = true;
   bool modalVisible = false;
   bool menuAberto = false;
-
+  final TextEditingController _searchController = TextEditingController();
+ 
+  final List<String> _fotosExemplo = [
+    'assets/foto.png',
+    'assets/gato1.png',
+    'assets/gato2.png',
+    'assets/gato3.png',
+    'assets/mario.png',
+    'assets/sonic.png',
+  ];
+ 
   @override
   void initState() {
     super.initState();
     _loadPerfil();
   }
-
+ 
   Future<void> _loadPerfil() async {
-    // Buscar dados completos do SharedPreferences
     final prefs = await SharedPreferences.getInstance();
     final usuarioStr = prefs.getString('usuario');
-    
+   
     if (usuarioStr == null) {
       setState(() => loading = false);
       if (mounted) Navigator.pushReplacementNamed(context, '/login');
       return;
     }
-    
+   
     try {
       final usuarioData = jsonDecode(usuarioStr) as Map<String, dynamic>;
       setState(() {
@@ -69,6 +76,7 @@ class _PaginaPerfilState extends State<PaginaPerfil> {
           "email": usuarioData["email"] ?? "",
           "senha": usuarioData["senha"] ?? "",
           "telefone": usuarioData["telefone"] ?? "",
+          "foto": usuarioData["foto"] ?? "assets/foto.png",
         };
         loading = false;
       });
@@ -77,13 +85,104 @@ class _PaginaPerfilState extends State<PaginaPerfil> {
       if (mounted) Navigator.pushReplacementNamed(context, '/login');
     }
   }
-
+ 
+  Future<void> _selecionarFotoComputador() async {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Seleção de arquivos não disponível. Use as fotos de exemplo.')),
+    );
+  }
+ 
+  Future<void> _salvarFoto(String caminhoFoto) async {
+    final prefs = await SharedPreferences.getInstance();
+    final usuarioData = {...formData, "foto": caminhoFoto};
+    setState(() {
+      formData = usuarioData;
+    });
+    await prefs.setString('usuario', jsonEncode(usuarioData));
+    _showDialog("Foto alterada com sucesso!");
+  }
+ 
+  void _mostrarSeletorFoto() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text("Escolher Foto de Perfil"),
+        content: SizedBox(
+          width: 350,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.folder, color: Color(0xFF90017F)),
+                title: const Text("Escolher dos Arquivos do Computador"),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _selecionarFotoComputador();
+                },
+              ),
+              const Divider(),
+              const Text("Ou escolha uma das fotos de exemplo:"),
+              const SizedBox(height: 10),
+              SizedBox(
+                height: 150,
+                child: GridView.builder(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    crossAxisSpacing: 8,
+                    mainAxisSpacing: 8,
+                  ),
+                  itemCount: _fotosExemplo.length,
+                  itemBuilder: (context, index) {
+                    final foto = _fotosExemplo[index];
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.pop(ctx);
+                        _salvarFoto(foto);
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: formData["foto"] == foto ? const Color(0xFF90017F) : Colors.grey,
+                            width: 2,
+                          ),
+                        ),
+                        child: CircleAvatar(
+                          backgroundImage: AssetImage(foto),
+                          onBackgroundImageError: (exception, stackTrace) {},
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text("Cancelar"),
+          ),
+        ],
+      ),
+    );
+  }
+ 
+  ImageProvider _getImageProvider(String imagePath) {
+    if (imagePath.startsWith('assets/')) {
+      return AssetImage(imagePath);
+    } else {
+      return FileImage(File(imagePath));
+    }
+  }
+ 
   void _handleEdit() {
     setState(() {
       modalVisible = true;
     });
   }
-
+ 
   Future<void> _handleSave(Map<String, dynamic> updatedData) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final usuarioData = {...formData, ...updatedData};
@@ -94,7 +193,7 @@ class _PaginaPerfilState extends State<PaginaPerfil> {
     await prefs.setString('usuario', jsonEncode(usuarioData));
     _showDialog("Perfil atualizado com sucesso!");
   }
-  
+ 
   Future<void> _handleLogout() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.remove('usuario');
@@ -102,7 +201,7 @@ class _PaginaPerfilState extends State<PaginaPerfil> {
       Navigator.pushReplacementNamed(context, '/');
     });
   }
-
+ 
   Future<void> _handleDelete() async {
     showDialog(
       context: context,
@@ -130,13 +229,19 @@ class _PaginaPerfilState extends State<PaginaPerfil> {
       ),
     );
   }
-
+ 
   void _toggleMenu() {
     setState(() {
       menuAberto = !menuAberto;
     });
   }
-
+ 
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+ 
   void _showDialog(String msg, {VoidCallback? onClose}) {
     showDialog(
       context: context,
@@ -154,233 +259,282 @@ class _PaginaPerfilState extends State<PaginaPerfil> {
       ),
     );
   }
-
+ 
   @override
   Widget build(BuildContext context) {
-    final logo = 'assets/logo.site.tcc.png';
     return Scaffold(
       backgroundColor: const Color(0xFFE9E9E9),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF90017F),
-        elevation: 0,
-        title: Image.asset(logo, height: 38),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.menu, color: Colors.white),
-            onPressed: _toggleMenu,
-          ),
-        ],
+      appBar: Navbar(
+        onMenuTap: _toggleMenu,
+        isMenuOpen: menuAberto,
+        searchController: _searchController,
       ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            DrawerHeader(
-              decoration: const BoxDecoration(
-                color: Color(0xFF90017F),
-              ),
-              child: Image.asset(logo),
-            ),
-            ListTile(
-              leading: const Icon(Icons.home),
-              title: const Text('Início'),
-              onTap: () => Navigator.pushReplacementNamed(context, '/Index'),
-            ),
-            ListTile(
-              leading: const Icon(Icons.videogame_asset),
-              title: const Text('Games'),
-              onTap: () => Navigator.pushReplacementNamed(context, '/'),
-            ),
-            ListTile(
-              leading: const Icon(Icons.help),
-              title: const Text('Sobre'),
-              onTap: () => Navigator.pushReplacementNamed(context, '/Que'),
-            ),
-            ListTile(
-              leading: const Icon(Icons.headset_mic),
-              title: const Text('Suporte'),
-              onTap: () => Navigator.pushReplacementNamed(context, '/Suporte'),
-            ),
-            ListTile(
-              leading: const Icon(Icons.credit_card),
-              title: const Text('Meus Cartões'),
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const CartoesPerfil())),
-            ),
-          ],
-        ),
-      ),
-      body: loading
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              child: Column(
-                children: [
-                  // Search bar + user panel
-                  Container(
-                    color: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            decoration: InputDecoration(
-                              contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 14),
-                              hintText: "Pesquisar Jogos, Tags ou Criadores",
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              suffixIcon: IconButton(
-                                icon: const Icon(Icons.search),
-                                onPressed: () {},
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        (formData["nome"] != null && formData["nome"].toString().isNotEmpty)
-                            ? TextButton.icon(
-                                onPressed: () => Navigator.pushNamed(context, '/Perfil'),
-                                icon: const Icon(Icons.account_circle),
-                                label: Text("Perfil (${formData["nome"]})"),
-                              )
-                            : Row(
-                                children: [
-                                  TextButton(
-                                    onPressed: () => Navigator.pushNamed(context, '/Login'),
-                                    child: const Text("Login"),
-                                  ),
-                                  TextButton(
-                                    onPressed: () => Navigator.pushNamed(context, '/Cadastro'),
-                                    child: const Text("Registre-se"),
-                                  ),
-                                ],
-                              ),
-                      ],
-                    ),
-                  ),
-                  // Perfil Info
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 0),
-                    child: Center(
-                      child: Container(
-                        width: 480,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(18),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black12,
-                              blurRadius: 12,
-                              offset: Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
-                        child: Column(
-                          children: [
-                            CircleAvatar(
-                              radius: 40,
-                              backgroundColor: const Color(0xFF90017F),
-                              child: const Icon(Icons.person, size: 50, color: Colors.white),
-                            ),
-                            const SizedBox(height: 24),
-
-                            const SizedBox(height: 16),
-                            PerfilInfo(formData: formData),
-                            const SizedBox(height: 22),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                ElevatedButton(
-                                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF90017F)),
-                                  onPressed: _handleEdit,
-                                  child: const Text("Editar Perfil", style: TextStyle(color: Colors.white)),
-                                ),
-                                ElevatedButton(
-                                  style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-                                  onPressed: _handleLogout,
-                                  child: const Text("Logout", style: TextStyle(color: Colors.white)),
-                                ),
-                                ElevatedButton(
-                                  style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                                  onPressed: _handleDelete,
-                                  child: const Text("Excluir Perfil", style: TextStyle(color: Colors.white)),
+      body: Stack(
+        children: [
+          loading
+              ? const Center(child: CircularProgressIndicator())
+              : SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 16),
+                        child: Center(
+                          child: Container(
+                            width: 520,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(24),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  blurRadius: 20,
+                                  offset: const Offset(0, 8),
+                                  spreadRadius: 2,
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 8),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  // Modal
-                  if (modalVisible)
-                    PerfilModal(
-                      formData: formData,
-                      onClose: () => setState(() => modalVisible = false),
-                      onSave: _handleSave,
-                    ),
-                  // Footer
-                  Container(
-                    color: const Color(0xFF90017F),
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 0),
-                    child: Center(
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 1200),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text.rich(
-                              TextSpan(
-                                children: [
-                                  TextSpan(
-                                    text: "Game",
-                                    style: TextStyle(fontWeight: FontWeight.bold),
+                            child: Column(
+                              children: [
+                                Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.all(32),
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [const Color(0xFF90017F), const Color(0xFF90017F).withOpacity(0.8)],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    ),
+                                    borderRadius: const BorderRadius.only(
+                                      topLeft: Radius.circular(24),
+                                      topRight: Radius.circular(24),
+                                    ),
                                   ),
-                                  TextSpan(text: "Legends"),
-                                ],
-                              ),
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 26,
-                              ),
+                                  child: Column(
+                                    children: [
+                                      Stack(
+                                        children: [
+                                          Container(
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              border: Border.all(color: Colors.white, width: 4),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.black.withOpacity(0.2),
+                                                  blurRadius: 10,
+                                                  offset: const Offset(0, 4),
+                                                ),
+                                              ],
+                                            ),
+                                            child: CircleAvatar(
+                                              radius: 50,
+                                              backgroundColor: Colors.white,
+                                              backgroundImage: _getImageProvider(formData["foto"] ?? 'assets/foto.png'),
+                                              onBackgroundImageError: (exception, stackTrace) {},
+                                            ),
+                                          ),
+                                          Positioned(
+                                            bottom: 0,
+                                            right: 0,
+                                            child: GestureDetector(
+                                              onTap: _mostrarSeletorFoto,
+                                              child: Container(
+                                                padding: const EdgeInsets.all(8),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.white,
+                                                  shape: BoxShape.circle,
+                                                  border: Border.all(color: const Color(0xFF90017F), width: 2),
+                                                  boxShadow: [
+                                                    BoxShadow(
+                                                      color: Colors.black.withOpacity(0.2),
+                                                      blurRadius: 4,
+                                                      offset: const Offset(0, 2),
+                                                    ),
+                                                  ],
+                                                ),
+                                                child: const Icon(
+                                                  Icons.camera_alt,
+                                                  color: Color(0xFF90017F),
+                                                  size: 20,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 16),
+                                      Text(
+                                        "${formData["nome"] ?? ""} ${formData["sobrenome"] ?? ""}".trim(),
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 24,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white.withOpacity(0.2),
+                                          borderRadius: BorderRadius.circular(20),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            const Icon(Icons.email, color: Colors.white, size: 16),
+                                            const SizedBox(width: 6),
+                                            Text(
+                                              formData["email"] ?? "",
+                                              style: const TextStyle(color: Colors.white, fontSize: 14),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(32),
+                                  child: Column(
+                                    children: [
+                                      PerfilInfo(formData: formData),
+                                      const SizedBox(height: 32),
+                                      Column(
+                                        children: [
+                                          SizedBox(
+                                            width: double.infinity,
+                                            child: ElevatedButton.icon(
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: const Color(0xFF90017F),
+                                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius: BorderRadius.circular(12),
+                                                ),
+                                                elevation: 3,
+                                              ),
+                                              onPressed: _handleEdit,
+                                              icon: const Icon(Icons.edit, color: Colors.white),
+                                              label: const Text("Editar Perfil", style: TextStyle(color: Colors.white, fontSize: 16)),
+                                            ),
+                                          ),
+                                          const SizedBox(height: 12),
+                                          Row(
+                                            children: [
+                                              Expanded(
+                                                child: ElevatedButton.icon(
+                                                  style: ElevatedButton.styleFrom(
+                                                    backgroundColor: Colors.orange,
+                                                    padding: const EdgeInsets.symmetric(vertical: 14),
+                                                    shape: RoundedRectangleBorder(
+                                                      borderRadius: BorderRadius.circular(12),
+                                                    ),
+                                                    elevation: 2,
+                                                  ),
+                                                  onPressed: _handleLogout,
+                                                  icon: const Icon(Icons.logout, color: Colors.white, size: 18),
+                                                  label: const Text("Logout", style: TextStyle(color: Colors.white)),
+                                                ),
+                                              ),
+                                              const SizedBox(width: 12),
+                                              Expanded(
+                                                child: ElevatedButton.icon(
+                                                  style: ElevatedButton.styleFrom(
+                                                    backgroundColor: Colors.red,
+                                                    padding: const EdgeInsets.symmetric(vertical: 14),
+                                                    shape: RoundedRectangleBorder(
+                                                      borderRadius: BorderRadius.circular(12),
+                                                    ),
+                                                    elevation: 2,
+                                                  ),
+                                                  onPressed: _handleDelete,
+                                                  icon: const Icon(Icons.delete, color: Colors.white, size: 18),
+                                                  label: const Text("Excluir", style: TextStyle(color: Colors.white)),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 10),
-                            const Text(
-                              "Game Legends é uma plataforma dedicada a jogos indie, fornecendo uma maneira fácil para desenvolvedores distribuírem seus jogos e para jogadores descobrirem novas experiências.",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 15,
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
                       ),
-                    ),
-                  ),
-                  Container(
-                    width: double.infinity,
-                    color: const Color(0xFF90017F),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    child: const Center(
-                      child: Text(
-                        "© 2025 Game Legends. Todos os direitos reservados.",
-                        style: TextStyle(color: Colors.white70),
+                      if (modalVisible)
+                        PerfilModal(
+                          formData: formData,
+                          onClose: () => setState(() => modalVisible = false),
+                          onSave: _handleSave,
+                        ),
+                      Container(
+                        color: const Color(0xFF90017F),
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 0),
+                        child: Center(
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 1200),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text.rich(
+                                  TextSpan(
+                                    children: [
+                                      TextSpan(
+                                        text: "Game",
+                                        style: TextStyle(fontWeight: FontWeight.bold),
+                                      ),
+                                      TextSpan(text: "Legends"),
+                                    ],
+                                  ),
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 26,
+                                  ),
+                                ),
+                                const SizedBox(height: 10),
+                                const Text(
+                                  "Game Legends é uma plataforma dedicada a jogos indie, fornecendo uma maneira fácil para desenvolvedores distribuírem seus jogos e para jogadores descobrirem novas experiências.",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
+                      Container(
+                        width: double.infinity,
+                        color: const Color(0xFF90017F),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        child: const Center(
+                          child: Text(
+                            "© 2025 Game Legends. Todos os direitos reservados.",
+                            style: TextStyle(color: Colors.white70),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+          if (menuAberto)
+            NavbarMobileMenu(
+              closeMenu: () => setState(() => menuAberto = false),
+              searchController: _searchController,
             ),
+        ],
+      ),
     );
   }
 }
-
+ 
 class PerfilInfo extends StatelessWidget {
   final Map<String, dynamic> formData;
   const PerfilInfo({required this.formData});
-
+ 
   @override
   Widget build(BuildContext context) {
     String dataNasc = "";
@@ -391,62 +545,85 @@ class PerfilInfo extends StatelessWidget {
         dataNasc = formData["datanascimento"].toString();
       }
     }
+   
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text.rich(TextSpan(children: [
-          const TextSpan(text: "Nome: ", style: TextStyle(fontWeight: FontWeight.bold)),
-          TextSpan(text: formData["nome"] ?? ""),
-        ])),
-        Text.rich(TextSpan(children: [
-          const TextSpan(text: "Sobrenome: ", style: TextStyle(fontWeight: FontWeight.bold)),
-          TextSpan(text: formData["sobrenome"] ?? ""),
-        ])),
-        Text.rich(TextSpan(children: [
-          const TextSpan(text: "CPF: ", style: TextStyle(fontWeight: FontWeight.bold)),
-          TextSpan(text: formData["cpf"] ?? ""),
-        ])),
-        Text.rich(TextSpan(children: [
-          const TextSpan(text: "Data de Nascimento: ", style: TextStyle(fontWeight: FontWeight.bold)),
-          TextSpan(text: dataNasc),
-        ])),
-        Text.rich(TextSpan(children: [
-          const TextSpan(text: "Email: ", style: TextStyle(fontWeight: FontWeight.bold)),
-          TextSpan(text: formData["email"] ?? ""),
-        ])),
-        Text.rich(TextSpan(children: [
-          const TextSpan(text: "Telefone: ", style: TextStyle(fontWeight: FontWeight.bold)),
-          TextSpan(text: formData["telefone"] ?? ""),
-        ])),
-        Text.rich(TextSpan(children: [
-          const TextSpan(text: "Senha: ", style: TextStyle(fontWeight: FontWeight.bold)),
-          TextSpan(text: formData["senha"] ?? ""),
-        ])),
+        _buildInfoCard(Icons.badge, "Nome Completo", "${formData["nome"] ?? ""} ${formData["sobrenome"] ?? ""}".trim()),
+        _buildInfoCard(Icons.credit_card, "CPF", formData["cpf"] ?? ""),
+        _buildInfoCard(Icons.cake, "Data de Nascimento", dataNasc),
+        _buildInfoCard(Icons.phone, "Telefone", formData["telefone"] ?? ""),
+        _buildInfoCard(Icons.lock, "Senha", "••••••••"),
         if (formData["usuario"] != null && formData["usuario"].toString().isNotEmpty)
-          Text.rich(TextSpan(children: [
-            const TextSpan(text: "Usuário: ", style: TextStyle(fontWeight: FontWeight.bold)),
-            TextSpan(text: formData["usuario"] ?? ""),
-          ])),
+          _buildInfoCard(Icons.account_circle, "Usuário", formData["usuario"] ?? ""),
       ],
     );
   }
+ 
+  Widget _buildInfoCard(IconData icon, String label, String value) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey[200]!),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: const Color(0xFF90017F).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, color: const Color(0xFF90017F), size: 20),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[600],
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  value.isEmpty ? "Não informado" : value,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: value.isEmpty ? Colors.grey[400] : Colors.black87,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
-
+ 
 class PerfilModal extends StatefulWidget {
   final Map<String, dynamic> formData;
   final VoidCallback onClose;
   final Function(Map<String, dynamic>) onSave;
-
+ 
   const PerfilModal({
     required this.formData,
     required this.onClose,
     required this.onSave,
   });
-
+ 
   @override
   State<PerfilModal> createState() => _PerfilModalState();
 }
-
+ 
 class _PerfilModalState extends State<PerfilModal> {
   late TextEditingController nomeCtrl;
   late TextEditingController sobrenomeCtrl;
@@ -455,7 +632,7 @@ class _PerfilModalState extends State<PerfilModal> {
   late TextEditingController emailCtrl;
   late TextEditingController senhaCtrl;
   late TextEditingController telefoneCtrl;
-
+ 
   @override
   void initState() {
     super.initState();
@@ -467,7 +644,7 @@ class _PerfilModalState extends State<PerfilModal> {
     senhaCtrl = TextEditingController(text: widget.formData["senha"]);
     telefoneCtrl = TextEditingController(text: widget.formData["telefone"]);
   }
-
+ 
   @override
   void dispose() {
     nomeCtrl.dispose();
@@ -479,7 +656,7 @@ class _PerfilModalState extends State<PerfilModal> {
     telefoneCtrl.dispose();
     super.dispose();
   }
-
+ 
   void _handleSubmit() {
     final dataNascimento = dataNascCtrl.text.trim();
     if (dataNascimento.isEmpty || DateTime.tryParse(dataNascimento) == null) {
@@ -498,7 +675,7 @@ class _PerfilModalState extends State<PerfilModal> {
       "telefone": telefoneCtrl.text,
     });
   }
-
+ 
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -510,61 +687,115 @@ class _PerfilModalState extends State<PerfilModal> {
         ),
         Center(
           child: Container(
-            width: 340,
-            padding: const EdgeInsets.all(24),
+            width: 400,
+            margin: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
             ),
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text("Editar Perfil", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
-                  const SizedBox(height: 16),
-                  _inputField("Nome", nomeCtrl),
-                  _inputField("Sobrenome", sobrenomeCtrl),
-                  _inputField("CPF", cpfCtrl),
-                  _dateField("Data de Nascimento", dataNascCtrl),
-                  _inputField("Email", emailCtrl, keyboardType: TextInputType.emailAddress),
-                  _inputField("Senha", senhaCtrl, obscureText: true),
-                  _inputField("Telefone", telefoneCtrl),
-                  const SizedBox(height: 18),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(24),
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF90017F),
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(20),
+                      topRight: Radius.circular(20),
+                    ),
+                  ),
+                  child: Row(
                     children: [
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF90017F)),
-                        onPressed: _handleSubmit,
-                        child: const Text("Salvar", style: TextStyle(color: Colors.white)),
+                      const Icon(Icons.edit, color: Colors.white),
+                      const SizedBox(width: 12),
+                      const Text(
+                        "Editar Perfil",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20,
+                        ),
                       ),
-                      TextButton(
+                      const Spacer(),
+                      IconButton(
                         onPressed: widget.onClose,
-                        child: const Text("Cancelar"),
+                        icon: const Icon(Icons.close, color: Colors.white),
                       ),
                     ],
                   ),
-                ],
-              ),
+                ),
+                Flexible(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      children: [
+                        _inputField("Nome", nomeCtrl, Icons.person),
+                        _inputField("Sobrenome", sobrenomeCtrl, Icons.person_outline),
+                        _inputField("CPF", cpfCtrl, Icons.credit_card),
+                        _dateField("Data de Nascimento", dataNascCtrl),
+                        _inputField("Email", emailCtrl, Icons.email, keyboardType: TextInputType.emailAddress),
+                        _inputField("Senha", senhaCtrl, Icons.lock, obscureText: true),
+                        _inputField("Telefone", telefoneCtrl, Icons.phone),
+                        const SizedBox(height: 24),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF90017F),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              elevation: 3,
+                            ),
+                            onPressed: _handleSubmit,
+                            icon: const Icon(Icons.save, color: Colors.white),
+                            label: const Text("Salvar Alterações", style: TextStyle(color: Colors.white, fontSize: 16)),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
       ],
     );
   }
-
-  Widget _inputField(String label, TextEditingController ctrl,
+ 
+  Widget _inputField(String label, TextEditingController ctrl, IconData icon,
       {TextInputType keyboardType = TextInputType.text,
       bool enabled = true,
       bool obscureText = false}) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: 16),
       child: TextField(
         controller: ctrl,
         decoration: InputDecoration(
           labelText: label,
-          border: const OutlineInputBorder(),
-          isDense: true,
+          prefixIcon: Icon(icon, color: const Color(0xFF90017F)),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey[300]!),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Color(0xFF90017F), width: 2),
+          ),
+          filled: true,
+          fillColor: Colors.grey[50],
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         ),
         keyboardType: keyboardType,
         enabled: enabled,
@@ -572,16 +803,27 @@ class _PerfilModalState extends State<PerfilModal> {
       ),
     );
   }
-
+ 
   Widget _dateField(String label, TextEditingController ctrl) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: 16),
       child: TextField(
         controller: ctrl,
         decoration: InputDecoration(
           labelText: label,
-          border: const OutlineInputBorder(),
-          isDense: true,
+          prefixIcon: const Icon(Icons.cake, color: Color(0xFF90017F)),
+          suffixIcon: const Icon(Icons.calendar_today, color: Color(0xFF90017F)),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey[300]!),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Color(0xFF90017F), width: 2),
+          ),
+          filled: true,
+          fillColor: Colors.grey[50],
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           hintText: "AAAA-MM-DD",
         ),
         keyboardType: TextInputType.datetime,
@@ -605,3 +847,4 @@ class _PerfilModalState extends State<PerfilModal> {
     );
   }
 }
+ 

@@ -59,7 +59,7 @@ class _PaginaSobreState extends State<PaginaSobre> {
                 ),
                 alignment: Alignment.center,
                 child: Container(
-                  color: Colors.black.withValues(alpha: 0.3),
+                  color: Colors.black.withOpacity(0.3),
                   padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 12),
                   child: Text(
                     'Quem Somos',
