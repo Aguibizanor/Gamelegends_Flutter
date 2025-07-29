@@ -25,12 +25,18 @@ class _CadastroFormState extends State<CadastroForm> {
     'usuario': '',
   };
   final TextEditingController _searchController = TextEditingController();
-
+  bool menuAberto = false;
   String _mensagem = '';
 
   void _handleChange(String key, String value) {
     setState(() {
       _formData[key] = value;
+    });
+  }
+
+  void toggleMenu() {
+    setState(() {
+      menuAberto = !menuAberto;
     });
   }
 
@@ -101,244 +107,263 @@ class _CadastroFormState extends State<CadastroForm> {
 
   @override
   Widget build(BuildContext context) {
+    final isWide = MediaQuery.of(context).size.width > 900;
+
     return Scaffold(
-      appBar: Navbar(
-        searchController: _searchController,
-      ),
       backgroundColor: const Color(0xFFE9E9E9),
-      body: ListView(
+      body: Stack(
         children: [
-          Center(
-            child: Container(
-              width: MediaQuery.of(context).size.width > 600 ? 500 : null,
-              margin: const EdgeInsets.all(20),
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 10,
-                    spreadRadius: 5,
-                  ),
-                ],
+          Column(
+            children: [
+              Navbar(
+                searchController: _searchController,
+                isMenuOpen: menuAberto,
+                onMenuTap: toggleMenu,
               ),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
+              Expanded(
+                child: ListView(
                   children: [
-                    const Text(
-                      'CRIAR CONTA',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF90017F),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    _buildTextFormField(
-                      label: 'Nome',
-                      onSaved: (value) => _handleChange('nome', value ?? ''),
-                    ),
-                    _buildTextFormField(
-                      label: 'Sobrenome',
-                      onSaved: (value) => _handleChange('sobrenome', value ?? ''),
-                    ),
-                    _buildTextFormField(
-                      label: 'CPF',
-                      onSaved: (value) => _handleChange('cpf', value ?? ''),
-                      keyboardType: TextInputType.number,
-                      maxLength: 14,
-                    ),
-                    _buildTextFormField(
-                      label: 'Data de Nascimento',
-                      onSaved: (value) => _handleChange('dataNascimento', value ?? ''),
-                      keyboardType: TextInputType.datetime,
-                      isDate: true,
-                    ),
-                    _buildTextFormField(
-                      label: 'Email',
-                      onSaved: (value) => _handleChange('email', value ?? ''),
-                      keyboardType: TextInputType.emailAddress,
-                    ),
-                    _buildTextFormField(
-                      label: 'Telefone',
-                      onSaved: (value) => _handleChange('telefone', value ?? ''),
-                      keyboardType: TextInputType.phone,
-                      maxLength: 15,
-                    ),
-                    _buildTextFormField(
-                      label: 'Senha',
-                      onSaved: (value) => _handleChange('senha', value ?? ''),
-                      obscureText: true,
-                    ),
-                    _buildTextFormField(
-                      label: 'Confirmar Senha',
-                      onSaved: (value) => _handleChange('confirmarSenha', value ?? ''),
-                      obscureText: true,
-                    ),
-                    _buildDropdownUserType(),
-                    const SizedBox(height: 20),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: _handleSubmit,
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 12,
-                            horizontal: 24,
-                          ),
-                          backgroundColor: const Color(0xFF007BFF),
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(5),
-                          ),
-                        ),
-                        child: const Text(
-                          'CADASTRE-SE',
-                          style: TextStyle(fontSize: 18),
-                        ),
-                      ),
-                    ),
-                    if (_mensagem.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 16),
-                        child: Text(
-                          _mensagem,
-                          style: const TextStyle(color: Colors.red),
-                        ),
-                      ),
-                    const SizedBox(height: 14),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text('Já tem uma conta? '),
-                        GestureDetector(
-                          onTap: () => Navigator.pushNamed(context, '/login'),
-                          child: const Text(
-                            'Login',
-                            style: TextStyle(color: Color(0xFF007BFF), fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 30),
-          Container(
-            width: double.infinity,
-            color: const Color(0xFF90017F),
-            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 0),
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 1200),
-                child: Wrap(
-                  runSpacing: 24,
-                  spacing: 50,
-                  children: [
-                    SizedBox(
-                      width: 350,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text.rich(
-                            TextSpan(
-                              children: [
-                                TextSpan(
-                                  text: "Game",
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                                TextSpan(text: "Legends"),
-                              ],
+                    Center(
+                      child: Container(
+                        width: MediaQuery.of(context).size.width > 600 ? 500 : null,
+                        margin: const EdgeInsets.all(20),
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 10,
+                              spreadRadius: 5,
                             ),
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 26,
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          const Text(
-                            "Game Legends é uma plataforma dedicada a jogos indie, fornecendo uma maneira fácil para desenvolvedores distribuírem seus jogos e para jogadores descobrirem novas experiências.",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 15,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Row(
-                            children: const [
-                              Icon(Icons.phone, color: Colors.white70, size: 18),
-                              SizedBox(width: 6),
-                              Text(
-                                "(99) 99999-9999",
-                                style: TextStyle(color: Colors.white70),
-                              ),
-                              SizedBox(width: 18),
-                              Icon(Icons.email, color: Colors.white70, size: 18),
-                              SizedBox(width: 6),
-                              Text(
-                                "info@gamelegends.com",
-                                style: TextStyle(color: Colors.white70),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 18),
-                          Row(
+                          ],
+                        ),
+                        child: Form(
+                          key: _formKey,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
-                              IconButton(
-                                icon: const Icon(Icons.facebook, color: Colors.white),
-                                onPressed: () => launchUrl(Uri.parse('https://www.facebook.com/profile.php?id=61578797307500')),
+                              const Text(
+                                'CRIAR CONTA',
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF90017F),
+                                ),
                               ),
-                              IconButton(
-                                icon: const Icon(Icons.camera_alt, color: Colors.white),
-                                onPressed: () {},
+                              const SizedBox(height: 20),
+                              _buildTextFormField(
+                                label: 'Nome',
+                                onSaved: (value) => _handleChange('nome', value ?? ''),
                               ),
-                              IconButton(
-                                icon: const Icon(Icons.alternate_email, color: Colors.white),
-                                onPressed: () => launchUrl(Uri.parse('https://www.instagram.com/game._legends/')),
+                              _buildTextFormField(
+                                label: 'Sobrenome',
+                                onSaved: (value) => _handleChange('sobrenome', value ?? ''),
                               ),
-                              IconButton(
-                                icon: const Icon(Icons.business, color: Colors.white),
-                                onPressed: () {},
+                              _buildTextFormField(
+                                label: 'CPF',
+                                onSaved: (value) => _handleChange('cpf', value ?? ''),
+                                keyboardType: TextInputType.number,
+                                maxLength: 14,
+                              ),
+                              _buildTextFormField(
+                                label: 'Data de Nascimento',
+                                onSaved: (value) => _handleChange('dataNascimento', value ?? ''),
+                                keyboardType: TextInputType.datetime,
+                                isDate: true,
+                              ),
+                              _buildTextFormField(
+                                label: 'Email',
+                                onSaved: (value) => _handleChange('email', value ?? ''),
+                                keyboardType: TextInputType.emailAddress,
+                              ),
+                              _buildTextFormField(
+                                label: 'Telefone',
+                                onSaved: (value) => _handleChange('telefone', value ?? ''),
+                                keyboardType: TextInputType.phone,
+                                maxLength: 15,
+                              ),
+                              _buildTextFormField(
+                                label: 'Senha',
+                                onSaved: (value) => _handleChange('senha', value ?? ''),
+                                obscureText: true,
+                              ),
+                              _buildTextFormField(
+                                label: 'Confirmar Senha',
+                                onSaved: (value) => _handleChange('confirmarSenha', value ?? ''),
+                                obscureText: true,
+                              ),
+                              _buildDropdownUserType(),
+                              const SizedBox(height: 20),
+                              SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton(
+                                  onPressed: _handleSubmit,
+                                  style: ElevatedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 12,
+                                      horizontal: 24,
+                                    ),
+                                    backgroundColor: const Color(0xFF007BFF),
+                                    foregroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(5),
+                                    ),
+                                  ),
+                                  child: const Text(
+                                    'CADASTRE-SE',
+                                    style: TextStyle(fontSize: 18),
+                                  ),
+                                ),
+                              ),
+                              if (_mensagem.isNotEmpty)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 16),
+                                  child: Text(
+                                    _mensagem,
+                                    style: const TextStyle(color: Colors.red),
+                                  ),
+                                ),
+                              const SizedBox(height: 14),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Text('Já tem uma conta? '),
+                                  GestureDetector(
+                                    onTap: () => Navigator.pushNamed(context, '/login'),
+                                    child: const Text(
+                                      'Login',
+                                      style: TextStyle(color: Color(0xFF007BFF), fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
-                          const SizedBox(height: 16),
-                          InkWell(
-                            onTap: () => Navigator.pushNamed(context, '/privacidade'),
-                            child: const Text(
-                              "Conheça nossa política de privacidade",
-                              style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 14,
-                                decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 30),
+                    Container(
+                      width: double.infinity,
+                      color: const Color(0xFF90017F),
+                      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 0),
+                      child: Center(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 1200),
+                          child: Wrap(
+                            runSpacing: 24,
+                            spacing: 50,
+                            children: [
+                              SizedBox(
+                                width: 350,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text.rich(
+                                      TextSpan(
+                                        children: [
+                                          TextSpan(
+                                            text: "Game",
+                                            style: TextStyle(fontWeight: FontWeight.bold),
+                                          ),
+                                          TextSpan(text: "Legends"),
+                                        ],
+                                      ),
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 26,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 10),
+                                    const Text(
+                                      "Game Legends é uma plataforma dedicada a jogos indie, fornecendo uma maneira fácil para desenvolvedores distribuírem seus jogos e para jogadores descobrirem novas experiências.",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 15,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 16),
+                                    Row(
+                                      children: const [
+                                        Icon(Icons.phone, color: Colors.white70, size: 18),
+                                        SizedBox(width: 6),
+                                        Text(
+                                          "(99) 99999-9999",
+                                          style: TextStyle(color: Colors.white70),
+                                        ),
+                                        SizedBox(width: 18),
+                                        Icon(Icons.email, color: Colors.white70, size: 18),
+                                        SizedBox(width: 6),
+                                        Text(
+                                          "info@gamelegends.com",
+                                          style: TextStyle(color: Colors.white70),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 18),
+                                    Row(
+                                      children: [
+                                        IconButton(
+                                          icon: const Icon(Icons.facebook, color: Colors.white),
+                                          onPressed: () => launchUrl(Uri.parse('https://www.facebook.com/profile.php?id=61578797307500')),
+                                        ),
+                                        IconButton(
+                                          icon: const Icon(Icons.camera_alt, color: Colors.white),
+                                          onPressed: () {},
+                                        ),
+                                        IconButton(
+                                          icon: const Icon(Icons.alternate_email, color: Colors.white),
+                                          onPressed: () => launchUrl(Uri.parse('https://www.instagram.com/game._legends/')),
+                                        ),
+                                        IconButton(
+                                          icon: const Icon(Icons.business, color: Colors.white),
+                                          onPressed: () {},
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 16),
+                                    InkWell(
+                                      onTap: () => Navigator.pushNamed(context, '/privacidade'),
+                                      child: const Text(
+                                        "Conheça nossa política de privacidade",
+                                        style: TextStyle(
+                                          color: Colors.white70,
+                                          fontSize: 14,
+                                          decoration: TextDecoration.underline,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
+                            ],
                           ),
-                        ],
+                        ),
+                      ),
+                    ),
+                    Container(
+                      width: double.infinity,
+                      color: const Color(0xFF90017F),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: const Center(
+                        child: Text(
+                          "© gamelegends.com | Feito pelo time do Game Legends",
+                          style: TextStyle(color: Colors.white70),
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
-            ),
+            ],
           ),
-          Container(
-            width: double.infinity,
-            color: const Color(0xFF90017F),
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            child: const Center(
-              child: Text(
-                "© gamelegends.com | Feito pelo time do Game Legends",
-                style: TextStyle(color: Colors.white70),
-              ),
+          if (!isWide && menuAberto)
+            NavbarMobileMenu(
+              closeMenu: () => setState(() => menuAberto = false),
+              searchController: _searchController,
             ),
-          ),
         ],
       ),
     );
