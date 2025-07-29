@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'navbar.dart';
-
+ 
 // Lista dos jogos para a categoria "Windows" (agora com usuário, descrição e comentários!)
 // Removido o campo "pai"
 final _windowsGames = [
@@ -72,14 +72,14 @@ final _windowsGames = [
     ]
   },
 ];
-
+ 
 class WindowsPage extends StatefulWidget {
   const WindowsPage({Key? key}) : super(key: key);
-
+ 
   @override
   State<WindowsPage> createState() => _WindowsPageState();
 }
-
+ 
 class _WindowsPageState extends State<WindowsPage> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
@@ -91,30 +91,30 @@ class _WindowsPageState extends State<WindowsPage> {
     'postagem': true,
     'status': true,
   };
-
+ 
   void toggleList(String section) {
     setState(() {
       isOpen[section] = !(isOpen[section] ?? false);
     });
   }
-
+ 
   void toggleMenu() {
     setState(() {
       menuAberto = !menuAberto;
     });
   }
-
+ 
   void toggleMobileMenu() {
     setState(() {
       isMobileOpen = !isMobileOpen;
     });
   }
-
+ 
   @override
   Widget build(BuildContext context) {
     final isWide = MediaQuery.of(context).size.width > 900;
     final sideBarOpen = isWide || isMobileOpen;
-
+ 
     return Scaffold(
       body: Column(
         children: [
@@ -182,20 +182,20 @@ class _WindowsPageState extends State<WindowsPage> {
                       ),
                     ),
                   ),
-                
+               
                 // Botão hamburguer mobile lateral
                 if (!isWide && !sideBarOpen)
                   IconButton(
                     icon: const Icon(Icons.chevron_right),
                     onPressed: toggleMobileMenu,
                   ),
-                
+               
                 if (!isWide && sideBarOpen)
                   IconButton(
                     icon: const Icon(Icons.chevron_left),
                     onPressed: toggleMobileMenu,
                   ),
-                
+               
                 // Lista dos jogos do Windows
                 Expanded(
                   child: Container(
@@ -214,10 +214,10 @@ class _WindowsPageState extends State<WindowsPage> {
                           onTap: () {},
                           sidebarOpen: sideBarOpen,
                         )),
-                        
+                       
                         // Espaço antes do footer
                         const SizedBox(height: 30),
-                        
+                       
                         // Footer
                         Container(
                           color: const Color(0xFF90017F),
@@ -313,7 +313,7 @@ class _WindowsPageState extends State<WindowsPage> {
                                       ],
                                     ),
                                   ),
-
+ 
                                 ],
                               ),
                             ),
@@ -339,7 +339,7 @@ class _WindowsPageState extends State<WindowsPage> {
           ),
         ],
       ),
-      
+     
       // Menu mobile overlay do topo (hambúrguer)
       endDrawer: !isWide && menuAberto
           ? NavbarMobileMenu(
@@ -349,7 +349,7 @@ class _WindowsPageState extends State<WindowsPage> {
           : null,
     );
   }
-
+ 
   // Cria uma seção de filtro dobrável
   Widget _buildSection(String title, String key, List<Widget> children) {
     return Column(
@@ -384,7 +384,7 @@ class _WindowsPageState extends State<WindowsPage> {
       ],
     );
   }
-
+ 
   Widget _buildFilterLink(BuildContext context, String label, IconData icon, String route) {
     return InkWell(
       onTap: () => Navigator.pushNamed(context, route),
@@ -399,7 +399,7 @@ class _WindowsPageState extends State<WindowsPage> {
     );
   }
 }
-
+ 
 // Card customizado para Windows, estilo desenvolvendo.dart
 class _WindowsGameCard extends StatelessWidget {
   final String img;
@@ -409,7 +409,7 @@ class _WindowsGameCard extends StatelessWidget {
   final String description;
   final VoidCallback onTap;
   final bool sidebarOpen;
-
+ 
   const _WindowsGameCard({
     required this.img,
     required this.name,
@@ -419,7 +419,7 @@ class _WindowsGameCard extends StatelessWidget {
     required this.onTap,
     required this.sidebarOpen,
   });
-
+ 
   @override
   Widget build(BuildContext context) {
     return Card(

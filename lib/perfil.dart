@@ -48,9 +48,19 @@ class _PaginaPerfilState extends State<PaginaPerfil> {
   }
 
   Future<void> _loadPerfil() async {
-    final usuarioData = await getUsuarioLogado();
-    setState(() {
-      if (usuarioData != null) {
+    // Buscar dados completos do SharedPreferences
+    final prefs = await SharedPreferences.getInstance();
+    final usuarioStr = prefs.getString('usuario');
+    
+    if (usuarioStr == null) {
+      setState(() => loading = false);
+      if (mounted) Navigator.pushReplacementNamed(context, '/login');
+      return;
+    }
+    
+    try {
+      final usuarioData = jsonDecode(usuarioStr) as Map<String, dynamic>;
+      setState(() {
         formData = {
           "nome": usuarioData["nome"] ?? "",
           "sobrenome": usuarioData["sobrenome"] ?? "",
@@ -60,11 +70,11 @@ class _PaginaPerfilState extends State<PaginaPerfil> {
           "senha": usuarioData["senha"] ?? "",
           "telefone": usuarioData["telefone"] ?? "",
         };
-      }
-      loading = false;
-    });
-    if (usuarioData == null && mounted) {
-      Navigator.pushReplacementNamed(context, '/Login');
+        loading = false;
+      });
+    } catch (e) {
+      setState(() => loading = false);
+      if (mounted) Navigator.pushReplacementNamed(context, '/login');
     }
   }
 

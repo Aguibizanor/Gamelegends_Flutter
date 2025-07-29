@@ -1,76 +1,10 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'navbar.dart';
+import 'jogo_detalhes.dart';
 
-// Lista dos jogos para a categoria Aventura (agora com usuário, descrição e comentários!)
-// Removido o campo "pai"
-final _aventuraGames = [
-  {
-    "img": "assets/laranja.png",
-    "name": "Coop Catacombs",
-    "user": "catacombcoop",
-    "description": "Explore catacumbas em cooperação com amigos e resolva enigmas.",
-    "comments": [
-      "Adorei jogar em dupla!",
-      "Cenários bem criativos.",
-      "Desafios inteligentes."
-    ]
-  },
-  {
-    "img": "assets/limao.png",
-    "name": "Hero's Hour",
-    "user": "herohourfan",
-    "description": "Comande heróis em batalhas em tempo real e conquiste territórios.",
-    "comments": [
-      "Muito estratégico.",
-      "Gráficos estilosos.",
-      "Lembra jogos clássicos."
-    ]
-  },
-  {
-    "img": "assets/jaca.png",
-    "name": "The Vale",
-    "user": "valeexplorer",
-    "description": "Uma aventura sensorial intensa em um mundo medieval.",
-    "comments": [
-      "Narrativa imersiva.",
-      "Ótimo para deficientes visuais.",
-      "Trilha sonora marcante."
-    ]
-  },
-  {
-    "img": "assets/goiaba.png",
-    "name": "Bug Fables",
-    "user": "buglover",
-    "description": "Acompanhe insetos carismáticos em uma jornada épica.",
-    "comments": [
-      "Personagens cativantes.",
-      "Puzzles divertidos.",
-      "História envolvente."
-    ]
-  },
-  {
-    "img": "assets/framboesa.png",
-    "name": "Billie Bust up",
-    "user": "billieplayer",
-    "description": "Enfrente desafios musicais em uma aventura animada.",
-    "comments": [
-      "Músicas incríveis!",
-      "Visual colorido.",
-      "Muito divertido."
-    ]
-  },
-  {
-    "img": "assets/damasco.png",
-    "name": "Endless Blue",
-    "user": "bluesailor",
-    "description": "Navegue mares misteriosos e descubra segredos profundos.",
-    "comments": [
-      "Atmosfera relaxante.",
-      "Mundo aberto interessante.",
-      "Recomendo para quem gosta de exploração."
-    ]
-  },
-];
+// Dados serão carregados do banco de dados
 
 class AventuraPage extends StatefulWidget {
   const AventuraPage({Key? key}) : super(key: key);
@@ -90,6 +24,47 @@ class _AventuraPageState extends State<AventuraPage> {
     'postagem': true,
     'status': true,
   };
+  
+  List<Map<String, dynamic>> aventuraGames = [];
+  bool carregandoJogos = true;
+  
+  @override
+  void initState() {
+    super.initState();
+    carregarJogosAventura();
+  }
+  
+  Future<void> carregarJogosAventura() async {
+    try {
+      final response = await http.get(Uri.parse('http://localhost:8080/projetos'));
+      if (response.statusCode == 200) {
+        final List<dynamic> projetos = jsonDecode(response.body);
+        final jogosAventura = projetos.where((projeto) => 
+          projeto['genero']?.toLowerCase().contains('aventura') == true
+        ).toList();
+        
+        setState(() {
+          aventuraGames = jogosAventura.map((projeto) => {
+            'id': projeto['id'],
+            'img': projeto['foto'] != null ? 'http://localhost:8080/projetos/${projeto['id']}/foto' : 'assets/default_game.png',
+            'name': projeto['nomeProjeto'],
+            'description': projeto['descricao'],
+            'user': 'Desenvolvedor', // Placeholder
+            'comments': ['Jogo interessante!', 'Vale a pena jogar!'], // Placeholder
+          }).toList().cast<Map<String, dynamic>>();
+          carregandoJogos = false;
+        });
+      } else {
+        setState(() {
+          carregandoJogos = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        carregandoJogos = false;
+      });
+    }
+  }
 
   void toggleList(String section) {
     setState(() {
@@ -206,15 +181,32 @@ class _AventuraPageState extends State<AventuraPage> {
                       padding: const EdgeInsets.all(10),
                       children: [
                         // Lista de jogos
-                        ..._aventuraGames.map((game) => _AventuraGameCard(
-                          img: (game.containsKey('img') && game['img'] != null) ? game['img'] as String : '',
-                          name: (game.containsKey('name') && game['name'] != null) ? game['name'] as String : '',
-                          user: (game.containsKey('user') && game['user'] != null) ? game['user'] as String : '',
-                          comments: (game['comments'] is List) ? List<String>.from(game['comments'] as List) : [],
-                          description: (game.containsKey('description') && game['description'] != null) ? game['description'] as String : '',
-                          onTap: () {},
-                          sidebarOpen: sideBarOpen,
-                        )),
+                        if (carregandoJogos)
+                          const Center(child: CircularProgressIndicator())
+                        else if (aventuraGames.isEmpty)
+                          const Center(
+                            child: Text(
+                              'Nenhum jogo de aventura encontrado.',
+                              style: TextStyle(fontSize: 18, color: Colors.grey),
+                            ),
+                          )
+                        else
+                          ...aventuraGames.map((game) => _AventuraGameCard(
+                            img: game['img'] ?? '',
+                            name: game['name'] ?? '',
+                            user: game['user'] ?? '',
+                            comments: List<String>.from(game['comments'] ?? []),
+                            description: game['description'] ?? '',
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => JogoDetalhes(jogoId: game['id'].toString()),
+                                ),
+                              );
+                            },
+                            sidebarOpen: sideBarOpen,
+                          )),
                         
                         // Espaço antes do footer
                         const SizedBox(height: 30),
@@ -275,7 +267,7 @@ class _AventuraPageState extends State<AventuraPage> {
                                   // Divisor
                                   Container(
                                     height: 1,
-                                    color: Colors.white.withOpacity(0.3),
+                                    color: Colors.white.withValues(alpha: 0.3),
                                     margin: const EdgeInsets.symmetric(horizontal: 40),
                                   ),
                                   const SizedBox(height: 16),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'navbar.dart';
 
@@ -50,11 +51,18 @@ class _PaginaLoginState extends State<PaginaLogin> {
       if (response.statusCode == 200) {
         final responseMap = jsonDecode(response.body);
 
-        // Salvar dados completos do usuário
-        await salvarUsuarioLogado(
-          nome: responseMap['nome'] ?? '',
-          tipo: responseMap['usuario'] ?? responseMap['tipo'] ?? 'Cliente',
-        );
+        // Salvar dados completos do usuário no SharedPreferences
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('usuario', jsonEncode({
+          "nome": responseMap['nome'] ?? '',
+          "sobrenome": responseMap['sobrenome'] ?? '',
+          "cpf": responseMap['cpf'] ?? '',
+          "datanascimento": responseMap['datanascimento'] ?? responseMap['dataNascimento'] ?? '',
+          "email": responseMap['email'] ?? email,
+          "senha": responseMap['senha'] ?? '',
+          "telefone": responseMap['telefone'] ?? '',
+          "tipo": responseMap['usuario'] ?? responseMap['tipo'] ?? 'Cliente',
+        }));
 
         if (!mounted) return;
         showDialog(

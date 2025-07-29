@@ -3,6 +3,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'navbar.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'jogo_detalhes.dart';
 
 class IndexPrincipal extends StatefulWidget {
   const IndexPrincipal({Key? key}) : super(key: key);
@@ -199,7 +200,12 @@ class _IndexPrincipalState extends State<IndexPrincipal> {
                                     nome: projeto['nomeProjeto'] ?? '',
                                     imageUrl: getProjetoImagem(projeto),
                                     onTap: () {
-                                      Navigator.pushNamed(context, '/Descricao/${projeto['id']}');
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => JogoDetalhes(jogoId: projeto['id'].toString()),
+                                        ),
+                                      );
                                     },
                                   );
                                 },
