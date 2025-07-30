@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'cadastro_cartao.dart';
 
 const String cartaoApiUrl = "http://localhost:8080/cadcartao";
 
-// Função para obter usuário logado
 Future<Map<String, dynamic>?> getUsuarioLogado() async {
   final prefs = await SharedPreferences.getInstance();
   final usuarioStr = prefs.getString('usuario');
@@ -18,7 +18,6 @@ Future<Map<String, dynamic>?> getUsuarioLogado() async {
   }
 }
 
-// Função para buscar cartões do cliente
 Future<List<Map<String, dynamic>>> buscarCartoesCliente(int clienteId) async {
   try {
     final response = await http.get(Uri.parse('$cartaoApiUrl/cliente/$clienteId'));
@@ -31,14 +30,14 @@ Future<List<Map<String, dynamic>>> buscarCartoesCliente(int clienteId) async {
   return [];
 }
 
-class CartoesPerfil extends StatefulWidget {
-  const CartoesPerfil({Key? key}) : super(key: key);
+class CartoesPage extends StatefulWidget {
+  const CartoesPage({Key? key}) : super(key: key);
 
   @override
-  State<CartoesPerfil> createState() => _CartoesPerfilState();
+  State<CartoesPage> createState() => _CartoesPageState();
 }
 
-class _CartoesPerfilState extends State<CartoesPerfil> {
+class _CartoesPageState extends State<CartoesPage> {
   List<Map<String, dynamic>> cartoes = [];
   bool carregando = true;
 
@@ -49,17 +48,48 @@ class _CartoesPerfilState extends State<CartoesPerfil> {
   }
 
   Future<void> _carregarCartoes() async {
-    final usuarioData = await getUsuarioLogado();
-    if (usuarioData != null && usuarioData['id'] != null) {
-      final cartoesData = await buscarCartoesCliente(usuarioData['id']);
+    try {
+      final usuarioData = await getUsuarioLogado();
+      if (usuarioData != null && usuarioData['id'] != null) {
+        final cartoesData = await buscarCartoesCliente(usuarioData['id']);
+        setState(() {
+          cartoes = cartoesData;
+          carregando = false;
+        });
+      } else {
+        setState(() {
+          carregando = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Faça login para ver seus cartões'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+    } catch (e) {
       setState(() {
-        cartoes = cartoesData;
         carregando = false;
       });
-    } else {
-      setState(() {
-        carregando = false;
-      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erro: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _adicionarCartao() async {
+    final resultado = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const CadastroCartaoScreen(),
+      ),
+    );
+    
+    if (resultado == true) {
+      _carregarCartoes();
     }
   }
 
@@ -79,18 +109,51 @@ class _CartoesPerfilState extends State<CartoesPerfil> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF7F7F7),
       appBar: AppBar(
         title: const Text('Meus Cartões'),
         backgroundColor: const Color(0xFF90017F),
         foregroundColor: Colors.white,
+        actions: [
+          IconButton(
+            onPressed: _adicionarCartao,
+            icon: const Icon(Icons.add),
+            tooltip: 'Adicionar Cartão',
+          ),
+        ],
       ),
       body: carregando
           ? const Center(child: CircularProgressIndicator())
           : cartoes.isEmpty
-              ? const Center(
-                  child: Text(
-                    'Nenhum cartão cadastrado',
-                    style: TextStyle(fontSize: 18, color: Colors.grey),
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.credit_card_off,
+                        size: 80,
+                        color: Colors.grey,
+                      ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Nenhum cartão cadastrado',
+                        style: TextStyle(fontSize: 18, color: Colors.grey),
+                      ),
+                      const SizedBox(height: 24),
+                      ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF90017F),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 12,
+                          ),
+                        ),
+                        onPressed: _adicionarCartao,
+                        icon: const Icon(Icons.add),
+                        label: const Text('Adicionar Primeiro Cartão'),
+                      ),
+                    ],
                   ),
                 )
               : ListView.builder(
@@ -99,7 +162,9 @@ class _CartoesPerfilState extends State<CartoesPerfil> {
                   itemBuilder: (context, index) {
                     final cartao = cartoes[index];
                     final numero = cartao['numC'].toString();
-                    final ultimos4 = numero.length >= 4 ? numero.substring(numero.length - 4) : numero;
+                    final ultimos4 = numero.length >= 4 
+                        ? numero.substring(numero.length - 4) 
+                        : numero;
                     
                     return Card(
                       margin: const EdgeInsets.only(bottom: 16),
@@ -196,6 +261,13 @@ class _CartoesPerfilState extends State<CartoesPerfil> {
                     );
                   },
                 ),
+      floatingActionButton: cartoes.isNotEmpty
+          ? FloatingActionButton(
+              onPressed: _adicionarCartao,
+              backgroundColor: const Color(0xFF90017F),
+              child: const Icon(Icons.add, color: Colors.white),
+            )
+          : null,
     );
   }
 }

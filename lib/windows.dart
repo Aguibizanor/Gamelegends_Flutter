@@ -2,74 +2,48 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'navbar.dart';
  
-// Lista dos jogos para a categoria "Windows" (agora com usuário, descrição e comentários!)
-// Removido o campo "pai"
 final _windowsGames = [
   {
     "img": "assets/cato.png",
     "name": "Happy Cat Tavern",
     "user": "catlover123",
     "description": "Gerencie sua própria taverna cheia de gatos felizes!",
-    "comments": [
-      "Muito fofo!",
-      "Quero um DLC de filhotes.",
-      "Top demais!"
-    ]
+    "comments": ["Muito fofo!", "Quero um DLC de filhotes.", "Top demais!"]
   },
   {
     "img": "assets/pombo.png",
     "name": "Subida de pomba",
     "user": "pombinhu",
     "description": "Ajude a pomba a subir o prédio sem cair.",
-    "comments": [
-      "Morri de rir desse jogo.",
-      "Adorei a trilha sonora.",
-      "Pombas são incríveis!"
-    ]
+    "comments": ["Morri de rir desse jogo.", "Adorei a trilha sonora.", "Pombas são incríveis!"]
   },
   {
     "img": "assets/limao.png",
     "name": "Hero's Hour",
     "user": "herozin",
     "description": "Seja um herói em batalhas épicas em tempo real.",
-    "comments": [
-      "Batalhas muito dinâmicas.",
-      "Viciante demais!",
-      "Arte linda."
-    ]
+    "comments": ["Batalhas muito dinâmicas.", "Viciante demais!", "Arte linda."]
   },
   {
     "img": "assets/goiaba.png",
     "name": "Bug Fables",
     "user": "folhudo",
     "description": "Uma aventura de insetos carismáticos pelo mundo.",
-    "comments": [
-      "O melhor RPG de insetos!",
-      "Muito divertido.",
-      "Quero sequência."
-    ]
+    "comments": ["O melhor RPG de insetos!", "Muito divertido.", "Quero sequência."]
   },
   {
     "img": "assets/diaba.png",
     "name": "Hedon Bloodrite",
     "user": "orcgamer",
     "description": "FPS oldschool com muita ação e mistério.",
-    "comments": [
-      "Lembrou Doom!",
-      "Amo esse estilo de jogo.",
-      "Difícil pra caramba."
-    ]
+    "comments": ["Lembrou Doom!", "Amo esse estilo de jogo.", "Difícil pra caramba."]
   },
   {
     "img": "assets/marquin.png",
     "name": "Buck up and drive",
     "user": "pilotoshow",
     "description": "Corrida insana com carros que desafiam a gravidade.",
-    "comments": [
-      "Drift infinito!",
-      "Joguei horas seguidas.",
-      "Ótima trilha sonora."
-    ]
+    "comments": ["Drift infinito!", "Joguei horas seguidas.", "Ótima trilha sonora."]
   },
 ];
  
@@ -116,241 +90,252 @@ class _WindowsPageState extends State<WindowsPage> {
     final sideBarOpen = isWide || isMobileOpen;
  
     return Scaffold(
-      body: Column(
+      body: Stack(
         children: [
-          Navbar(
-            searchController: _searchController,
-            isMenuOpen: menuAberto,
-            onMenuTap: toggleMenu,
-          ),
-          Expanded(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Barra lateral
-                if (sideBarOpen)
-                  SizedBox(
-                    width: 260,
-                    child: Drawer(
-                      elevation: 0,
+          Column(
+            children: [
+              Navbar(
+                searchController: _searchController,
+                isMenuOpen: menuAberto,
+                onMenuTap: toggleMenu,
+              ),
+              Expanded(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (sideBarOpen)
+                      SizedBox(
+                        width: 260,
+                        child: Drawer(
+                          elevation: 0,
+                          child: Container(
+                            color: Colors.white,
+                            child: ListView(
+                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+                              children: [
+                                _buildSection(
+                                  "Gênero",
+                                  "genero",
+                                  [
+                                    _buildFilterLink(context, "Terror", Icons.sports_esports, "/terror"),
+                                    _buildFilterLink(context, "Esporte", Icons.sports_esports, "/esporte"),
+                                    _buildFilterLink(context, "Aventura", Icons.sports_esports, "/aventura"),
+                                    _buildFilterLink(context, "Educacional", Icons.sports_esports, "/educacional"),
+                                    _buildFilterLink(context, "Sobrevivência", Icons.sports_esports, "/sobrevivencia"),
+                                    _buildFilterLink(context, "Jogo de cartas", Icons.sports_esports, "/cartas"),
+                                  ],
+                                ),
+                                _buildSection(
+                                  "Plataformas",
+                                  "plataformas",
+                                  [
+                                    _buildFilterLink(context, "Windows", Icons.desktop_windows, "/windows"),
+                                    _buildFilterLink(context, "Mac OS", Icons.laptop_mac, "/macOs"),
+                                    _buildFilterLink(context, "Android", Icons.android, "/android"),
+                                    _buildFilterLink(context, "iOS", Icons.phone_iphone, "/iOS"),
+                                  ],
+                                ),
+                                _buildSection(
+                                  "Postagem",
+                                  "postagem",
+                                  [
+                                    _buildFilterLink(context, "Hoje", Icons.access_time, "/hoje"),
+                                    _buildFilterLink(context, "Essa semana", Icons.access_time, "/essaSemana"),
+                                    _buildFilterLink(context, "Esse mês", Icons.access_time, "/esseMes"),
+                                  ],
+                                ),
+                                _buildSection(
+                                  "Status",
+                                  "status",
+                                  [
+                                    _buildFilterLink(context, "Desenvolvido", Icons.flash_on, "/desenvolvido"),
+                                    _buildFilterLink(context, "Desenvolvendo", Icons.play_arrow, "/desenvolvendo"),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    if (!isWide && !sideBarOpen)
+                      IconButton(
+                        icon: const Icon(Icons.chevron_right),
+                        onPressed: toggleMobileMenu,
+                      ),
+                    if (!isWide && sideBarOpen)
+                      IconButton(
+                        icon: const Icon(Icons.chevron_left),
+                        onPressed: toggleMobileMenu,
+                      ),
+                    Expanded(
                       child: Container(
-                        color: Colors.white,
+                        color: const Color(0xFFE9E9E9),
                         child: ListView(
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+                          controller: _scrollController,
+                          padding: const EdgeInsets.all(10),
                           children: [
-                            _buildSection(
-                              "Gênero",
-                              "genero",
-                              [
-                                _buildFilterLink(context, "Terror", Icons.sports_esports, "/terror"),
-                                _buildFilterLink(context, "Esporte", Icons.sports_esports, "/esporte"),
-                                _buildFilterLink(context, "Aventura", Icons.sports_esports, "/aventura"),
-                                _buildFilterLink(context, "Educacional", Icons.sports_esports, "/educacional"),
-                                _buildFilterLink(context, "Sobrevivência", Icons.sports_esports, "/sobrevivencia"),
-                                _buildFilterLink(context, "Jogo de cartas", Icons.sports_esports, "/cartas"),
-                              ],
-                            ),
-                            _buildSection(
-                              "Plataformas",
-                              "plataformas",
-                              [
-                                _buildFilterLink(context, "Windows", Icons.desktop_windows, "/windows"),
-                                _buildFilterLink(context, "Mac OS", Icons.laptop_mac, "/macOs"),
-                                _buildFilterLink(context, "Android", Icons.android, "/android"),
-                                _buildFilterLink(context, "iOS", Icons.phone_iphone, "/iOS"),
-                              ],
-                            ),
-                            _buildSection(
-                              "Postagem",
-                              "postagem",
-                              [
-                                _buildFilterLink(context, "Hoje", Icons.access_time, "/hoje"),
-                                _buildFilterLink(context, "Essa semana", Icons.access_time, "/essaSemana"),
-                                _buildFilterLink(context, "Esse mês", Icons.access_time, "/esseMes"),
-                              ],
-                            ),
-                            _buildSection(
-                              "Status",
-                              "status",
-                              [
-                                _buildFilterLink(context, "Desenvolvido", Icons.flash_on, "/desenvolvido"),
-                                _buildFilterLink(context, "Desenvolvendo", Icons.play_arrow, "/desenvolvendo"),
-                              ],
+                            ..._windowsGames.map((game) => _WindowsGameCard(
+                              img: (game.containsKey('img') && game['img'] != null) ? game['img'] as String : '',
+                              name: (game.containsKey('name') && game['name'] != null) ? game['name'] as String : '',
+                              user: (game.containsKey('user') && game['user'] != null) ? game['user'] as String : '',
+                              comments: (game['comments'] is List) ? List<String>.from(game['comments'] as List) : [],
+                              description: (game.containsKey('description') && game['description'] != null) ? game['description'] as String : '',
+                              onTap: () {},
+                              sidebarOpen: sideBarOpen,
+                            )),
+                            const SizedBox(height: 30),
+                            LayoutBuilder(
+                              builder: (context, constraints) {
+                                final isWideFooter = constraints.maxWidth > 700;
+                                return Column(
+                                  children: [
+                                    Container(
+                                      width: double.infinity,
+                                      color: const Color(0xFF90017F),
+                                      padding: EdgeInsets.symmetric(
+                                          vertical: 24,
+                                          horizontal: isWideFooter ? 0 : 18),
+                                      child: Center(
+                                        child: ConstrainedBox(
+                                          constraints: const BoxConstraints(maxWidth: 1200),
+                                          child: Flex(
+                                            direction: isWideFooter ? Axis.horizontal : Axis.vertical,
+                                            mainAxisAlignment:
+                                              isWideFooter ? MainAxisAlignment.start : MainAxisAlignment.center,
+                                            crossAxisAlignment:
+                                              isWideFooter ? CrossAxisAlignment.start : CrossAxisAlignment.center,
+                                            children: [
+                                              SizedBox(
+                                                width: isWideFooter ? 350 : double.infinity,
+                                                child: Column(
+                                                  crossAxisAlignment: isWideFooter
+                                                      ? CrossAxisAlignment.start
+                                                      : CrossAxisAlignment.center,
+                                                  children: [
+                                                    const Text.rich(
+                                                      TextSpan(
+                                                        children: [
+                                                          TextSpan(
+                                                            text: "Game",
+                                                            style: TextStyle(fontWeight: FontWeight.bold),
+                                                          ),
+                                                          TextSpan(text: "Legends"),
+                                                        ],
+                                                      ),
+                                                      style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontSize: 26,
+                                                      ),
+                                                      textAlign: TextAlign.center,
+                                                    ),
+                                                    const SizedBox(height: 10),
+                                                    const Text(
+                                                      "Game Legends é uma plataforma dedicada a jogos indie, fornecendo uma maneira fácil para desenvolvedores distribuírem seus jogos e para jogadores descobrirem novas experiências.",
+                                                      style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontSize: 15,
+                                                      ),
+                                                      textAlign: TextAlign.center,
+                                                    ),
+                                                    const SizedBox(height: 16),
+                                                    Row(
+                                                      mainAxisAlignment: isWideFooter
+                                                          ? MainAxisAlignment.start
+                                                          : MainAxisAlignment.center,
+                                                      children: const [
+                                                        Icon(Icons.phone, color: Colors.white70, size: 18),
+                                                        SizedBox(width: 6),
+                                                        Text(
+                                                          "(99) 99999-9999",
+                                                          style: TextStyle(color: Colors.white70),
+                                                        ),
+                                                        SizedBox(width: 18),
+                                                        Icon(Icons.email, color: Colors.white70, size: 18),
+                                                        SizedBox(width: 6),
+                                                        Text(
+                                                          "info@gamelegends.com",
+                                                          style: TextStyle(color: Colors.white70),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    const SizedBox(height: 18),
+                                                    Row(
+                                                      mainAxisAlignment: isWideFooter
+                                                          ? MainAxisAlignment.start
+                                                          : MainAxisAlignment.center,
+                                                      children: [
+                                                        IconButton(
+                                                          icon: const Icon(Icons.facebook, color: Colors.white),
+                                                          onPressed: () => launchUrl(Uri.parse('https://www.facebook.com/profile.php?id=61578797307500')),
+                                                        ),
+                                                        IconButton(
+                                                          icon: const Icon(Icons.camera_alt, color: Colors.white),
+                                                          onPressed: () {},
+                                                        ),
+                                                        IconButton(
+                                                          icon: const Icon(Icons.alternate_email, color: Colors.white),
+                                                          onPressed: () => launchUrl(Uri.parse('https://www.instagram.com/game._legends/')),
+                                                        ),
+                                                        IconButton(
+                                                          icon: const Icon(Icons.business, color: Colors.white),
+                                                          onPressed: () {},
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    const SizedBox(height: 16),
+                                                    InkWell(
+                                                      onTap: () => Navigator.pushNamed(context, '/privacidade'),
+                                                      child: const Text(
+                                                        "Conheça nossa política de privacidade",
+                                                        style: TextStyle(
+                                                          color: Colors.white70,
+                                                          fontSize: 14,
+                                                          decoration: TextDecoration.underline,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    Container(
+                                      width: double.infinity,
+                                      color: const Color(0xFF90017F),
+                                      padding: const EdgeInsets.symmetric(vertical: 12),
+                                      child: const Center(
+                                        child: Text(
+                                          "© gamelegends.com | Feito pelo time do Game Legends",
+                                          style: TextStyle(color: Colors.white70),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
                             ),
                           ],
                         ),
                       ),
                     ),
-                  ),
-               
-                // Botão hamburguer mobile lateral
-                if (!isWide && !sideBarOpen)
-                  IconButton(
-                    icon: const Icon(Icons.chevron_right),
-                    onPressed: toggleMobileMenu,
-                  ),
-               
-                if (!isWide && sideBarOpen)
-                  IconButton(
-                    icon: const Icon(Icons.chevron_left),
-                    onPressed: toggleMobileMenu,
-                  ),
-               
-                // Lista dos jogos do Windows
-                Expanded(
-                  child: Container(
-                    color: const Color(0xFFE9E9E9),
-                    child: ListView(
-                      controller: _scrollController,
-                      padding: const EdgeInsets.all(10),
-                      children: [
-                        // Lista de jogos
-                        ..._windowsGames.map((game) => _WindowsGameCard(
-                          img: (game.containsKey('img') && game['img'] != null) ? game['img'] as String : '',
-                          name: (game.containsKey('name') && game['name'] != null) ? game['name'] as String : '',
-                          user: (game.containsKey('user') && game['user'] != null) ? game['user'] as String : '',
-                          comments: (game['comments'] is List) ? List<String>.from(game['comments'] as List) : [],
-                          description: (game.containsKey('description') && game['description'] != null) ? game['description'] as String : '',
-                          onTap: () {},
-                          sidebarOpen: sideBarOpen,
-                        )),
-                       
-                        // Espaço antes do footer
-                        const SizedBox(height: 30),
-                       
-                        // Footer
-                        Container(
-                          color: const Color(0xFF90017F),
-                          width: double.infinity,
-                          padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 0),
-                          child: Center(
-                            child: ConstrainedBox(
-                              constraints: const BoxConstraints(maxWidth: 1200),
-                              child: Wrap(
-                                runSpacing: 24,
-                                spacing: 50,
-                                children: [
-                                  // Sobre a plataforma
-                                  SizedBox(
-                                    width: 350,
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        const Text.rich(
-                                          TextSpan(
-                                            children: [
-                                              TextSpan(
-                                                text: "Game",
-                                                style: TextStyle(fontWeight: FontWeight.bold),
-                                              ),
-                                              TextSpan(text: "Legends"),
-                                            ],
-                                          ),
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 26,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 10),
-                                        const Text(
-                                          "Game Legends é uma plataforma dedicada a jogos indie, fornecendo uma maneira fácil para desenvolvedores distribuírem seus jogos e para jogadores descobrirem novas experiências.",
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 15,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 16),
-                                        Row(
-                                          children: const [
-                                            Icon(Icons.phone, color: Colors.white70, size: 18),
-                                            SizedBox(width: 6),
-                                            Text(
-                                              "(99) 99999-9999",
-                                              style: TextStyle(color: Colors.white70),
-                                            ),
-                                            SizedBox(width: 18),
-                                            Icon(Icons.email, color: Colors.white70, size: 18),
-                                            SizedBox(width: 6),
-                                            Text(
-                                              "info@gamelegends.com",
-                                              style: TextStyle(color: Colors.white70),
-                                            ),
-                                          ],
-                                        ),
-                                        const SizedBox(height: 18),
-                                        Row(
-                                          children: [
-                                            IconButton(
-                                              icon: const Icon(Icons.facebook, color: Colors.white),
-                                              onPressed: () => launchUrl(Uri.parse('https://www.facebook.com/profile.php?id=61578797307500')),
-                                            ),
-                                            IconButton(
-                                              icon: const Icon(Icons.camera_alt, color: Colors.white),
-                                              onPressed: () {},
-                                            ),
-                                            IconButton(
-                                              icon: const Icon(Icons.alternate_email, color: Colors.white),
-                                              onPressed: () => launchUrl(Uri.parse('https://www.instagram.com/game._legends/')),
-                                            ),
-                                            IconButton(
-                                              icon: const Icon(Icons.business, color: Colors.white),
-                                              onPressed: () {},
-                                            ),
-                                          ],
-                                        ),
-                                        const SizedBox(height: 16),
-                                        InkWell(
-                                          onTap: () => Navigator.pushNamed(context, '/privacidade'),
-                                          child: const Text(
-                                            "Conheça nossa política de privacidade",
-                                            style: TextStyle(
-                                              color: Colors.white70,
-                                              fontSize: 14,
-                                              decoration: TextDecoration.underline,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
- 
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                        Container(
-                          width: double.infinity,
-                          color: const Color(0xFF90017F),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          child: const Center(
-                            child: Text(
-                              "© gamelegends.com | Feito pelo time do Game Legends",
-                              style: TextStyle(color: Colors.white70),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
-      ),
-     
-      // Menu mobile overlay do topo (hambúrguer)
-      endDrawer: !isWide && menuAberto
-          ? NavbarMobileMenu(
+          if (!isWide && menuAberto)
+            NavbarMobileMenu(
               closeMenu: () => setState(() => menuAberto = false),
               searchController: _searchController,
-            )
-          : null,
+            ),
+        ],
+      ),
     );
   }
  
-  // Cria uma seção de filtro dobrável
   Widget _buildSection(String title, String key, List<Widget> children) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -400,7 +385,6 @@ class _WindowsPageState extends State<WindowsPage> {
   }
 }
  
-// Card customizado para Windows, estilo desenvolvendo.dart
 class _WindowsGameCard extends StatelessWidget {
   final String img;
   final String name;
@@ -422,6 +406,49 @@ class _WindowsGameCard extends StatelessWidget {
  
   @override
   Widget build(BuildContext context) {
+    if (sidebarOpen) {
+      return Center(
+        child: Card(
+          margin: const EdgeInsets.only(bottom: 20),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          elevation: 5,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(18),
+                  child: Image.asset(
+                    img,
+                    width: 180,
+                    height: 180,
+                    fit: BoxFit.cover,
+                    errorBuilder: (c, o, s) => Container(
+                      width: 180,
+                      height: 180,
+                      color: Colors.grey[200],
+                      alignment: Alignment.center,
+                      child: const Text("sem imagem", style: TextStyle(color: Colors.black38)),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  name,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 18,
+                    color: Color(0xFF90017F),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
     return Card(
       margin: const EdgeInsets.only(bottom: 20),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
@@ -431,7 +458,6 @@ class _WindowsGameCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Imagem do jogo
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: Image.asset(
@@ -449,7 +475,6 @@ class _WindowsGameCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 15),
-            // Título, descrição, botão
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -489,7 +514,6 @@ class _WindowsGameCard extends StatelessWidget {
                 ],
               ),
             ),
-            // Usuário e comentários (modelo igual à imagem do terror)
             if (user.isNotEmpty)
               Container(
                 margin: const EdgeInsets.only(left: 18, top: 2),

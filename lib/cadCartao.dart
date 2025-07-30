@@ -3,10 +3,18 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Função para buscar o id do cliente do storage (caso precise associar o cartão ao cliente)
 Future<int?> getClienteId() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
-  return prefs.getInt('clienteId');
+  final usuarioStr = prefs.getString('usuario');
+  if (usuarioStr != null) {
+    try {
+      final usuarioData = jsonDecode(usuarioStr) as Map<String, dynamic>;
+      return usuarioData['id']?.toInt();
+    } catch (e) {
+      return null;
+    }
+  }
+  return null;
 }
 
 /// Função para cadastrar o cartão no backend
@@ -17,16 +25,18 @@ Future<bool> cadastrarCartao({
   required String cvv,
   required String bandeira,
 }) async {
-  const String baseUrl = "http://10.0.2.2:8080"; // Troque para seu IP se for no celular real
+  const String baseUrl = "http://localhost:8080";
+  
+  final clienteId = await getClienteId();
+  if (clienteId == null) return false;
 
-  // Se o backend espera o id do cliente no JSON, descomente e envie "fk_Cliente_ID": idCliente
   final Map<String, dynamic> data = {
     "nomeT": nomeT,
     "numC": numC,
     "validade": validade,
     "CVV": cvv,
     "bandeira": bandeira,
-    // "fk_Cliente_ID": idCliente, // Adicione se o backend exigir
+    "clienteId": clienteId,
   };
 
   final response = await http.post(
@@ -104,19 +114,16 @@ class _CadastroCartaoScreenState extends State<CadastroCartaoScreen> {
             TextField(
               controller: numCtrl,
               decoration: const InputDecoration(labelText: "Número do Cartão"),
-              keyboardType: TextInputType.number,
             ),
             const SizedBox(height: 12),
             TextField(
               controller: validadeCtrl,
               decoration: const InputDecoration(labelText: "Validade (MM/AA)"),
-              keyboardType: TextInputType.datetime,
             ),
             const SizedBox(height: 12),
             TextField(
               controller: cvvCtrl,
               decoration: const InputDecoration(labelText: "CVV"),
-              keyboardType: TextInputType.number,
               obscureText: true,
             ),
             const SizedBox(height: 12),

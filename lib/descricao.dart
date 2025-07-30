@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'navbar.dart';
+import 'cadastro_cartao.dart';
 
 // Imagens e assets
 final String logo = 'assets/logo.site.tcc.png';
@@ -22,6 +23,26 @@ const String clienteApiUrl = "http://localhost:8080/cliente/";
 Future<int?> getClienteId() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   return prefs.getInt('clienteId');
+}
+
+// Função para buscar dados do usuário logado
+Future<Map<String, dynamic>?> getUsuarioLogado() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  final usuarioJson = prefs.getString('usuario');
+  
+  if (usuarioJson != null) {
+    try {
+      final usuario = jsonDecode(usuarioJson);
+      return {
+        'nome': usuario['nome'],
+        'email': usuario['email'],
+        'tipo': usuario['tipo'],
+      };
+    } catch (e) {
+      return null;
+    }
+  }
+  return null;
 }
 
 
@@ -131,11 +152,13 @@ class _PaginaDescricaoState extends State<PaginaDescricao> {
   }
 
   void onCadastrarCartao() async {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Implementar tela de cadastro de cartão!')),
+    final resultado = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const CadastroCartaoScreen()),
     );
-    await Future.delayed(const Duration(seconds: 2));
-    await buscarDadosUsuario();
+    if (resultado == true) {
+      await buscarDadosUsuario();
+    }
   }
 
   void onCartaoSelecionado(String? id) {

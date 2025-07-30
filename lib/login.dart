@@ -54,6 +54,7 @@ class _PaginaLoginState extends State<PaginaLogin> {
         // Salvar dados completos do usuário no SharedPreferences
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('usuario', jsonEncode({
+          "id": responseMap['id'],
           "nome": responseMap['nome'] ?? '',
           "sobrenome": responseMap['sobrenome'] ?? '',
           "cpf": responseMap['cpf'] ?? '',

@@ -27,6 +27,7 @@ import 'redefinir.dart';
 import 'perfil.dart';
 import 'descricao.dart';
 import 'privacidade.dart';
+import 'cartoes_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -68,6 +69,7 @@ class MyApp extends StatelessWidget {
         '/perfil': (context) => PaginaPerfil(),
         '/descricao': (context) => PaginaDescricao(),
         '/privacidade': (context) => PrivacidadePage(),
+        '/cartoes': (context) => CartoesPage(),
       },
     );
   }
