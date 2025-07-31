@@ -17,12 +17,43 @@ final String esquerda = 'assets/esquerda.png';
 const String avaliacaoApiUrl = "http://localhost:8080/avaliacao";
 const String doacaoApiUrl = "http://localhost:8080/doacao";
 const String cartaoApiUrl = "http://localhost:8080/cadcartao/cliente/";
+
+// Função para buscar cartões do cliente
+Future<List<Map<String, dynamic>>> buscarCartoesCliente(int clienteId) async {
+  try {
+    final url = '$cartaoApiUrl$clienteId';
+    print('Buscando cartões na URL: $url');
+    
+    final response = await http.get(Uri.parse(url));
+    print('Status da resposta: ${response.statusCode}');
+    print('Corpo da resposta: ${response.body}');
+    
+    if (response.statusCode == 200) {
+      final cartoes = List<Map<String, dynamic>>.from(jsonDecode(response.body));
+      print('Cartões decodificados: $cartoes');
+      return cartoes;
+    }
+  } catch (e) {
+    print('Erro ao buscar cartões: $e');
+  }
+  return [];
+}
 const String clienteApiUrl = "http://localhost:8080/cliente/";
 
 // Função para buscar o id do cliente do storage
 Future<int?> getClienteId() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
-  return prefs.getInt('clienteId');
+  final usuarioJson = prefs.getString('usuario');
+  
+  if (usuarioJson != null) {
+    try {
+      final usuario = jsonDecode(usuarioJson);
+      return usuario['id']?.toInt();
+    } catch (e) {
+      print('Erro ao obter ID do cliente: $e');
+    }
+  }
+  return null;
 }
 
 // Função para buscar dados do usuário logado
@@ -80,16 +111,29 @@ class _PaginaDescricaoState extends State<PaginaDescricao> {
   Future<void> buscarDadosUsuario() async {
     final usuarioData = await getUsuarioLogado();
     if (usuarioData != null && usuarioData['nome'] != null) {
+      final clienteId = await getClienteId();
+      print('Cliente ID encontrado: $clienteId');
+      
+      List<Map<String, dynamic>> cartoes = [];
+      
+      if (clienteId != null) {
+        cartoes = await buscarCartoesCliente(clienteId);
+        print('Cartões encontrados: ${cartoes.length}');
+        print('Cartões: $cartoes');
+      }
+      
       setState(() {
         usuarioLogado = true;
         nomeUsuario = usuarioData['nome'];
-        cartoesUsuario = [];
-        cartaoSelecionadoId = null;
+        idCliente = clienteId;
+        cartoesUsuario = cartoes;
+        cartaoSelecionadoId = cartoes.isNotEmpty ? cartoes.first['id'].toString() : null;
       });
     } else {
       setState(() {
         usuarioLogado = false;
         nomeUsuario = null;
+        idCliente = null;
         cartoesUsuario = [];
         cartaoSelecionadoId = null;
       });
@@ -1039,30 +1083,58 @@ class _ModalDoacaoState extends State<_ModalDoacao> {
                           widget.cartoesUsuario.isEmpty
                               ? Column(
                                   children: [
-                                    const Text('Nenhum cartão cadastrado.'),
-                                    const SizedBox(height: 10),
+                                    const Icon(Icons.credit_card_off, size: 48, color: Colors.grey),
+                                    const SizedBox(height: 8),
+                                    const Text('Nenhum cartão cadastrado.', style: TextStyle(color: Colors.grey)),
+                                    const SizedBox(height: 12),
                                     ElevatedButton.icon(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: const Color(0xFF90017F),
+                                        foregroundColor: Colors.white,
+                                      ),
                                       onPressed: () => widget.onCadastrarCartao(),
-                                      icon: const Icon(Icons.credit_card),
-                                      label: const Text('Cadastrar cartão'),
+                                      icon: const Icon(Icons.add),
+                                      label: const Text('Cadastrar Cartão'),
                                     ),
                                   ],
                                 )
-                              : DropdownButtonFormField<String>(
-                                  value: widget.cartaoSelecionadoId,
-                                  items: widget.cartoesUsuario
-                                      .map((cartao) => DropdownMenuItem(
-                                            value: cartao['id'].toString(),
-                                            child: Text(
-                                                '${cartao['bandeira'] ?? ""} - ${cartao['numC']?.toString().substring(cartao['numC'].toString().length - 4) ?? ""}'),
-                                          ))
-                                      .toList(),
-                                  onChanged: widget.onCartaoSelecionado,
-                                  decoration: const InputDecoration(
-                                    labelText: "Cartão para doação",
-                                    border: OutlineInputBorder(),
-                                    prefixIcon: Icon(Icons.credit_card),
-                                  ),
+                              : Column(
+                                  children: [
+                                    DropdownButtonFormField<String>(
+                                      value: widget.cartaoSelecionadoId,
+                                      items: widget.cartoesUsuario
+                                          .map((cartao) {
+                                            final numero = cartao['numC']?.toString() ?? '';
+                                            final ultimos4 = numero.length >= 4 ? numero.substring(numero.length - 4) : numero;
+                                            return DropdownMenuItem(
+                                              value: cartao['id'].toString(),
+                                              child: Row(
+                                                children: [
+                                                  Icon(Icons.credit_card, color: Color(0xFF90017F), size: 20),
+                                                  const SizedBox(width: 8),
+                                                  Text('${cartao['bandeira'] ?? "Cartão"} - **** $ultimos4'),
+                                                ],
+                                              ),
+                                            );
+                                          })
+                                          .toList(),
+                                      onChanged: widget.onCartaoSelecionado,
+                                      decoration: const InputDecoration(
+                                        labelText: "Selecione o cartão para doação",
+                                        border: OutlineInputBorder(),
+                                        prefixIcon: Icon(Icons.credit_card),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    TextButton.icon(
+                                      onPressed: () => widget.onCadastrarCartao(),
+                                      icon: const Icon(Icons.add, size: 16),
+                                      label: const Text('Adicionar outro cartão'),
+                                      style: TextButton.styleFrom(
+                                        foregroundColor: const Color(0xFF90017F),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                           const SizedBox(height: 12),
                           TextField(
@@ -1077,8 +1149,14 @@ class _ModalDoacaoState extends State<_ModalDoacao> {
                           ),
                           const SizedBox(height: 16),
                           ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF90017F),
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                            ),
                             onPressed: valorController.text.trim().isEmpty ||
-                                    widget.cartoesUsuario.isEmpty
+                                    widget.cartoesUsuario.isEmpty ||
+                                    widget.cartaoSelecionadoId == null
                                 ? null
                                 : enviarDoacao,
                             child: const Text('Enviar Doação'),
