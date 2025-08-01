@@ -5,6 +5,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'navbar.dart';
 import 'cadastro_cartao.dart';
+import 'admin_service.dart';
+import 'avaliacao_notifier.dart';
 
 // Imagens e assets
 final String logo = 'assets/logo.site.tcc.png';
@@ -101,6 +103,11 @@ class _PaginaDescricaoState extends State<PaginaDescricao> {
   String? nomeUsuario;
   List<Map<String, dynamic>> cartoesUsuario = [];
   String? cartaoSelecionadoId;
+  
+  // Controle de administrador
+  bool isAdmin = false;
+  bool modoSelecaoComentarios = false;
+  Set<int> comentariosSelecionados = {};
 
   @override
   void initState() {
@@ -122,13 +129,21 @@ class _PaginaDescricaoState extends State<PaginaDescricao> {
         print('Cartões: $cartoes');
       }
       
+      final adminStatus = await AdminService.isAdmin();
+      print('=== DEBUG DESCRICAO ===');
+      print('Status de admin retornado: $adminStatus');
+      print('Dados do usuário: $usuarioData');
+      
       setState(() {
         usuarioLogado = true;
         nomeUsuario = usuarioData['nome'];
         idCliente = clienteId;
         cartoesUsuario = cartoes;
         cartaoSelecionadoId = cartoes.isNotEmpty ? cartoes.first['id'].toString() : null;
+        isAdmin = adminStatus;
       });
+      print('isAdmin definido no setState como: $isAdmin');
+      print('=== FIM DEBUG DESCRICAO ===');
     } else {
       setState(() {
         usuarioLogado = false;
@@ -136,6 +151,9 @@ class _PaginaDescricaoState extends State<PaginaDescricao> {
         idCliente = null;
         cartoesUsuario = [];
         cartaoSelecionadoId = null;
+        isAdmin = false;
+        modoSelecaoComentarios = false;
+        comentariosSelecionados.clear();
       });
     }
   }
@@ -209,6 +227,73 @@ class _PaginaDescricaoState extends State<PaginaDescricao> {
     setState(() {
       cartaoSelecionadoId = id;
     });
+  }
+  
+  void toggleModoSelecaoComentarios() {
+    setState(() {
+      modoSelecaoComentarios = !modoSelecaoComentarios;
+      if (!modoSelecaoComentarios) {
+        comentariosSelecionados.clear();
+      }
+    });
+  }
+  
+  void toggleComentarioSelecionado(int avaliacaoId) {
+    setState(() {
+      if (comentariosSelecionados.contains(avaliacaoId)) {
+        comentariosSelecionados.remove(avaliacaoId);
+      } else {
+        comentariosSelecionados.add(avaliacaoId);
+      }
+    });
+  }
+  
+  void excluirComentariosSelecionados() {
+    if (comentariosSelecionados.isEmpty) return;
+    
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text("Confirmar Exclusão"),
+        content: Text("${comentariosSelecionados.length} comentário(s) será(ão) excluído(s). Tem certeza?"),
+        actions: [
+          TextButton(
+            child: Text("Cancelar"),
+            onPressed: () => Navigator.of(ctx).pop(),
+          ),
+          TextButton(
+            child: Text("Excluir", style: TextStyle(color: Colors.red)),
+            onPressed: () async {
+              Navigator.of(ctx).pop();
+              
+              bool sucesso = true;
+              print('Comentários selecionados para exclusão: $comentariosSelecionados');
+              for (int id in comentariosSelecionados) {
+                print('Excluindo comentário ID: $id');
+                bool resultado = await AdminService.excluirComentario(id);
+                print('Resultado da exclusão ID $id: $resultado');
+                if (!resultado) sucesso = false;
+              }
+              
+              setState(() {
+                comentariosSelecionados.clear();
+                modoSelecaoComentarios = false;
+              });
+              
+              // Notificar atualização das avaliações
+              AvaliacaoNotifier().notificarAtualizacao();
+              
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(sucesso ? "Comentários excluídos com sucesso!" : "Erro ao excluir alguns comentários"),
+                  backgroundColor: sucesso ? Colors.green : Colors.red,
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -286,6 +371,13 @@ class _PaginaDescricaoState extends State<PaginaDescricao> {
                                               abrirModalDoacao: usuarioLogado ? abrirModalDoacao : null,
                                               usuarioLogado: usuarioLogado,
                                               onAvaliacaoEnviada: () => setState(() {}),
+                                              isAdmin: isAdmin,
+                                              modoSelecaoComentarios: modoSelecaoComentarios,
+                                              comentariosSelecionados: comentariosSelecionados,
+                                              onToggleModoSelecao: toggleModoSelecaoComentarios,
+                                              onToggleComentario: toggleComentarioSelecionado,
+                                              onExcluirSelecionados: excluirComentariosSelecionados,
+                                              onRecarregarAvaliacoes: () => setState(() {}),
                                             ),
                                           ),
                                         ],
@@ -329,6 +421,13 @@ class _PaginaDescricaoState extends State<PaginaDescricao> {
                                             abrirModalDoacao: usuarioLogado ? abrirModalDoacao : null,
                                             usuarioLogado: usuarioLogado,
                                             onAvaliacaoEnviada: () => setState(() {}),
+                                            isAdmin: isAdmin,
+                                            modoSelecaoComentarios: modoSelecaoComentarios,
+                                            comentariosSelecionados: comentariosSelecionados,
+                                            onToggleModoSelecao: toggleModoSelecaoComentarios,
+                                            onToggleComentario: toggleComentarioSelecionado,
+                                            onExcluirSelecionados: excluirComentariosSelecionados,
+                                            onRecarregarAvaliacoes: () => setState(() {}),
                                           ),
                                         ],
                                       ),
@@ -503,12 +602,26 @@ class _DescricaoEInfo extends StatefulWidget {
   final VoidCallback? abrirModalDoacao;
   final bool usuarioLogado;
   final VoidCallback? onAvaliacaoEnviada;
+  final bool isAdmin;
+  final bool modoSelecaoComentarios;
+  final Set<int> comentariosSelecionados;
+  final VoidCallback onToggleModoSelecao;
+  final Function(int) onToggleComentario;
+  final VoidCallback onExcluirSelecionados;
+  final VoidCallback? onRecarregarAvaliacoes;
 
   const _DescricaoEInfo({
     required this.abrirModalAvaliacao,
     required this.abrirModalDoacao,
     required this.usuarioLogado,
     this.onAvaliacaoEnviada,
+    required this.isAdmin,
+    required this.modoSelecaoComentarios,
+    required this.comentariosSelecionados,
+    required this.onToggleModoSelecao,
+    required this.onToggleComentario,
+    required this.onExcluirSelecionados,
+    this.onRecarregarAvaliacoes,
   });
 
   @override
@@ -524,6 +637,13 @@ class _DescricaoEInfoState extends State<_DescricaoEInfo> {
   void initState() {
     super.initState();
     carregarAvaliacoes();
+    AvaliacaoNotifier().addListener(recarregarAvaliacoes);
+  }
+  
+  @override
+  void dispose() {
+    AvaliacaoNotifier().removeListener(recarregarAvaliacoes);
+    super.dispose();
   }
 
   Future<void> carregarAvaliacoes() async {
@@ -535,9 +655,21 @@ class _DescricaoEInfoState extends State<_DescricaoEInfo> {
       carregandoAvaliacoes = false;
     });
   }
+  
+  void recarregarAvaliacoes() {
+    setState(() {
+      carregandoAvaliacoes = true;
+    });
+    carregarAvaliacoes();
+  }
 
   @override
   Widget build(BuildContext context) {
+    print('=== BUILD DESCRICAO E INFO ===');
+    print('widget.isAdmin: ${widget.isAdmin}');
+    print('widget.modoSelecaoComentarios: ${widget.modoSelecaoComentarios}');
+    print('=== FIM BUILD DESCRICAO E INFO ===');
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -623,6 +755,43 @@ class _DescricaoEInfoState extends State<_DescricaoEInfo> {
                       style: const TextStyle(color: Colors.grey),
                     ),
                   ],
+                  const Spacer(),
+                  // BOTÃO DE TESTE TEMPORÁRIO
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+                    onPressed: () {
+                      print('=== TESTE FORÇADO ===');
+                      print('Forçando isAdmin = true');
+                      widget.onToggleModoSelecao();
+                    },
+                    child: Text('TESTE ADMIN', style: TextStyle(color: Colors.white, fontSize: 10)),
+                  ),
+                  const SizedBox(width: 8),
+                  if (widget.isAdmin) ...[
+                    if (!widget.modoSelecaoComentarios)
+                      IconButton(
+                        icon: const Icon(Icons.admin_panel_settings, color: Colors.red),
+                        tooltip: 'Modo Administrador',
+                        onPressed: widget.onToggleModoSelecao,
+                      )
+                    else ...[
+                      Text(
+                        '${widget.comentariosSelecionados.length} selecionados',
+                        style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(width: 8),
+                      IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.red),
+                        tooltip: 'Excluir Selecionados',
+                        onPressed: widget.comentariosSelecionados.isEmpty ? null : widget.onExcluirSelecionados,
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close, color: Colors.grey),
+                        tooltip: 'Cancelar',
+                        onPressed: widget.onToggleModoSelecao,
+                      ),
+                    ],
+                  ],
                 ],
               ),
               const SizedBox(height: 12),
@@ -633,41 +802,65 @@ class _DescricaoEInfoState extends State<_DescricaoEInfo> {
               else
                 Column(
                   children: avaliacoes.take(3).map((avaliacao) {
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 8),
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.grey[200]!),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Text(
-                                avaliacao['nomeUsuario'] ?? 'Anônimo',
-                                style: const TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              const SizedBox(width: 8),
-                              Row(
-                                children: List.generate(5, (index) {
-                                  return Icon(
-                                    index < (avaliacao['estrelas'] ?? 0) ? Icons.star : Icons.star_border,
-                                    color: const Color(0xFFFFC107),
-                                    size: 16,
-                                  );
-                                }),
-                              ),
-                            ],
+                    final avaliacaoId = avaliacao['id'] ?? 0;
+                    print('Avaliação ID: $avaliacaoId, Dados: $avaliacao');
+                    final isSelected = widget.comentariosSelecionados.contains(avaliacaoId);
+                    
+                    return GestureDetector(
+                      onTap: widget.modoSelecaoComentarios ? () => widget.onToggleComentario(avaliacaoId) : null,
+                      child: Container(
+                        margin: const EdgeInsets.only(bottom: 8),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: isSelected ? Colors.red[50] : Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: isSelected ? Colors.red : Colors.grey[200]!,
+                            width: isSelected ? 2 : 1,
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            avaliacao['comentario'] ?? '',
-                            style: const TextStyle(color: Colors.black87),
-                          ),
-                        ],
+                        ),
+                        child: Row(
+                          children: [
+                            if (widget.modoSelecaoComentarios)
+                              Padding(
+                                padding: const EdgeInsets.only(right: 8),
+                                child: Icon(
+                                  isSelected ? Icons.check_circle : Icons.radio_button_unchecked,
+                                  color: isSelected ? Colors.red : Colors.grey,
+                                ),
+                              ),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Text(
+                                        avaliacao['nomeUsuario'] ?? 'Anônimo',
+                                        style: const TextStyle(fontWeight: FontWeight.bold),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Row(
+                                        children: List.generate(5, (index) {
+                                          return Icon(
+                                            index < (avaliacao['estrelas'] ?? 0) ? Icons.star : Icons.star_border,
+                                            color: const Color(0xFFFFC107),
+                                            size: 16,
+                                          );
+                                        }),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    avaliacao['comentario'] ?? '',
+                                    style: const TextStyle(color: Colors.black87),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     );
                   }).toList(),

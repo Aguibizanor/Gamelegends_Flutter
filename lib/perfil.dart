@@ -286,7 +286,7 @@ class _PaginaPerfilState extends State<PaginaPerfil> {
                               borderRadius: BorderRadius.circular(24),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
+                                  color: Colors.black.withValues(alpha: 0.1),
                                   blurRadius: 20,
                                   offset: const Offset(0, 8),
                                   spreadRadius: 2,
@@ -300,7 +300,7 @@ class _PaginaPerfilState extends State<PaginaPerfil> {
                                   padding: const EdgeInsets.all(32),
                                   decoration: BoxDecoration(
                                     gradient: LinearGradient(
-                                      colors: [const Color(0xFF90017F), const Color(0xFF90017F).withOpacity(0.8)],
+                                      colors: [const Color(0xFF90017F), const Color(0xFF90017F).withValues(alpha: 0.8)],
                                       begin: Alignment.topLeft,
                                       end: Alignment.bottomRight,
                                     ),
@@ -319,7 +319,7 @@ class _PaginaPerfilState extends State<PaginaPerfil> {
                                               border: Border.all(color: Colors.white, width: 4),
                                               boxShadow: [
                                                 BoxShadow(
-                                                  color: Colors.black.withOpacity(0.2),
+                                                  color: Colors.black.withValues(alpha: 0.2),
                                                   blurRadius: 10,
                                                   offset: const Offset(0, 4),
                                                 ),
@@ -345,7 +345,7 @@ class _PaginaPerfilState extends State<PaginaPerfil> {
                                                   border: Border.all(color: const Color(0xFF90017F), width: 2),
                                                   boxShadow: [
                                                     BoxShadow(
-                                                      color: Colors.black.withOpacity(0.2),
+                                                      color: Colors.black.withValues(alpha: 0.2),
                                                       blurRadius: 4,
                                                       offset: const Offset(0, 2),
                                                     ),
@@ -374,7 +374,7 @@ class _PaginaPerfilState extends State<PaginaPerfil> {
                                       Container(
                                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                         decoration: BoxDecoration(
-                                          color: Colors.white.withOpacity(0.2),
+                                          color: Colors.white.withValues(alpha: 0.2),
                                           borderRadius: BorderRadius.circular(20),
                                         ),
                                         child: Row(
@@ -590,7 +590,7 @@ class PerfilInfo extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: const Color(0xFF90017F).withOpacity(0.1),
+              color: const Color(0xFF90017F).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(icon, color: const Color(0xFF90017F), size: 20),
@@ -711,7 +711,7 @@ class _PerfilModalState extends State<PerfilModal> {
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
+                  color: Colors.black.withValues(alpha: 0.2),
                   blurRadius: 20,
                   offset: const Offset(0, 10),
                 ),

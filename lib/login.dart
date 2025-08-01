@@ -53,7 +53,10 @@ class _PaginaLoginState extends State<PaginaLogin> {
 
         // Salvar dados completos do usuário no SharedPreferences
         final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('usuario', jsonEncode({
+        final tipoUsuario = responseMap['usuario'] ?? 'Cliente';
+        print('Tipo de usuário do backend: $tipoUsuario');
+        
+        final dadosUsuario = {
           "id": responseMap['id'],
           "nome": responseMap['nome'] ?? '',
           "sobrenome": responseMap['sobrenome'] ?? '',
@@ -62,8 +65,11 @@ class _PaginaLoginState extends State<PaginaLogin> {
           "email": responseMap['email'] ?? email,
           "senha": responseMap['senha'] ?? '',
           "telefone": responseMap['telefone'] ?? '',
-          "tipo": responseMap['usuario'] ?? responseMap['tipo'] ?? 'Cliente',
-        }));
+          "tipo": tipoUsuario,
+        };
+        
+        print('Dados salvos no SharedPreferences: $dadosUsuario');
+        await prefs.setString('usuario', jsonEncode(dadosUsuario));
 
         if (!mounted) return;
         showDialog(
