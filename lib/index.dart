@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'navbar.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -233,7 +234,7 @@ class _IndexPrincipalState extends State<IndexPrincipal> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text.rich(
+                              Text.rich(
                                 TextSpan(
                                   children: [
                                     TextSpan(
@@ -243,9 +244,10 @@ class _IndexPrincipalState extends State<IndexPrincipal> {
                                     TextSpan(text: "Legends"),
                                   ],
                                 ),
-                                style: TextStyle(
+                                style: GoogleFonts.blackOpsOne(
                                   color: Colors.white,
                                   fontSize: 26,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
                               const SizedBox(height: 10),

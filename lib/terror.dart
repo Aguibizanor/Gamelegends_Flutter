@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'navbar.dart';
 
 // Lista dos jogos para a categoria "Terror"
@@ -237,7 +238,7 @@ class _TerrorPageState extends State<TerrorPage> {
                                                       ? CrossAxisAlignment.start
                                                       : CrossAxisAlignment.center,
                                                   children: [
-                                                    const Text.rich(
+                                                    Text.rich(
                                                       TextSpan(
                                                         children: [
                                                           TextSpan(
@@ -247,9 +248,10 @@ class _TerrorPageState extends State<TerrorPage> {
                                                           TextSpan(text: "Legends"),
                                                         ],
                                                       ),
-                                                      style: TextStyle(
+                                                      style: GoogleFonts.blackOpsOne(
                                                         color: Colors.white,
                                                         fontSize: 26,
+                                                        fontWeight: FontWeight.bold,
                                                       ),
                                                       textAlign: TextAlign.center,
                                                     ),

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class PaginaMandarEmail extends StatefulWidget {
   const PaginaMandarEmail({Key? key}) : super(key: key);
@@ -241,7 +243,7 @@ class _PaginaMandarEmailState extends State<PaginaMandarEmail> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text.rich(
+                            Text.rich(
                               TextSpan(
                                 children: [
                                   TextSpan(
@@ -251,9 +253,10 @@ class _PaginaMandarEmailState extends State<PaginaMandarEmail> {
                                   TextSpan(text: "Legends"),
                                 ],
                               ),
-                              style: TextStyle(
+                              style: GoogleFonts.blackOpsOne(
                                 color: Colors.white,
                                 fontSize: 26,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                             const SizedBox(height: 10),
@@ -287,7 +290,7 @@ class _PaginaMandarEmailState extends State<PaginaMandarEmail> {
                               children: [
                                 IconButton(
                                   icon: const Icon(Icons.facebook, color: Colors.white),
-                                  onPressed: () {},
+                                  onPressed: () => launchUrl(Uri.parse('https://www.facebook.com/profile.php?id=61578797307500')),
                                 ),
                                 IconButton(
                                   icon: const Icon(Icons.camera_alt, color: Colors.white),
@@ -295,7 +298,7 @@ class _PaginaMandarEmailState extends State<PaginaMandarEmail> {
                                 ),
                                 IconButton(
                                   icon: const Icon(Icons.alternate_email, color: Colors.white),
-                                  onPressed: () {},
+                                  onPressed: () => launchUrl(Uri.parse('https://www.instagram.com/game._legends/')),
                                 ),
                                 IconButton(
                                   icon: const Icon(Icons.business, color: Colors.white),
@@ -303,38 +306,18 @@ class _PaginaMandarEmailState extends State<PaginaMandarEmail> {
                                 ),
                               ],
                             ),
-                          ],
-                        ),
-                      ),
-                      // Links rápidos
-                      SizedBox(
-                        width: 220,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text("Links Rápidos",
+                            const SizedBox(height: 16),
+                            InkWell(
+                              onTap: () => Navigator.pushNamed(context, '/privacidade'),
+                              child: const Text(
+                                "Conheça nossa política de privacidade",
                                 style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 18)),
-                            const SizedBox(height: 10),
-                            ...[
-                              "Eventos",
-                              "Equipe",
-                              "Missão",
-                              "Serviços",
-                              "Afiliados"
-                            ].map((txt) => Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 2),
-                                  child: InkWell(
-                                    onTap: () {},
-                                    child: Text(
-                                      txt,
-                                      style: const TextStyle(
-                                          color: Colors.white70, fontSize: 15),
-                                    ),
-                                  ),
-                                )),
+                                  color: Colors.white70,
+                                  fontSize: 14,
+                                  decoration: TextDecoration.underline,
+                                ),
+                              ),
+                            ),
                           ],
                         ),
                       ),

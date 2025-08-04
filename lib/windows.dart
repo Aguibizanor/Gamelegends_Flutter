@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'navbar.dart';
  
 final _windowsGames = [
@@ -212,7 +213,7 @@ class _WindowsPageState extends State<WindowsPage> {
                                                       ? CrossAxisAlignment.start
                                                       : CrossAxisAlignment.center,
                                                   children: [
-                                                    const Text.rich(
+                                                    Text.rich(
                                                       TextSpan(
                                                         children: [
                                                           TextSpan(
@@ -222,9 +223,10 @@ class _WindowsPageState extends State<WindowsPage> {
                                                           TextSpan(text: "Legends"),
                                                         ],
                                                       ),
-                                                      style: TextStyle(
+                                                      style: GoogleFonts.blackOpsOne(
                                                         color: Colors.white,
                                                         fontSize: 26,
+                                                        fontWeight: FontWeight.bold,
                                                       ),
                                                       textAlign: TextAlign.center,
                                                     ),

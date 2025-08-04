@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'navbar.dart';
 
 class CadastroForm extends StatefulWidget {
@@ -261,7 +262,7 @@ class _CadastroFormState extends State<CadastroForm> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text.rich(
+                                    Text.rich(
                                       TextSpan(
                                         children: [
                                           TextSpan(
@@ -271,9 +272,10 @@ class _CadastroFormState extends State<CadastroForm> {
                                           TextSpan(text: "Legends"),
                                         ],
                                       ),
-                                      style: TextStyle(
+                                      style: GoogleFonts.blackOpsOne(
                                         color: Colors.white,
                                         fontSize: 26,
+                                        fontWeight: FontWeight.bold,
                                       ),
                                     ),
                                     const SizedBox(height: 10),

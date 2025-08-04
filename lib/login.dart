@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'navbar.dart';
 
 class PaginaLogin extends StatefulWidget {
@@ -293,7 +294,7 @@ class _PaginaLoginState extends State<PaginaLogin> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text.rich(
+                                    Text.rich(
                                       TextSpan(
                                         children: [
                                           TextSpan(
@@ -303,9 +304,10 @@ class _PaginaLoginState extends State<PaginaLogin> {
                                           TextSpan(text: "Legends"),
                                         ],
                                       ),
-                                      style: TextStyle(
+                                      style: GoogleFonts.blackOpsOne(
                                         color: Colors.white,
                                         fontSize: 26,
+                                        fontWeight: FontWeight.bold,
                                       ),
                                     ),
                                     const SizedBox(height: 10),

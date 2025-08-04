@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'navbar.dart';
 
 // Lista dos jogos para a categoria "Sobrevivência" (agora com usuário, descrição e comentários!)
@@ -238,7 +239,7 @@ class _SobrevivenciaPageState extends State<SobrevivenciaPage> {
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        const Text.rich(
+                                        Text.rich(
                                           TextSpan(
                                             children: [
                                               TextSpan(
@@ -248,9 +249,10 @@ class _SobrevivenciaPageState extends State<SobrevivenciaPage> {
                                               TextSpan(text: "Legends"),
                                             ],
                                           ),
-                                          style: TextStyle(
+                                          style: GoogleFonts.blackOpsOne(
                                             color: Colors.white,
                                             fontSize: 26,
+                                            fontWeight: FontWeight.bold,
                                           ),
                                         ),
                                         const SizedBox(height: 10),
