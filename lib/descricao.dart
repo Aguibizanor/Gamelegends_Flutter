@@ -7,6 +7,7 @@ import 'navbar.dart';
 import 'cadastro_cartao.dart';
 import 'admin_service.dart';
 import 'avaliacao_notifier.dart';
+import 'modal_admin.dart';
 
 // Imagens e assets
 final String logo = 'assets/logo.site.tcc.png';
@@ -108,6 +109,7 @@ class _PaginaDescricaoState extends State<PaginaDescricao> {
   bool isAdmin = false;
   bool modoSelecaoComentarios = false;
   Set<int> comentariosSelecionados = {};
+  bool modalAdminAberto = false;
 
   @override
   void initState() {
@@ -235,6 +237,20 @@ class _PaginaDescricaoState extends State<PaginaDescricao> {
       if (!modoSelecaoComentarios) {
         comentariosSelecionados.clear();
       }
+    });
+  }
+  
+  void abrirModalAdmin() {
+    setState(() {
+      modalAdminAberto = true;
+    });
+  }
+  
+  void fecharModalAdmin() {
+    setState(() {
+      modalAdminAberto = false;
+      modoSelecaoComentarios = false;
+      comentariosSelecionados.clear();
     });
   }
   
@@ -378,6 +394,7 @@ class _PaginaDescricaoState extends State<PaginaDescricao> {
                                               onToggleComentario: toggleComentarioSelecionado,
                                               onExcluirSelecionados: excluirComentariosSelecionados,
                                               onRecarregarAvaliacoes: () => setState(() {}),
+                                              abrirModalAdmin: abrirModalAdmin,
                                             ),
                                           ),
                                         ],
@@ -428,6 +445,7 @@ class _PaginaDescricaoState extends State<PaginaDescricao> {
                                             onToggleComentario: toggleComentarioSelecionado,
                                             onExcluirSelecionados: excluirComentariosSelecionados,
                                             onRecarregarAvaliacoes: () => setState(() {}),
+                                            abrirModalAdmin: abrirModalAdmin,
                                           ),
                                         ],
                                       ),
@@ -581,6 +599,12 @@ class _PaginaDescricaoState extends State<PaginaDescricao> {
                         idCliente: idCliente,
                         usuarioLogado: usuarioLogado,
                       ),
+                    if (modalAdminAberto && isAdmin)
+                      ModalAdmin(
+                        fechar: fecharModalAdmin,
+                        nomeJogo: "Happy Cat Tavern",
+                        onComentarioExcluido: () => setState(() {}),
+                      ),
                   ],
                 ),
               ),
@@ -609,6 +633,7 @@ class _DescricaoEInfo extends StatefulWidget {
   final Function(int) onToggleComentario;
   final VoidCallback onExcluirSelecionados;
   final VoidCallback? onRecarregarAvaliacoes;
+  final VoidCallback abrirModalAdmin;
 
   const _DescricaoEInfo({
     required this.abrirModalAvaliacao,
@@ -622,6 +647,7 @@ class _DescricaoEInfo extends StatefulWidget {
     required this.onToggleComentario,
     required this.onExcluirSelecionados,
     this.onRecarregarAvaliacoes,
+    required this.abrirModalAdmin,
   });
 
   @override
@@ -729,141 +755,175 @@ class _DescricaoEInfoState extends State<_DescricaoEInfo> {
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: Colors.grey[300]!),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Stack(
             children: [
-              Row(
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Avaliações',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(width: 10),
-                  if (!carregandoAvaliacoes) ...[
-                    Row(
-                      children: List.generate(5, (index) {
-                        return Icon(
-                          index < mediaEstrelas.round() ? Icons.star : Icons.star_border,
-                          color: const Color(0xFFFFC107),
-                          size: 20,
-                        );
-                      }),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      '${mediaEstrelas.toStringAsFixed(1)} (${avaliacoes.length} avaliações)',
-                      style: const TextStyle(color: Colors.grey),
-                    ),
-                  ],
-                  const Spacer(),
-                  // BOTÃO DE TESTE TEMPORÁRIO
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-                    onPressed: () {
-                      print('=== TESTE FORÇADO ===');
-                      print('Forçando isAdmin = true');
-                      widget.onToggleModoSelecao();
-                    },
-                    child: Text('TESTE ADMIN', style: TextStyle(color: Colors.white, fontSize: 10)),
-                  ),
-                  const SizedBox(width: 8),
-                  if (widget.isAdmin) ...[
-                    if (!widget.modoSelecaoComentarios)
-                      IconButton(
-                        icon: const Icon(Icons.admin_panel_settings, color: Colors.red),
-                        tooltip: 'Modo Administrador',
-                        onPressed: widget.onToggleModoSelecao,
-                      )
-                    else ...[
-                      Text(
-                        '${widget.comentariosSelecionados.length} selecionados',
-                        style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                  Row(
+                    children: [
+                      const Text(
+                        'Avaliações',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
-                      const SizedBox(width: 8),
-                      IconButton(
-                        icon: const Icon(Icons.delete, color: Colors.red),
-                        tooltip: 'Excluir Selecionados',
-                        onPressed: widget.comentariosSelecionados.isEmpty ? null : widget.onExcluirSelecionados,
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.close, color: Colors.grey),
-                        tooltip: 'Cancelar',
-                        onPressed: widget.onToggleModoSelecao,
-                      ),
-                    ],
-                  ],
-                ],
-              ),
-              const SizedBox(height: 12),
-              if (carregandoAvaliacoes)
-                const Center(child: CircularProgressIndicator())
-              else if (avaliacoes.isEmpty)
-                const Text('Nenhuma avaliação ainda. Seja o primeiro!')
-              else
-                Column(
-                  children: avaliacoes.take(3).map((avaliacao) {
-                    final avaliacaoId = avaliacao['id'] ?? 0;
-                    print('Avaliação ID: $avaliacaoId, Dados: $avaliacao');
-                    final isSelected = widget.comentariosSelecionados.contains(avaliacaoId);
-                    
-                    return GestureDetector(
-                      onTap: widget.modoSelecaoComentarios ? () => widget.onToggleComentario(avaliacaoId) : null,
-                      child: Container(
-                        margin: const EdgeInsets.only(bottom: 8),
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: isSelected ? Colors.red[50] : Colors.white,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: isSelected ? Colors.red : Colors.grey[200]!,
-                            width: isSelected ? 2 : 1,
-                          ),
+                      const SizedBox(width: 10),
+                      if (!carregandoAvaliacoes) ...[
+                        Row(
+                          children: List.generate(5, (index) {
+                            return Icon(
+                              index < mediaEstrelas.round() ? Icons.star : Icons.star_border,
+                              color: const Color(0xFFFFC107),
+                              size: 20,
+                            );
+                          }),
                         ),
-                        child: Row(
-                          children: [
-                            if (widget.modoSelecaoComentarios)
-                              Padding(
-                                padding: const EdgeInsets.only(right: 8),
-                                child: Icon(
-                                  isSelected ? Icons.check_circle : Icons.radio_button_unchecked,
-                                  color: isSelected ? Colors.red : Colors.grey,
-                                ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '${mediaEstrelas.toStringAsFixed(1)} (${avaliacoes.length} avaliações)',
+                          style: const TextStyle(color: Colors.grey),
+                        ),
+                      ],
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  if (carregandoAvaliacoes)
+                    const Center(child: CircularProgressIndicator())
+                  else if (avaliacoes.isEmpty)
+                    const Text('Nenhuma avaliação ainda. Seja o primeiro!')
+                  else
+                    Column(
+                      children: avaliacoes.take(3).map((avaliacao) {
+                        final avaliacaoId = avaliacao['id'] ?? 0;
+                        final isSelected = widget.comentariosSelecionados.contains(avaliacaoId);
+                        
+                        return GestureDetector(
+                          onTap: widget.modoSelecaoComentarios ? () => widget.onToggleComentario(avaliacaoId) : null,
+                          child: Container(
+                            margin: const EdgeInsets.only(bottom: 8),
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: isSelected ? Colors.red[50] : Colors.white,
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: isSelected ? Colors.red : Colors.grey[200]!,
+                                width: isSelected ? 2 : 1,
                               ),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
+                            ),
+                            child: Row(
+                              children: [
+                                if (widget.modoSelecaoComentarios)
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 8),
+                                    child: Icon(
+                                      isSelected ? Icons.check_circle : Icons.radio_button_unchecked,
+                                      color: isSelected ? Colors.red : Colors.grey,
+                                    ),
+                                  ),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text(
-                                        avaliacao['nomeUsuario'] ?? 'Anônimo',
-                                        style: const TextStyle(fontWeight: FontWeight.bold),
-                                      ),
-                                      const SizedBox(width: 8),
                                       Row(
-                                        children: List.generate(5, (index) {
-                                          return Icon(
-                                            index < (avaliacao['estrelas'] ?? 0) ? Icons.star : Icons.star_border,
-                                            color: const Color(0xFFFFC107),
-                                            size: 16,
-                                          );
-                                        }),
+                                        children: [
+                                          Text(
+                                            avaliacao['nomeUsuario'] ?? 'Anônimo',
+                                            style: const TextStyle(fontWeight: FontWeight.bold),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Row(
+                                            children: List.generate(5, (index) {
+                                              return Icon(
+                                                index < (avaliacao['estrelas'] ?? 0) ? Icons.star : Icons.star_border,
+                                                color: const Color(0xFFFFC107),
+                                                size: 16,
+                                              );
+                                            }),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        avaliacao['comentario'] ?? '',
+                                        style: const TextStyle(color: Colors.black87),
                                       ),
                                     ],
                                   ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    avaliacao['comentario'] ?? '',
-                                    style: const TextStyle(color: Colors.black87),
-                                  ),
-                                ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                ],
+              ),
+              // Botão de Administrador no canto inferior direito
+              if (widget.isAdmin)
+                Positioned(
+                  bottom: 0,
+                  right: 0,
+                  child: widget.modoSelecaoComentarios
+                      ? Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: Colors.red[100],
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                '${widget.comentariosSelecionados.length} selecionados',
+                                style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 12),
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Colors.red,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: IconButton(
+                                icon: const Icon(Icons.delete, color: Colors.white, size: 18),
+                                tooltip: 'Excluir Selecionados',
+                                onPressed: widget.comentariosSelecionados.isEmpty ? null : widget.onExcluirSelecionados,
+                                constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Colors.grey,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: IconButton(
+                                icon: const Icon(Icons.close, color: Colors.white, size: 18),
+                                tooltip: 'Cancelar',
+                                onPressed: widget.onToggleModoSelecao,
+                                constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
                               ),
                             ),
                           ],
+                        )
+                      : Container(
+                          decoration: BoxDecoration(
+                            color: Colors.red,
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black26,
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: IconButton(
+                            icon: const Icon(Icons.admin_panel_settings, color: Colors.white, size: 20),
+                            tooltip: 'Gerenciar Comentários (Admin)',
+                            onPressed: widget.abrirModalAdmin,
+                            constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+                          ),
                         ),
-                      ),
-                    );
-                  }).toList(),
                 ),
             ],
           ),

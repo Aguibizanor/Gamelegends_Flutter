@@ -10,42 +10,55 @@ class AdminService {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final usuarioJson = prefs.getString('usuario');
     
-    print('=== DEBUG ADMIN SERVICE ===');
-    print('usuarioJson: $usuarioJson');
-    
     if (usuarioJson != null) {
       try {
         final usuario = jsonDecode(usuarioJson);
         final tipoUsuario = usuario['tipo'] ?? usuario['usuario'];
-        print('Tipo de usuário encontrado: $tipoUsuario');
-        print('Dados completos do usuário: $usuario');
-        final isAdm = tipoUsuario == 'ADM' || tipoUsuario == 'Administrador' || tipoUsuario?.toLowerCase() == 'administrador';
-        print('É administrador? $isAdm');
-        print('=== FIM DEBUG ADMIN SERVICE ===');
+        
+        // Verificar se é administrador
+        final isAdm = tipoUsuario == 'ADM' || 
+                     tipoUsuario == 'ADMIN' ||
+                     tipoUsuario == 'Administrador' || 
+                     tipoUsuario?.toLowerCase() == 'administrador' ||
+                     tipoUsuario?.toLowerCase() == 'admin';
+        
         return isAdm;
       } catch (e) {
         print('Erro ao decodificar usuário: $e');
         return false;
       }
     }
-    print('Nenhum usuário logado');
     return false;
   }
 
   // Excluir comentário/avaliação
   static Future<bool> excluirComentario(int avaliacaoId) async {
     try {
-      print('Tentando excluir avaliação ID: $avaliacaoId');
       final response = await http.delete(
         Uri.parse('$baseUrl/avaliacao/$avaliacaoId'),
         headers: {"Content-Type": "application/json"},
       );
-      print('Status da resposta: ${response.statusCode}');
-      print('Corpo da resposta: ${response.body}');
       return response.statusCode == 204 || response.statusCode == 200;
     } catch (e) {
       print('Erro ao excluir comentário: $e');
       return false;
     }
+  }
+
+  // Listar todos os comentários de um jogo
+  static Future<List<Map<String, dynamic>>> listarComentariosJogo(String nomeJogo) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/avaliacao/jogo/$nomeJogo'),
+        headers: {"Content-Type": "application/json"},
+      );
+      
+      if (response.statusCode == 200) {
+        return List<Map<String, dynamic>>.from(jsonDecode(response.body));
+      }
+    } catch (e) {
+      print('Erro ao listar comentários: $e');
+    }
+    return [];
   }
 }
