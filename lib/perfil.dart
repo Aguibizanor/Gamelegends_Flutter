@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:html' as html;
 import 'navbar.dart';
  
 Future<Map<String, dynamic>?> getUsuarioLogado() async {
@@ -87,9 +88,22 @@ class _PaginaPerfilState extends State<PaginaPerfil> {
   }
  
   Future<void> _selecionarFotoComputador() async {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Seleção de arquivos não disponível. Use as fotos de exemplo.')),
-    );
+    final input = html.FileUploadInputElement();
+    input.accept = 'image/*';
+    input.click();
+   
+    input.onChange.listen((e) {
+      final files = input.files;
+      if (files!.isNotEmpty) {
+        final file = files[0];
+        final reader = html.FileReader();
+        reader.readAsDataUrl(file);
+        reader.onLoad.listen((e) {
+          final dataUrl = reader.result as String;
+          _salvarFoto(dataUrl);
+        });
+      }
+    });
   }
  
   Future<void> _salvarFoto(String caminhoFoto) async {
@@ -172,6 +186,8 @@ class _PaginaPerfilState extends State<PaginaPerfil> {
   ImageProvider _getImageProvider(String imagePath) {
     if (imagePath.startsWith('assets/')) {
       return AssetImage(imagePath);
+    } else if (imagePath.startsWith('data:')) {
+      return NetworkImage(imagePath);
     } else {
       return FileImage(File(imagePath));
     }
