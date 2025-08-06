@@ -97,7 +97,7 @@ class _IndexPrincipalState extends State<IndexPrincipal> {
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: colors.first.withOpacity(0.4),
+            color: colors.first.withValues(alpha: 0.4),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -247,6 +247,7 @@ class _IndexPrincipalState extends State<IndexPrincipal> {
                     constraints: const BoxConstraints(maxWidth: 1200),
                     child: Column(
                       children: [
+                        // Logo com efeito brilhante
                         ShaderMask(
                           shaderCallback: (bounds) => const LinearGradient(
                             colors: [Colors.white, Color(0xFFB19CD9), Colors.white],
@@ -269,6 +270,8 @@ class _IndexPrincipalState extends State<IndexPrincipal> {
                           ),
                         ),
                         const SizedBox(height: 25),
+                        
+                        // Descrição com sombra colorida
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 20),
                           child: Text(
@@ -279,7 +282,7 @@ class _IndexPrincipalState extends State<IndexPrincipal> {
                               height: 1.6,
                               shadows: [
                                 Shadow(
-                                  color: Colors.black.withOpacity(0.3),
+                                  color: Colors.black.withValues(alpha: 0.3),
                                   offset: const Offset(2, 2),
                                   blurRadius: 4,
                                 ),
@@ -289,6 +292,8 @@ class _IndexPrincipalState extends State<IndexPrincipal> {
                           ),
                         ),
                         const SizedBox(height: 35),
+                        
+                        // Informações de contato com círculos coloridos
                         Wrap(
                           alignment: WrapAlignment.center,
                           spacing: 40,
@@ -345,6 +350,8 @@ class _IndexPrincipalState extends State<IndexPrincipal> {
                           ],
                         ),
                         const SizedBox(height: 35),
+                        
+                        // Redes sociais com círculos animados
                         const Text(
                           "🌟 Siga-nos nas Redes Sociais 🌟",
                           style: TextStyle(
@@ -354,6 +361,7 @@ class _IndexPrincipalState extends State<IndexPrincipal> {
                           ),
                         ),
                         const SizedBox(height: 20),
+                        
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -383,6 +391,8 @@ class _IndexPrincipalState extends State<IndexPrincipal> {
                           ],
                         ),
                         const SizedBox(height: 30),
+                        
+                        // Link de privacidade estilizado
                         InkWell(
                           onTap: () => Navigator.pushNamed(context, '/privacidade'),
                           child: Container(
@@ -394,7 +404,7 @@ class _IndexPrincipalState extends State<IndexPrincipal> {
                               borderRadius: BorderRadius.circular(25),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.2),
+                                  color: Colors.black.withValues(alpha: 0.2),
                                   blurRadius: 8,
                                   offset: const Offset(0, 4),
                                 ),
@@ -418,10 +428,12 @@ class _IndexPrincipalState extends State<IndexPrincipal> {
                           ),
                         ),
                         const SizedBox(height: 30),
+                        
+                        // Copyright com emojis
                         Text(
                           "© Game Legends ✨ | Feito com 💜 pelo nosso time incrível!",
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.9),
+                            color: Colors.white.withValues(alpha: 0.9),
                             fontSize: 15,
                             fontWeight: FontWeight.w500,
                           ),

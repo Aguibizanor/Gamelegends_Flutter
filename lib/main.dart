@@ -27,6 +27,8 @@ import 'mandaremail.dart';
 import 'redefinir.dart';
 import 'perfil.dart';
 import 'descricao.dart';
+import 'descricao2.dart';
+import 'descricao3.dart';
 import 'privacidade.dart';
 import 'cartoes_page.dart';
 
@@ -69,6 +71,8 @@ class MyApp extends StatelessWidget {
         '/redefinir': (context) => PaginaRedefinirSenha(),
         '/perfil': (context) => PaginaPerfil(),
         '/descricao': (context) => PaginaDescricao(),
+        '/descricao2': (context) => PaginaDescricao2(),
+        '/descricao3': (context) => PaginaDescricao3(),
         '/privacidade': (context) => PrivacidadePage(),
         '/cartoes': (context) => CartoesPage(),
       },
@@ -174,7 +178,7 @@ class _MainPrincipalState extends State<MainPrincipal> {
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: colors.first.withOpacity(0.4),
+            color: colors.first.withValues(alpha: 0.4),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -226,22 +230,22 @@ class _MainPrincipalState extends State<MainPrincipal> {
                                           child: Column(
                                             crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
-                                              const Text(
-                                                'EXPLORE O \nMUNDO\nDOS JOGOS',
+                                              Text(
+                                                'EXPLORE O MUNDO DOS JOGOS',
                                                 style: TextStyle(
-                                                  fontSize: 46,
+                                                  fontSize: isWide ? 46 : 28,
                                                   fontWeight: FontWeight.bold,
                                                   color: Color(0xFF90017F),
-                                                  height: 1.05,
+                                                  height: isWide ? 1.05 : 1.2,
                                                 ),
                                               ),
                                               const SizedBox(height: 18),
-                                              const Text(
-                                                'Venha conhecer \nnossa plataforma \nonde você poderá\nencontrar jogos\nda nossa comunidade.',
+                                              Text(
+                                                'Venha conhecer nossa plataforma onde você poderá encontrar jogos da nossa comunidade.',
                                                 style: TextStyle(
-                                                  fontSize: 20,
+                                                  fontSize: isWide ? 20 : 16,
                                                   color: Colors.black87,
-                                                  height: 1.3,
+                                                  height: 1.4,
                                                 ),
                                               ),
                                               const SizedBox(height: 28),
@@ -301,7 +305,7 @@ class _MainPrincipalState extends State<MainPrincipal> {
                                       ),
                                       Expanded(
                                         child: SizedBox(
-                                          height: 320,
+                                          height: 350,
                                           child: ListView.builder(
                                             controller: _carouselController,
                                             scrollDirection: Axis.horizontal,
@@ -354,22 +358,32 @@ class _MainPrincipalState extends State<MainPrincipal> {
                                                               item['name'] ?? '',
                                                               style: TextStyle(
                                                                 fontWeight: FontWeight.bold,
-                                                                fontSize: isFocused ? 20 : 18,
+                                                                fontSize: isFocused ? 18 : 16,
                                                                 color: const Color(0xFF90017F),
                                                               ),
+                                                              maxLines: 2,
+                                                              overflow: TextOverflow.ellipsis,
                                                             ),
                                                             const SizedBox(height: 6),
                                                             Text(
                                                               item['descricao'] ?? '',
                                                               style: const TextStyle(
-                                                                fontSize: 12,
+                                                                fontSize: 11,
                                                                 color: Colors.black87,
                                                               ),
+                                                              maxLines: 3,
+                                                              overflow: TextOverflow.ellipsis,
                                                             ),
                                                             const SizedBox(height: 10),
                                                             GestureDetector(
                                                               onTap: () {
-                                                                Navigator.pushNamed(context, '/descricao');
+                                                                String route = '/descricao';
+                                                                if (item['id'] == 2) {
+                                                                  route = '/descricao2';
+                                                                } else if (item['id'] == 3) {
+                                                                  route = '/descricao3';
+                                                                }
+                                                                Navigator.pushNamed(context, route);
                                                               },
                                                               child: Container(
                                                                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -458,7 +472,7 @@ class _MainPrincipalState extends State<MainPrincipal> {
                                             height: 1.6,
                                             shadows: [
                                               Shadow(
-                                                color: Colors.black.withOpacity(0.3),
+                                                color: Colors.black.withValues(alpha: 0.3),
                                                 offset: const Offset(2, 2),
                                                 blurRadius: 4,
                                               ),
@@ -580,7 +594,7 @@ class _MainPrincipalState extends State<MainPrincipal> {
                                             borderRadius: BorderRadius.circular(25),
                                             boxShadow: [
                                               BoxShadow(
-                                                color: Colors.black.withOpacity(0.2),
+                                                color: Colors.black.withValues(alpha: 0.2),
                                                 blurRadius: 8,
                                                 offset: const Offset(0, 4),
                                               ),
@@ -609,7 +623,7 @@ class _MainPrincipalState extends State<MainPrincipal> {
                                       Text(
                                         "© Game Legends ✨ | Feito com 💜 pelo nosso time incrível!",
                                         style: TextStyle(
-                                          color: Colors.white.withOpacity(0.9),
+                                          color: Colors.white.withValues(alpha: 0.9),
                                           fontSize: 15,
                                           fontWeight: FontWeight.w500,
                                         ),

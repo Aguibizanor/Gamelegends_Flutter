@@ -92,7 +92,7 @@ class _WindowsPageState extends State<WindowsPage> {
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: colors.first.withOpacity(0.4),
+            color: colors.first.withValues(alpha: 0.4),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -249,7 +249,7 @@ class _WindowsPageState extends State<WindowsPage> {
                                             height: 1.6,
                                             shadows: [
                                               Shadow(
-                                                color: Colors.black.withOpacity(0.3),
+                                                color: Colors.black.withValues(alpha: 0.3),
                                                 offset: const Offset(2, 2),
                                                 blurRadius: 4,
                                               ),
@@ -364,7 +364,7 @@ class _WindowsPageState extends State<WindowsPage> {
                                             borderRadius: BorderRadius.circular(25),
                                             boxShadow: [
                                               BoxShadow(
-                                                color: Colors.black.withOpacity(0.2),
+                                                color: Colors.black.withValues(alpha: 0.2),
                                                 blurRadius: 8,
                                                 offset: const Offset(0, 4),
                                               ),
@@ -391,7 +391,7 @@ class _WindowsPageState extends State<WindowsPage> {
                                       Text(
                                         "© Game Legends ✨ | Feito com 💜 pelo nosso time incrível!",
                                         style: TextStyle(
-                                          color: Colors.white.withOpacity(0.9),
+                                          color: Colors.white.withValues(alpha: 0.9),
                                           fontSize: 15,
                                           fontWeight: FontWeight.w500,
                                         ),

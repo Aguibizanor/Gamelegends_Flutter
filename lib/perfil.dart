@@ -3,7 +3,7 @@ import 'package:intl/intl.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:html' as html;
+import 'package:web/web.dart' as web;
 import 'navbar.dart';
  
 Future<Map<String, dynamic>?> getUsuarioLogado() async {
@@ -88,20 +88,23 @@ class _PaginaPerfilState extends State<PaginaPerfil> {
   }
  
   Future<void> _selecionarFotoComputador() async {
-    final input = html.FileUploadInputElement();
+    final input = web.HTMLInputElement();
+    input.type = 'file';
     input.accept = 'image/*';
     input.click();
    
     input.onChange.listen((e) {
       final files = input.files;
-      if (files!.isNotEmpty) {
-        final file = files[0];
-        final reader = html.FileReader();
-        reader.readAsDataUrl(file);
-        reader.onLoad.listen((e) {
-          final dataUrl = reader.result as String;
-          _salvarFoto(dataUrl);
-        });
+      if (files != null && files.length > 0) {
+        final file = files.item(0);
+        if (file != null) {
+          final reader = web.FileReader();
+          reader.readAsDataURL(file);
+          reader.onLoadEnd.listen((e) {
+            final dataUrl = reader.result as String;
+            _salvarFoto(dataUrl);
+          });
+        }
       }
     });
   }
