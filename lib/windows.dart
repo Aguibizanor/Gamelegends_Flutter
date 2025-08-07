@@ -9,42 +9,42 @@ final _windowsGames = [
     "name": "Happy Cat Tavern",
     "user": "catlover123",
     "description": "Gerencie sua própria taverna cheia de gatos felizes!",
-    "comments": ["Muito fofo!", "Quero um DLC de filhotes.", "Top demais!"]
+    "comments": ["Muito fofo!", "Quero um DLC de filhotes.", "Top demais!", "Gatos adoráveis!"]
   },
   {
     "img": "assets/pombo.png",
     "name": "Subida de pomba",
     "user": "pombinhu",
     "description": "Ajude a pomba a subir o prédio sem cair.",
-    "comments": ["Morri de rir desse jogo.", "Adorei a trilha sonora.", "Pombas são incríveis!"]
+    "comments": ["Morri de rir desse jogo.", "Adorei a trilha sonora.", "Pombas são incríveis!", "Muito engraçado!"]
   },
   {
     "img": "assets/limao.png",
     "name": "Hero's Hour",
     "user": "herozin",
     "description": "Seja um herói em batalhas épicas em tempo real.",
-    "comments": ["Batalhas muito dinâmicas.", "Viciante demais!", "Arte linda."]
+    "comments": ["Batalhas muito dinâmicas.", "Viciante demais!", "Arte linda.", "Heróis épicos!"]
   },
   {
     "img": "assets/goiaba.png",
     "name": "Bug Fables",
     "user": "folhudo",
     "description": "Uma aventura de insetos carismáticos pelo mundo.",
-    "comments": ["O melhor RPG de insetos!", "Muito divertido.", "Quero sequência."]
+    "comments": ["O melhor RPG de insetos!", "Muito divertido.", "Quero sequência.", "Bugs carismáticos!"]
   },
   {
     "img": "assets/diaba.png",
     "name": "Hedon Bloodrite",
     "user": "orcgamer",
     "description": "FPS oldschool com muita ação e mistério.",
-    "comments": ["Lembrou Doom!", "Amo esse estilo de jogo.", "Difícil pra caramba."]
+    "comments": ["Lembrou Doom!", "Amo esse estilo de jogo.", "Difícil pra caramba.", "FPS clássico!"]
   },
   {
     "img": "assets/marquin.png",
     "name": "Buck up and drive",
     "user": "pilotoshow",
     "description": "Corrida insana com carros que desafiam a gravidade.",
-    "comments": ["Drift infinito!", "Joguei horas seguidas.", "Ótima trilha sonora."]
+    "comments": ["Drift infinito!", "Joguei horas seguidas.", "Ótima trilha sonora.", "Corrida insana!"]
   },
 ];
  
@@ -92,7 +92,7 @@ class _WindowsPageState extends State<WindowsPage> {
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: colors.first.withValues(alpha: 0.4),
+            color: colors.first.withOpacity(0.4),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -109,8 +109,7 @@ class _WindowsPageState extends State<WindowsPage> {
   @override
   Widget build(BuildContext context) {
     final isWide = MediaQuery.of(context).size.width > 900;
-    final sideBarOpen = isWide || isMobileOpen;
- 
+
     return Scaffold(
       body: Stack(
         children: [
@@ -121,93 +120,31 @@ class _WindowsPageState extends State<WindowsPage> {
                 isMenuOpen: menuAberto,
                 onMenuTap: toggleMenu,
               ),
-              Expanded(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (sideBarOpen)
-                      SizedBox(
-                        width: 260,
-                        child: Drawer(
-                          elevation: 0,
-                          child: Container(
-                            color: Colors.white,
-                            child: ListView(
-                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
-                              children: [
-                                _buildSection(
-                                  "Gênero",
-                                  "genero",
-                                  [
-                                    _buildFilterLink(context, "Terror", Icons.sports_esports, "/terror"),
-                                    _buildFilterLink(context, "Esporte", Icons.sports_esports, "/esporte"),
-                                    _buildFilterLink(context, "Aventura", Icons.sports_esports, "/aventura"),
-                                    _buildFilterLink(context, "Educacional", Icons.sports_esports, "/educacional"),
-                                    _buildFilterLink(context, "Sobrevivência", Icons.sports_esports, "/sobrevivencia"),
-                                    _buildFilterLink(context, "Jogo de cartas", Icons.sports_esports, "/cartas"),
-                                  ],
-                                ),
-                                _buildSection(
-                                  "Plataformas",
-                                  "plataformas",
-                                  [
-                                    _buildFilterLink(context, "Windows", Icons.desktop_windows, "/windows"),
-                                    _buildFilterLink(context, "Mac OS", Icons.laptop_mac, "/macOs"),
-                                    _buildFilterLink(context, "Android", Icons.android, "/android"),
-                                    _buildFilterLink(context, "iOS", Icons.phone_iphone, "/iOS"),
-                                  ],
-                                ),
-                                _buildSection(
-                                  "Postagem",
-                                  "postagem",
-                                  [
-                                    _buildFilterLink(context, "Hoje", Icons.access_time, "/hoje"),
-                                    _buildFilterLink(context, "Essa semana", Icons.access_time, "/essaSemana"),
-                                    _buildFilterLink(context, "Esse mês", Icons.access_time, "/esseMes"),
-                                  ],
-                                ),
-                                _buildSection(
-                                  "Status",
-                                  "status",
-                                  [
-                                    _buildFilterLink(context, "Desenvolvido", Icons.flash_on, "/desenvolvido"),
-                                    _buildFilterLink(context, "Desenvolvendo", Icons.play_arrow, "/desenvolvendo"),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    if (!isWide && !sideBarOpen)
-                      IconButton(
-                        icon: const Icon(Icons.chevron_right),
-                        onPressed: toggleMobileMenu,
-                      ),
-                    if (!isWide && sideBarOpen)
-                      IconButton(
-                        icon: const Icon(Icons.chevron_left),
-                        onPressed: toggleMobileMenu,
-                      ),
-                    Expanded(
-                      child: Container(
-                        color: const Color(0xFFE9E9E9),
-                        child: ListView(
-                          controller: _scrollController,
-                          padding: const EdgeInsets.all(10),
-                          children: [
-                            ..._windowsGames.map((game) => _WindowsGameCard(
-                              img: (game.containsKey('img') && game['img'] != null) ? game['img'] as String : '',
-                              name: (game.containsKey('name') && game['name'] != null) ? game['name'] as String : '',
-                              user: (game.containsKey('user') && game['user'] != null) ? game['user'] as String : '',
-                              comments: (game['comments'] is List) ? List<String>.from(game['comments'] as List) : [],
-                              description: (game.containsKey('description') && game['description'] != null) ? game['description'] as String : '',
-                              onTap: () {},
-                              sidebarOpen: sideBarOpen,
-                            )),
-                            const SizedBox(height: 30),
-                            
-                            // ======= RODAPÉ COLORIDO =========
+          Expanded(
+            child: Stack(
+              children: [
+                // Conteúdo principal sempre visível
+                Container(
+                  color: const Color(0xFFE9E9E9),
+                  margin: EdgeInsets.only(left: isWide ? 260 : 0),
+                  child: ListView(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.all(10),
+                    children: [
+                      // Lista de jogos
+                      ..._windowsGames.map((game) => _WindowsGameCard(
+                        img: (game.containsKey('img') && game['img'] != null) ? game['img'] as String : '',
+                        name: (game.containsKey('name') && game['name'] != null) ? game['name'] as String : '',
+                        user: (game.containsKey('user') && game['user'] != null) ? game['user'] as String : '',
+                        comments: (game['comments'] is List) ? List<String>.from(game['comments'] as List) : [],
+                        description: (game.containsKey('description') && game['description'] != null) ? game['description'] as String : '',
+                        onTap: () {},
+                        sidebarOpen: false,
+                      )),
+
+                      const SizedBox(height: 30),
+                      
+                      // ======= RODAPÉ COLORIDO =========
                             Container(
                               width: double.infinity,
                               color: const Color(0xFF90017F),
@@ -217,6 +154,7 @@ class _WindowsPageState extends State<WindowsPage> {
                                   constraints: const BoxConstraints(maxWidth: 1200),
                                   child: Column(
                                     children: [
+                                      // Logo com efeito brilhante
                                       ShaderMask(
                                         shaderCallback: (bounds) => const LinearGradient(
                                           colors: [Colors.white, Color(0xFFB19CD9), Colors.white],
@@ -239,6 +177,8 @@ class _WindowsPageState extends State<WindowsPage> {
                                         ),
                                       ),
                                       const SizedBox(height: 25),
+                                      
+                                      // Descrição com sombra colorida
                                       Container(
                                         padding: const EdgeInsets.symmetric(horizontal: 20),
                                         child: Text(
@@ -249,7 +189,7 @@ class _WindowsPageState extends State<WindowsPage> {
                                             height: 1.6,
                                             shadows: [
                                               Shadow(
-                                                color: Colors.black.withValues(alpha: 0.3),
+                                                color: Colors.black.withOpacity(0.3),
                                                 offset: const Offset(2, 2),
                                                 blurRadius: 4,
                                               ),
@@ -259,6 +199,8 @@ class _WindowsPageState extends State<WindowsPage> {
                                         ),
                                       ),
                                       const SizedBox(height: 35),
+                                      
+                                      // Informações de contato com círculos coloridos
                                       Wrap(
                                         alignment: WrapAlignment.center,
                                         spacing: 40,
@@ -315,6 +257,8 @@ class _WindowsPageState extends State<WindowsPage> {
                                         ],
                                       ),
                                       const SizedBox(height: 35),
+                                      
+                                      // Redes sociais com círculos animados
                                       const Text(
                                         "🌟 Siga-nos nas Redes Sociais 🌟",
                                         style: TextStyle(
@@ -324,6 +268,7 @@ class _WindowsPageState extends State<WindowsPage> {
                                         ),
                                       ),
                                       const SizedBox(height: 20),
+                                      
                                       Row(
                                         mainAxisAlignment: MainAxisAlignment.center,
                                         children: [
@@ -353,6 +298,8 @@ class _WindowsPageState extends State<WindowsPage> {
                                         ],
                                       ),
                                       const SizedBox(height: 30),
+                                      
+                                      // Link de privacidade estilizado
                                       InkWell(
                                         onTap: () => Navigator.pushNamed(context, '/privacidade'),
                                         child: Container(
@@ -364,7 +311,7 @@ class _WindowsPageState extends State<WindowsPage> {
                                             borderRadius: BorderRadius.circular(25),
                                             boxShadow: [
                                               BoxShadow(
-                                                color: Colors.black.withValues(alpha: 0.2),
+                                                color: Colors.black.withOpacity(0.2),
                                                 blurRadius: 8,
                                                 offset: const Offset(0, 4),
                                               ),
@@ -388,10 +335,12 @@ class _WindowsPageState extends State<WindowsPage> {
                                         ),
                                       ),
                                       const SizedBox(height: 30),
+                                      
+                                      // Copyright com emojis
                                       Text(
                                         "© Game Legends ✨ | Feito com 💜 pelo nosso time incrível!",
                                         style: TextStyle(
-                                          color: Colors.white.withValues(alpha: 0.9),
+                                          color: Colors.white.withOpacity(0.9),
                                           fontSize: 15,
                                           fontWeight: FontWeight.w500,
                                         ),
@@ -401,14 +350,159 @@ class _WindowsPageState extends State<WindowsPage> {
                                   ),
                                 ),
                               ),
-                            ),
-                          ],
+                      ),
+                    ],
+                  ),
+                ),
+                // Seta destacada
+                if (!isWide)
+                  Positioned(
+                    top: 20,
+                    left: isMobileOpen ? 270 : 10,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF90017F),
+                        borderRadius: BorderRadius.circular(8),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.3),
+                            blurRadius: 6,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: IconButton(
+                        icon: Icon(
+                          isMobileOpen ? Icons.chevron_left : Icons.chevron_right,
+                          color: Colors.white,
+                          size: 24,
                         ),
+                        onPressed: toggleMobileMenu,
                       ),
                     ),
-                  ],
-                ),
-              ),
+                  ),
+                // Sidebar sobreposta para mobile
+                if (isMobileOpen && !isWide)
+                  Positioned(
+                    left: 0,
+                    top: 0,
+                    bottom: 0,
+                    child: Container(
+                      width: 260,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.3),
+                            blurRadius: 10,
+                            offset: const Offset(2, 0),
+                          ),
+                        ],
+                      ),
+                      child: ListView(
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+                        children: [
+                          _buildSection(
+                            "Gênero",
+                            "genero",
+                            [
+                              _buildFilterLink(context, "Terror", Icons.sports_esports, "/terror"),
+                              _buildFilterLink(context, "Esporte", Icons.sports_esports, "/esporte"),
+                              _buildFilterLink(context, "Aventura", Icons.sports_esports, "/aventura"),
+                              _buildFilterLink(context, "Educacional", Icons.sports_esports, "/educacional"),
+                              _buildFilterLink(context, "Sobrevivência", Icons.sports_esports, "/sobrevivencia"),
+                              _buildFilterLink(context, "Jogo de cartas", Icons.sports_esports, "/cartas"),
+                            ],
+                          ),
+                          _buildSection(
+                            "Plataformas",
+                            "plataformas",
+                            [
+                              _buildFilterLink(context, "Windows", Icons.desktop_windows, "/windows"),
+                              _buildFilterLink(context, "Mac OS", Icons.laptop_mac, "/macOs"),
+                              _buildFilterLink(context, "Android", Icons.android, "/android"),
+                              _buildFilterLink(context, "iOS", Icons.phone_iphone, "/iOS"),
+                            ],
+                          ),
+                          _buildSection(
+                            "Postagem",
+                            "postagem",
+                            [
+                              _buildFilterLink(context, "Hoje", Icons.access_time, "/hoje"),
+                              _buildFilterLink(context, "Essa semana", Icons.access_time, "/essaSemana"),
+                              _buildFilterLink(context, "Esse mês", Icons.access_time, "/esseMes"),
+                            ],
+                          ),
+                          _buildSection(
+                            "Status",
+                            "status",
+                            [
+                              _buildFilterLink(context, "Desenvolvido", Icons.flash_on, "/desenvolvido"),
+                              _buildFilterLink(context, "Desenvolvendo", Icons.play_arrow, "/desenvolvendo"),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                // Sidebar fixa para desktop
+                if (isWide)
+                  Positioned(
+                    left: 0,
+                    top: 0,
+                    bottom: 0,
+                    child: Container(
+                      width: 260,
+                      color: Colors.white,
+                      child: ListView(
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+                        children: [
+                          _buildSection(
+                            "Gênero",
+                            "genero",
+                            [
+                              _buildFilterLink(context, "Terror", Icons.sports_esports, "/terror"),
+                              _buildFilterLink(context, "Esporte", Icons.sports_esports, "/esporte"),
+                              _buildFilterLink(context, "Aventura", Icons.sports_esports, "/aventura"),
+                              _buildFilterLink(context, "Educacional", Icons.sports_esports, "/educacional"),
+                              _buildFilterLink(context, "Sobrevivência", Icons.sports_esports, "/sobrevivencia"),
+                              _buildFilterLink(context, "Jogo de cartas", Icons.sports_esports, "/cartas"),
+                            ],
+                          ),
+                          _buildSection(
+                            "Plataformas",
+                            "plataformas",
+                            [
+                              _buildFilterLink(context, "Windows", Icons.desktop_windows, "/windows"),
+                              _buildFilterLink(context, "Mac OS", Icons.laptop_mac, "/macOs"),
+                              _buildFilterLink(context, "Android", Icons.android, "/android"),
+                              _buildFilterLink(context, "iOS", Icons.phone_iphone, "/iOS"),
+                            ],
+                          ),
+                          _buildSection(
+                            "Postagem",
+                            "postagem",
+                            [
+                              _buildFilterLink(context, "Hoje", Icons.access_time, "/hoje"),
+                              _buildFilterLink(context, "Essa semana", Icons.access_time, "/essaSemana"),
+                              _buildFilterLink(context, "Esse mês", Icons.access_time, "/esseMes"),
+                            ],
+                          ),
+                          _buildSection(
+                            "Status",
+                            "status",
+                            [
+                              _buildFilterLink(context, "Desenvolvido", Icons.flash_on, "/desenvolvido"),
+                              _buildFilterLink(context, "Desenvolvendo", Icons.play_arrow, "/desenvolvendo"),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
             ],
           ),
           if (!isWide && menuAberto)
@@ -491,6 +585,8 @@ class _WindowsGameCard extends StatelessWidget {
  
   @override
   Widget build(BuildContext context) {
+    final isWide = MediaQuery.of(context).size.width > 600;
+    
     if (sidebarOpen) {
       return Center(
         child: Card(
@@ -534,6 +630,132 @@ class _WindowsGameCard extends StatelessWidget {
         ),
       );
     }
+    
+    // Layout para mobile (horizontal com comentários na direita)
+    if (!isWide) {
+      return Card(
+        margin: const EdgeInsets.only(bottom: 20),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        elevation: 5,
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Imagem do jogo
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.asset(
+                  img,
+                  width: 80,
+                  height: 80,
+                  fit: BoxFit.cover,
+                  errorBuilder: (c, o, s) => Container(
+                    width: 80,
+                    height: 80,
+                    color: Colors.grey[200],
+                    alignment: Alignment.center,
+                    child: const Text("sem imagem", style: TextStyle(color: Colors.black38, fontSize: 10)),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              // Título, descrição, botão
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        color: Color(0xFF90017F),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      description,
+                      style: const TextStyle(
+                        color: Color(0xFF3E78C9),
+                        fontWeight: FontWeight.w600,
+                        fontSize: 11,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 8),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF90017F),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(9),
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      ),
+                      onPressed: onTap,
+                      child: const Text(
+                        "ver detalhes",
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Usuário e comentários na direita
+              if (user.isNotEmpty)
+                Container(
+                  width: 140,
+                  margin: const EdgeInsets.only(left: 8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(Icons.account_circle, size: 16, color: Color(0xFF90017F)),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              user,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 11,
+                                color: Color(0xFF90017F),
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (comments.isNotEmpty) const SizedBox(height: 6),
+                      if (comments.isNotEmpty)
+                        ...comments.take(4).map((comment) => Container(
+                          margin: const EdgeInsets.only(bottom: 3),
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[200],
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            comment,
+                            style: const TextStyle(
+                              fontSize: 9,
+                              color: Colors.black87,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        )),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+        ),
+      );
+    }
+    
+    // Layout para desktop (horizontal)
     return Card(
       margin: const EdgeInsets.only(bottom: 20),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
@@ -623,7 +845,7 @@ class _WindowsGameCard extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 6),
-                    for (final comment in comments)
+                    for (final comment in comments.take(4))
                       Container(
                         margin: const EdgeInsets.only(bottom: 4),
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
