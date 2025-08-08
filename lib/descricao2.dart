@@ -12,7 +12,7 @@ import 'modal_admin.dart';
 
 // Imagens e assets
 final String logo = 'assets/logo.site.tcc.png';
-final String coopdescricao1 = 'assets/coopdescricao1.png';
+final String coopdescricao1 = 'assets/catacombs.png';
 final String coopdescricao2 = 'assets/coopdescricao2.png';
 final String coopdescricao3 = 'assets/coopdescricao3.png';
 final String esquerda = 'assets/esquerda.png';
@@ -94,7 +94,7 @@ class _PaginaDescricao2State extends State<PaginaDescricao2> {
   bool modalAvaliacaoAberto = false;
   bool modalDoacaoAberto = false;
 
-  final List<String> imagens = [coopdescricao1, coopdescricao2, coopdescricao3];
+  final List<String> imagens = ['assets/coopdescricao1.png', coopdescricao2, coopdescricao3];
   final TextEditingController _searchController = TextEditingController();
 
   // Dados do usuário
@@ -374,27 +374,31 @@ class _PaginaDescricao2State extends State<PaginaDescricao2> {
                                                   ),
                                                 ),
                                                 const SizedBox(height: 16),
-                                                Row(
-                                                  mainAxisAlignment: MainAxisAlignment.center,
-                                                  children: imagens
-                                                      .asMap()
-                                                      .entries
-                                                      .map((entry) => GestureDetector(
-                                                            onTap: () => abrirModalImagem(entry.key),
-                                                            child: Container(
-                                                              margin: const EdgeInsets.symmetric(horizontal: 6),
-                                                              child: ClipRRect(
-                                                                borderRadius: BorderRadius.circular(10),
-                                                                child: Image.asset(
-                                                                  entry.value,
-                                                                  height: 56,
-                                                                  width: 56,
-                                                                  fit: BoxFit.cover,
+                                                Center(
+                                                  child: Wrap(
+                                                    alignment: WrapAlignment.center,
+                                                    spacing: 8,
+                                                    runSpacing: 8,
+                                                    children: imagens
+                                                        .asMap()
+                                                        .entries
+                                                        .map((entry) => GestureDetector(
+                                                              onTap: () => abrirModalImagem(entry.key),
+                                                              child: Container(
+                                                                margin: const EdgeInsets.symmetric(horizontal: 2),
+                                                                child: ClipRRect(
+                                                                  borderRadius: BorderRadius.circular(10),
+                                                                  child: Image.asset(
+                                                                    entry.value,
+                                                                    height: 56,
+                                                                    width: 56,
+                                                                    fit: BoxFit.cover,
+                                                                  ),
                                                                 ),
                                                               ),
-                                                            ),
-                                                          ))
-                                                      .toList(),
+                                                            ))
+                                                        .toList(),
+                                                  ),
                                                 ),
                                               ],
                                             ),
@@ -430,27 +434,31 @@ class _PaginaDescricao2State extends State<PaginaDescricao2> {
                                             ),
                                           ),
                                           const SizedBox(height: 16),
-                                          Row(
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: imagens
-                                                .asMap()
-                                                .entries
-                                                .map((entry) => GestureDetector(
-                                                      onTap: () => abrirModalImagem(entry.key),
-                                                      child: Container(
-                                                        margin: const EdgeInsets.symmetric(horizontal: 6),
-                                                        child: ClipRRect(
-                                                          borderRadius: BorderRadius.circular(10),
-                                                          child: Image.asset(
-                                                            entry.value,
-                                                            height: 44,
-                                                            width: 44,
-                                                            fit: BoxFit.cover,
+                                          Center(
+                                            child: Wrap(
+                                              alignment: WrapAlignment.center,
+                                              spacing: 8,
+                                              runSpacing: 8,
+                                              children: imagens
+                                                  .asMap()
+                                                  .entries
+                                                  .map((entry) => GestureDetector(
+                                                        onTap: () => abrirModalImagem(entry.key),
+                                                        child: Container(
+                                                          margin: const EdgeInsets.symmetric(horizontal: 2),
+                                                          child: ClipRRect(
+                                                            borderRadius: BorderRadius.circular(10),
+                                                            child: Image.asset(
+                                                              entry.value,
+                                                              height: 44,
+                                                              width: 44,
+                                                              fit: BoxFit.cover,
+                                                            ),
                                                           ),
                                                         ),
-                                                      ),
-                                                    ))
-                                                .toList(),
+                                                      ))
+                                                  .toList(),
+                                            ),
                                           ),
                                           const SizedBox(height: 24),
                                           _DescricaoEInfo(

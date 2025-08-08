@@ -374,27 +374,31 @@ class _PaginaDescricao3State extends State<PaginaDescricao3> {
                                                   ),
                                                 ),
                                                 const SizedBox(height: 16),
-                                                Row(
-                                                  mainAxisAlignment: MainAxisAlignment.center,
-                                                  children: imagens
-                                                      .asMap()
-                                                      .entries
-                                                      .map((entry) => GestureDetector(
-                                                            onTap: () => abrirModalImagem(entry.key),
-                                                            child: Container(
-                                                              margin: const EdgeInsets.symmetric(horizontal: 6),
-                                                              child: ClipRRect(
-                                                                borderRadius: BorderRadius.circular(10),
-                                                                child: Image.asset(
-                                                                  entry.value,
-                                                                  height: 56,
-                                                                  width: 56,
-                                                                  fit: BoxFit.cover,
+                                                Center(
+                                                  child: Wrap(
+                                                    alignment: WrapAlignment.center,
+                                                    spacing: 8,
+                                                    runSpacing: 8,
+                                                    children: imagens
+                                                        .asMap()
+                                                        .entries
+                                                        .map((entry) => GestureDetector(
+                                                              onTap: () => abrirModalImagem(entry.key),
+                                                              child: Container(
+                                                                margin: const EdgeInsets.symmetric(horizontal: 2),
+                                                                child: ClipRRect(
+                                                                  borderRadius: BorderRadius.circular(10),
+                                                                  child: Image.asset(
+                                                                    entry.value,
+                                                                    height: 56,
+                                                                    width: 56,
+                                                                    fit: BoxFit.cover,
+                                                                  ),
                                                                 ),
                                                               ),
-                                                            ),
-                                                          ))
-                                                      .toList(),
+                                                            ))
+                                                        .toList(),
+                                                  ),
                                                 ),
                                               ],
                                             ),
@@ -430,27 +434,31 @@ class _PaginaDescricao3State extends State<PaginaDescricao3> {
                                             ),
                                           ),
                                           const SizedBox(height: 16),
-                                          Row(
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: imagens
-                                                .asMap()
-                                                .entries
-                                                .map((entry) => GestureDetector(
-                                                      onTap: () => abrirModalImagem(entry.key),
-                                                      child: Container(
-                                                        margin: const EdgeInsets.symmetric(horizontal: 6),
-                                                        child: ClipRRect(
-                                                          borderRadius: BorderRadius.circular(10),
-                                                          child: Image.asset(
-                                                            entry.value,
-                                                            height: 44,
-                                                            width: 44,
-                                                            fit: BoxFit.cover,
+                                          Center(
+                                            child: Wrap(
+                                              alignment: WrapAlignment.center,
+                                              spacing: 8,
+                                              runSpacing: 8,
+                                              children: imagens
+                                                  .asMap()
+                                                  .entries
+                                                  .map((entry) => GestureDetector(
+                                                        onTap: () => abrirModalImagem(entry.key),
+                                                        child: Container(
+                                                          margin: const EdgeInsets.symmetric(horizontal: 2),
+                                                          child: ClipRRect(
+                                                            borderRadius: BorderRadius.circular(10),
+                                                            child: Image.asset(
+                                                              entry.value,
+                                                              height: 44,
+                                                              width: 44,
+                                                              fit: BoxFit.cover,
+                                                            ),
                                                           ),
                                                         ),
-                                                      ),
-                                                    ))
-                                                .toList(),
+                                                      ))
+                                                  .toList(),
+                                            ),
                                           ),
                                           const SizedBox(height: 24),
                                           _DescricaoEInfo(

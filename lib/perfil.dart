@@ -3,7 +3,6 @@ import 'package:intl/intl.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:web/web.dart' as web;
 import 'navbar.dart';
  
 Future<Map<String, dynamic>?> getUsuarioLogado() async {
@@ -88,25 +87,9 @@ class _PaginaPerfilState extends State<PaginaPerfil> {
   }
  
   Future<void> _selecionarFotoComputador() async {
-    final input = web.HTMLInputElement();
-    input.type = 'file';
-    input.accept = 'image/*';
-    input.click();
-   
-    input.onChange.listen((e) {
-      final files = input.files;
-      if (files != null && files.length > 0) {
-        final file = files.item(0);
-        if (file != null) {
-          final reader = web.FileReader();
-          reader.readAsDataURL(file);
-          reader.onLoadEnd.listen((e) {
-            final dataUrl = reader.result as String;
-            _salvarFoto(dataUrl);
-          });
-        }
-      }
-    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Seleção de arquivos não disponível. Use as fotos de exemplo.')),
+    );
   }
  
   Future<void> _salvarFoto(String caminhoFoto) async {
@@ -189,8 +172,6 @@ class _PaginaPerfilState extends State<PaginaPerfil> {
   ImageProvider _getImageProvider(String imagePath) {
     if (imagePath.startsWith('assets/')) {
       return AssetImage(imagePath);
-    } else if (imagePath.startsWith('data:')) {
-      return NetworkImage(imagePath);
     } else {
       return FileImage(File(imagePath));
     }
@@ -305,7 +286,7 @@ class _PaginaPerfilState extends State<PaginaPerfil> {
                               borderRadius: BorderRadius.circular(24),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.1),
+                                  color: Colors.black.withOpacity(0.1),
                                   blurRadius: 20,
                                   offset: const Offset(0, 8),
                                   spreadRadius: 2,
@@ -319,7 +300,7 @@ class _PaginaPerfilState extends State<PaginaPerfil> {
                                   padding: const EdgeInsets.all(32),
                                   decoration: BoxDecoration(
                                     gradient: LinearGradient(
-                                      colors: [const Color(0xFF90017F), const Color(0xFF90017F).withValues(alpha: 0.8)],
+                                      colors: [const Color(0xFF90017F), const Color(0xFF90017F).withOpacity(0.8)],
                                       begin: Alignment.topLeft,
                                       end: Alignment.bottomRight,
                                     ),
@@ -338,7 +319,7 @@ class _PaginaPerfilState extends State<PaginaPerfil> {
                                               border: Border.all(color: Colors.white, width: 4),
                                               boxShadow: [
                                                 BoxShadow(
-                                                  color: Colors.black.withValues(alpha: 0.2),
+                                                  color: Colors.black.withOpacity(0.2),
                                                   blurRadius: 10,
                                                   offset: const Offset(0, 4),
                                                 ),
@@ -364,7 +345,7 @@ class _PaginaPerfilState extends State<PaginaPerfil> {
                                                   border: Border.all(color: const Color(0xFF90017F), width: 2),
                                                   boxShadow: [
                                                     BoxShadow(
-                                                      color: Colors.black.withValues(alpha: 0.2),
+                                                      color: Colors.black.withOpacity(0.2),
                                                       blurRadius: 4,
                                                       offset: const Offset(0, 2),
                                                     ),
@@ -393,7 +374,7 @@ class _PaginaPerfilState extends State<PaginaPerfil> {
                                       Container(
                                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                         decoration: BoxDecoration(
-                                          color: Colors.white.withValues(alpha: 0.2),
+                                          color: Colors.white.withOpacity(0.2),
                                           borderRadius: BorderRadius.circular(20),
                                         ),
                                         child: Row(
@@ -609,7 +590,7 @@ class PerfilInfo extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: const Color(0xFF90017F).withValues(alpha: 0.1),
+              color: const Color(0xFF90017F).withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(icon, color: const Color(0xFF90017F), size: 20),
@@ -730,7 +711,7 @@ class _PerfilModalState extends State<PerfilModal> {
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.2),
+                  color: Colors.black.withOpacity(0.2),
                   blurRadius: 20,
                   offset: const Offset(0, 10),
                 ),
