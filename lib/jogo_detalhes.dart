@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'navbar.dart';
+import 'cadastro_cartao.dart';
 
 // Endpoints do backend
 const String projetosApiUrl = "http://localhost:8080/projetos";
@@ -20,7 +21,7 @@ Future<Map<String, dynamic>?> getUsuarioLogado() async {
       return {
         'nome': usuario['nome'],
         'email': usuario['email'],
-        'tipo': usuario['tipo'],
+        'tipo': usuario['usuario'],
       };
     } catch (e) {
       return null;
@@ -53,8 +54,13 @@ class _JogoDetalhesState extends State<JogoDetalhes> {
   // Dados do usuário
   bool usuarioLogado = false;
   String? nomeUsuario;
+  String? tipoUsuario;
+  bool isAdmin = false;
   List<Map<String, dynamic>> cartoesUsuario = [];
   String? cartaoSelecionadoId;
+  
+  // Modal admin
+  bool modalAdminAberto = false;
   
   // Avaliações
   List<Map<String, dynamic>> avaliacoes = [];
@@ -103,6 +109,8 @@ class _JogoDetalhesState extends State<JogoDetalhes> {
       setState(() {
         usuarioLogado = true;
         nomeUsuario = usuarioData['nome'];
+        tipoUsuario = usuarioData['tipo'];
+        isAdmin = tipoUsuario == 'ADM';
       });
     }
   }
@@ -173,6 +181,18 @@ class _JogoDetalhesState extends State<JogoDetalhes> {
     });
   }
 
+  void abrirModalAdmin() {
+    setState(() {
+      modalAdminAberto = true;
+    });
+  }
+
+  void fecharModalAdmin() {
+    setState(() {
+      modalAdminAberto = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final isWide = MediaQuery.of(context).size.width > 700;
@@ -233,32 +253,37 @@ class _JogoDetalhesState extends State<JogoDetalhes> {
                     children: [
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 12),
-                        child: Center(
-                          child: ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 900),
-                            child: isWide
-                                ? Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Expanded(
-                                        flex: 4,
-                                        child: _buildImagemJogo(),
+                        child: Stack(
+                          children: [
+                            Center(
+                              child: ConstrainedBox(
+                                constraints: const BoxConstraints(maxWidth: 900),
+                                child: isWide
+                                    ? Row(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Expanded(
+                                            flex: 4,
+                                            child: _buildImagemJogo(),
+                                          ),
+                                          const SizedBox(width: 40),
+                                          Expanded(
+                                            flex: 7,
+                                            child: _buildInfoJogo(),
+                                          ),
+                                        ],
+                                      )
+                                    : Column(
+                                        children: [
+                                          _buildImagemJogo(),
+                                          const SizedBox(height: 24),
+                                          _buildInfoJogo(),
+                                        ],
                                       ),
-                                      const SizedBox(width: 40),
-                                      Expanded(
-                                        flex: 7,
-                                        child: _buildInfoJogo(),
-                                      ),
-                                    ],
-                                  )
-                                : Column(
-                                    children: [
-                                      _buildImagemJogo(),
-                                      const SizedBox(height: 24),
-                                      _buildInfoJogo(),
-                                    ],
-                                  ),
-                          ),
+                              ),
+                            ),
+
+                          ],
                         ),
                       ),
                       GestureDetector(
@@ -295,6 +320,12 @@ class _JogoDetalhesState extends State<JogoDetalhes> {
               fechar: fecharModalDoacao,
               nomeUsuario: nomeUsuario,
               usuarioLogado: usuarioLogado,
+            ),
+          if (modalAdminAberto)
+            _ModalAdmin(
+              fechar: fecharModalAdmin,
+              nomeJogo: jogoData!['nomeProjeto'],
+              onAvaliacaoExcluida: carregarAvaliacoes,
             ),
         ],
       ),
@@ -411,7 +442,20 @@ class _JogoDetalhesState extends State<JogoDetalhes> {
               child: const Text('Doações'),
               onPressed: usuarioLogado ? abrirModalDoacao : null,
             ),
-          ],
+            if (isAdmin) ...[
+              const SizedBox(width: 10),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+                child: const Text('Admin'),
+                onPressed: abrirModalAdmin,
+              ),
+            ]
+          ]
         ),
       ],
     );
@@ -871,8 +915,8 @@ class _ModalAvaliacaoState extends State<_ModalAvaliacao> {
   }
 }
 
-// Modal de Doação (simplificado)
-class _ModalDoacao extends StatelessWidget {
+// Modal de Doação
+class _ModalDoacao extends StatefulWidget {
   final VoidCallback fechar;
   final String? nomeUsuario;
   final bool usuarioLogado;
@@ -882,6 +926,77 @@ class _ModalDoacao extends StatelessWidget {
     required this.nomeUsuario,
     required this.usuarioLogado,
   });
+
+  @override
+  State<_ModalDoacao> createState() => _ModalDoacaoState();
+}
+
+class _ModalDoacaoState extends State<_ModalDoacao> {
+  final TextEditingController valorController = TextEditingController();
+  bool enviado = false;
+  List<Map<String, dynamic>> cartoesUsuario = [];
+  String? cartaoSelecionadoId;
+  bool carregandoCartoes = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _carregarCartoes();
+  }
+
+  Future<void> _carregarCartoes() async {
+    if (!widget.usuarioLogado) {
+      setState(() => carregandoCartoes = false);
+      return;
+    }
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final usuarioStr = prefs.getString('usuario');
+      if (usuarioStr != null) {
+        final usuarioData = jsonDecode(usuarioStr) as Map<String, dynamic>;
+        final clienteId = usuarioData['id'];
+        
+        if (clienteId != null) {
+          final response = await http.get(Uri.parse('http://localhost:8080/cadcartao/cliente/$clienteId'));
+          if (response.statusCode == 200) {
+            final cartoes = List<Map<String, dynamic>>.from(jsonDecode(response.body));
+            setState(() {
+              cartoesUsuario = cartoes;
+              cartaoSelecionadoId = cartoes.isNotEmpty ? cartoes.first['id'].toString() : null;
+              carregandoCartoes = false;
+            });
+          } else {
+            setState(() => carregandoCartoes = false);
+          }
+        } else {
+          setState(() => carregandoCartoes = false);
+        }
+      } else {
+        setState(() => carregandoCartoes = false);
+      }
+    } catch (e) {
+      setState(() => carregandoCartoes = false);
+    }
+  }
+
+  Future<void> enviarDoacao() async {
+    double? valor = double.tryParse(valorController.text.replaceAll(',', '.'));
+    if (valor == null || cartaoSelecionadoId == null || !widget.usuarioLogado) return;
+    
+    // Simular envio de doação
+    await Future.delayed(const Duration(seconds: 1));
+    setState(() {
+      enviado = true;
+    });
+    Future.delayed(const Duration(seconds: 2), widget.fechar);
+  }
+
+  @override
+  void dispose() {
+    valorController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -897,22 +1012,389 @@ class _ModalDoacao extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
             ),
             constraints: const BoxConstraints(maxWidth: 400),
+            child: !widget.usuarioLogado
+                ? Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      Icon(Icons.lock, color: Colors.red, size: 50),
+                      SizedBox(height: 10),
+                      Text(
+                        "Faça login para doar!",
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.red),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  )
+                : enviado
+                    ? Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: const [
+                          Icon(Icons.favorite, color: Colors.pink, size: 50),
+                          SizedBox(height: 10),
+                          Text(
+                            "Obrigado pela sua doação!",
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      )
+                    : Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Align(
+                            alignment: Alignment.topRight,
+                            child: IconButton(
+                              icon: const Icon(Icons.close),
+                              onPressed: widget.fechar,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Bem-vindo, ${widget.nomeUsuario ?? ""}',
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                          ),
+                          const SizedBox(height: 12),
+                          carregandoCartoes
+                              ? const Center(child: CircularProgressIndicator())
+                              : cartoesUsuario.isEmpty
+                                  ? Column(
+                                      children: [
+                                        const Icon(Icons.credit_card_off, size: 48, color: Colors.grey),
+                                        const SizedBox(height: 8),
+                                        const Text('Nenhum cartão cadastrado.', style: TextStyle(color: Colors.grey)),
+                                        const SizedBox(height: 12),
+                                        ElevatedButton.icon(
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: const Color(0xFF90017F),
+                                            foregroundColor: Colors.white,
+                                          ),
+                                          onPressed: () async {
+                                            final resultado = await Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) => const CadastroCartaoScreen(),
+                                              ),
+                                            );
+                                            if (resultado == true) {
+                                              await _carregarCartoes();
+                                            }
+                                          },
+                                          icon: const Icon(Icons.add),
+                                          label: const Text('Cadastrar Cartão'),
+                                        ),
+                                      ],
+                                    )
+                                  : Column(
+                                      children: [
+                                        DropdownButtonFormField<String>(
+                                          value: cartaoSelecionadoId,
+                                          items: cartoesUsuario
+                                              .map((cartao) {
+                                                final numero = cartao['numC']?.toString() ?? '';
+                                                final ultimos4 = numero.length >= 4 ? numero.substring(numero.length - 4) : numero;
+                                                return DropdownMenuItem(
+                                                  value: cartao['id'].toString(),
+                                                  child: Row(
+                                                    children: [
+                                                      Icon(Icons.credit_card, color: Color(0xFF90017F), size: 20),
+                                                      const SizedBox(width: 8),
+                                                      Text('${cartao['bandeira'] ?? "Cartão"} - **** $ultimos4'),
+                                                    ],
+                                                  ),
+                                                );
+                                              })
+                                              .toList(),
+                                          onChanged: (value) {
+                                            setState(() {
+                                              cartaoSelecionadoId = value;
+                                            });
+                                          },
+                                          decoration: const InputDecoration(
+                                            labelText: "Selecione o cartão para doação",
+                                            border: OutlineInputBorder(),
+                                            prefixIcon: Icon(Icons.credit_card),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        TextButton.icon(
+                                          onPressed: () async {
+                                            final resultado = await Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) => const CadastroCartaoScreen(),
+                                              ),
+                                            );
+                                            if (resultado == true) {
+                                              await _carregarCartoes();
+                                            }
+                                          },
+                                          icon: const Icon(Icons.add, size: 16),
+                                          label: const Text('Adicionar outro cartão'),
+                                          style: TextButton.styleFrom(
+                                            foregroundColor: const Color(0xFF90017F),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                          const SizedBox(height: 12),
+                          TextField(
+                            controller: valorController,
+                            keyboardType: TextInputType.numberWithOptions(decimal: true),
+                            decoration: const InputDecoration(
+                              labelText: 'Valor da doação',
+                              border: OutlineInputBorder(),
+                              prefixIcon: Icon(Icons.attach_money),
+                            ),
+                            onChanged: (_) => setState(() {}),
+                          ),
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF90017F),
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                            ),
+                            onPressed: valorController.text.trim().isEmpty ||
+                                    cartoesUsuario.isEmpty ||
+                                    cartaoSelecionadoId == null ||
+                                    carregandoCartoes
+                                ? null
+                                : enviarDoacao,
+                            child: const Text('Enviar Doação'),
+                          ),
+                        ],
+                      ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// Modal de Administração
+class _ModalAdmin extends StatefulWidget {
+  final VoidCallback fechar;
+  final String nomeJogo;
+  final VoidCallback onAvaliacaoExcluida;
+
+  const _ModalAdmin({
+    required this.fechar,
+    required this.nomeJogo,
+    required this.onAvaliacaoExcluida,
+  });
+
+  @override
+  State<_ModalAdmin> createState() => _ModalAdminState();
+}
+
+class _ModalAdminState extends State<_ModalAdmin> {
+  List<Map<String, dynamic>> avaliacoes = [];
+  bool carregando = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _carregarAvaliacoes();
+  }
+
+  Future<void> _carregarAvaliacoes() async {
+    try {
+      final response = await http.get(Uri.parse('$avaliacaoApiUrl/jogo/${widget.nomeJogo}'));
+      if (response.statusCode == 200) {
+        setState(() {
+          avaliacoes = List<Map<String, dynamic>>.from(jsonDecode(response.body));
+          carregando = false;
+        });
+      } else {
+        setState(() => carregando = false);
+      }
+    } catch (e) {
+      setState(() => carregando = false);
+    }
+  }
+
+  Future<void> _excluirAvaliacao(int avaliacaoId) async {
+    try {
+      final response = await http.delete(Uri.parse('$avaliacaoApiUrl/$avaliacaoId'));
+      if (response.statusCode == 200) {
+        setState(() {
+          avaliacoes.removeWhere((av) => av['id'] == avaliacaoId);
+        });
+        widget.onAvaliacaoExcluida();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Avaliação excluída com sucesso!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Erro ao excluir avaliação'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erro: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned.fill(
+      child: Material(
+        color: Colors.black54,
+        child: Center(
+          child: Container(
+            width: 600,
+            height: 500,
+            margin: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+            ),
             child: Column(
-              mainAxisSize: MainAxisSize.min,
               children: [
-                Align(
-                  alignment: Alignment.topRight,
-                  child: IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: fechar,
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(20),
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF90017F),
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(16),
+                      topRight: Radius.circular(16),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.admin_panel_settings, color: Colors.white),
+                      const SizedBox(width: 12),
+                      const Text(
+                        'Gerenciar Comentários',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const Spacer(),
+                      IconButton(
+                        onPressed: widget.fechar,
+                        icon: const Icon(Icons.close, color: Colors.white),
+                      ),
+                    ],
                   ),
                 ),
-                const Icon(Icons.favorite, color: Colors.pink, size: 50),
-                const SizedBox(height: 10),
-                const Text(
-                  "Funcionalidade de doação em desenvolvimento!",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                  textAlign: TextAlign.center,
+                Expanded(
+                  child: carregando
+                      ? const Center(child: CircularProgressIndicator())
+                      : avaliacoes.isEmpty
+                          ? const Center(
+                              child: Text(
+                                'Nenhum comentário encontrado',
+                                style: TextStyle(color: Colors.grey, fontSize: 16),
+                              ),
+                            )
+                          : ListView.builder(
+                              padding: const EdgeInsets.all(16),
+                              itemCount: avaliacoes.length,
+                              itemBuilder: (context, index) {
+                                final avaliacao = avaliacoes[index];
+                                return Card(
+                                  margin: const EdgeInsets.only(bottom: 12),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(16),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    avaliacao['nomeUsuario'] ?? 'Anônimo',
+                                                    style: const TextStyle(
+                                                      fontWeight: FontWeight.bold,
+                                                      fontSize: 16,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(height: 4),
+                                                  Row(
+                                                    children: List.generate(5, (starIndex) {
+                                                      return Icon(
+                                                        starIndex < (avaliacao['estrelas'] ?? 0)
+                                                            ? Icons.star
+                                                            : Icons.star_border,
+                                                        color: const Color(0xFFFFC107),
+                                                        size: 16,
+                                                      );
+                                                    }),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            IconButton(
+                                              onPressed: () {
+                                                showDialog(
+                                                  context: context,
+                                                  builder: (ctx) => AlertDialog(
+                                                    title: const Text('Excluir Comentário'),
+                                                    content: const Text(
+                                                        'Tem certeza que deseja excluir este comentário?'),
+                                                    actions: [
+                                                      TextButton(
+                                                        onPressed: () => Navigator.pop(ctx),
+                                                        child: const Text('Cancelar'),
+                                                      ),
+                                                      ElevatedButton(
+                                                        style: ElevatedButton.styleFrom(
+                                                          backgroundColor: Colors.red,
+                                                        ),
+                                                        onPressed: () {
+                                                          Navigator.pop(ctx);
+                                                          _excluirAvaliacao(avaliacao['id']);
+                                                        },
+                                                        child: const Text(
+                                                          'Excluir',
+                                                          style: TextStyle(color: Colors.white),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                );
+                                              },
+                                              icon: const Icon(Icons.delete, color: Colors.red),
+                                              tooltip: 'Excluir comentário',
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          avaliacao['comentario'] ?? '',
+                                          style: const TextStyle(fontSize: 14),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          'Data: ${avaliacao['dataAvaliacao'] ?? 'N/A'}',
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
                 ),
               ],
             ),

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import 'navbar.dart';
 import 'suporte.dart';
 import 'login.dart';
@@ -180,26 +179,7 @@ class _MainPrincipalState extends State<MainPrincipal> {
     });
   }
 
-  Widget _buildColorfulSocialButton(IconData icon, List<Color> colors, VoidCallback onPressed) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(colors: colors),
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: colors.first.withOpacity(0.4),
-            blurRadius: 12,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: IconButton(
-        icon: Icon(icon, color: Colors.white, size: 28),
-        onPressed: onPressed,
-        splashRadius: 30,
-      ),
-    );
-  }
+
 
   @override
   Widget build(BuildContext context) {

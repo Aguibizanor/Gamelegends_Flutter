@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'cadastro_cartao.dart';
+
 
 const String cartaoApiUrl = "http://localhost:8080/cadcartao";
 
@@ -80,17 +80,8 @@ class _CartoesPageState extends State<CartoesPage> {
     }
   }
 
-  Future<void> _adicionarCartao() async {
-    final resultado = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const CadastroCartaoScreen(),
-      ),
-    );
-    
-    if (resultado == true) {
-      _carregarCartoes();
-    }
+  void _adicionarCartao() {
+    Navigator.pushNamed(context, '/perfil');
   }
 
   IconData _getCardIcon(String bandeira) {
