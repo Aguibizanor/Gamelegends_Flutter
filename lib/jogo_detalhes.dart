@@ -4,6 +4,8 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'navbar.dart';
 import 'cadastro_cartao.dart';
+import 'modal_doacao_novo.dart';
+import 'modal_pix_novo.dart';
 
 // Endpoints do backend
 const String projetosApiUrl = "http://localhost:8080/projetos";
@@ -44,6 +46,7 @@ class _JogoDetalhesState extends State<JogoDetalhes> {
   bool modalImagemAberto = false;
   bool modalAvaliacaoAberto = false;
   bool modalDoacaoAberto = false;
+  bool modalPixAberto = false;
   
   final TextEditingController _searchController = TextEditingController();
   
@@ -178,6 +181,18 @@ class _JogoDetalhesState extends State<JogoDetalhes> {
   void fecharModalDoacao() {
     setState(() {
       modalDoacaoAberto = false;
+    });
+  }
+
+  void abrirModalPix() {
+    setState(() {
+      modalPixAberto = true;
+    });
+  }
+
+  void fecharModalPix() {
+    setState(() {
+      modalPixAberto = false;
     });
   }
 
@@ -316,10 +331,15 @@ class _JogoDetalhesState extends State<JogoDetalhes> {
               nomeJogo: jogoData!['nomeProjeto'],
             ),
           if (modalDoacaoAberto)
-            _ModalDoacao(
+            ModalDoacaoNovo(
               fechar: fecharModalDoacao,
               nomeUsuario: nomeUsuario,
               usuarioLogado: usuarioLogado,
+              abrirPix: abrirModalPix,
+            ),
+          if (modalPixAberto)
+            ModalPixNovo(
+              fechar: fecharModalPix,
             ),
           if (modalAdminAberto)
             _ModalAdmin(
@@ -724,7 +744,7 @@ class _JogoDetalhesState extends State<JogoDetalhes> {
                     borderRadius: BorderRadius.circular(25),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.2),
+                        color: Colors.black.withOpacity( 0.2),
                         blurRadius: 8,
                         offset: const Offset(0, 4),
                       ),
@@ -751,7 +771,7 @@ class _JogoDetalhesState extends State<JogoDetalhes> {
               Text(
                 "© Game Legends ✨ | Feito com 💜 pelo nosso time incrível!",
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.9),
+                  color: Colors.white.withOpacity( 0.9),
                   fontSize: 15,
                   fontWeight: FontWeight.w500,
                 ),
@@ -771,7 +791,7 @@ class _JogoDetalhesState extends State<JogoDetalhes> {
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: colors.first.withValues(alpha: 0.4),
+            color: colors.first.withOpacity( 0.4),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -920,11 +940,13 @@ class _ModalDoacao extends StatefulWidget {
   final VoidCallback fechar;
   final String? nomeUsuario;
   final bool usuarioLogado;
+  final VoidCallback abrirPix;
 
   const _ModalDoacao({
     required this.fechar,
     required this.nomeUsuario,
     required this.usuarioLogado,
+    required this.abrirPix,
   });
 
   @override
@@ -937,6 +959,8 @@ class _ModalDoacaoState extends State<_ModalDoacao> {
   List<Map<String, dynamic>> cartoesUsuario = [];
   String? cartaoSelecionadoId;
   bool carregandoCartoes = true;
+  bool mostrarCartao = false;
+  bool mostrarPix = false;
 
   @override
   void initState() {
@@ -1148,19 +1172,43 @@ class _ModalDoacaoState extends State<_ModalDoacao> {
                             onChanged: (_) => setState(() {}),
                           ),
                           const SizedBox(height: 16),
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF90017F),
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                            ),
-                            onPressed: valorController.text.trim().isEmpty ||
-                                    cartoesUsuario.isEmpty ||
-                                    cartaoSelecionadoId == null ||
-                                    carregandoCartoes
-                                ? null
-                                : enviarDoacao,
-                            child: const Text('Enviar Doação'),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFF90017F),
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(vertical: 12),
+                                  ),
+                                  onPressed: valorController.text.trim().isEmpty ||
+                                          cartoesUsuario.isEmpty ||
+                                          cartaoSelecionadoId == null ||
+                                          carregandoCartoes
+                                      ? null
+                                      : enviarDoacao,
+                                  child: const Text('Pagar com Cartão'),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: ElevatedButton.icon(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFF32BCAD),
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(vertical: 12),
+                                  ),
+                                  onPressed: valorController.text.trim().isEmpty
+                                      ? null
+                                      : () {
+                                          widget.fechar();
+                                          widget.abrirPix();
+                                        },
+                                  icon: const Icon(Icons.qr_code, size: 20),
+                                  label: const Text('PIX'),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -1398,6 +1446,263 @@ class _ModalAdminState extends State<_ModalAdmin> {
                 ),
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// Modal PIX
+class _ModalPix extends StatefulWidget {
+  final VoidCallback fechar;
+
+  const _ModalPix({
+    required this.fechar,
+  });
+
+  @override
+  State<_ModalPix> createState() => _ModalPixState();
+}
+
+class _ModalPixState extends State<_ModalPix> {
+  final TextEditingController valorController = TextEditingController();
+  String? pixCode;
+  bool carregandoPix = false;
+  bool pixGerado = false;
+  bool pagamentoConfirmado = false;
+
+  Future<void> gerarPix() async {
+    double? valor = double.tryParse(valorController.text.replaceAll(',', '.'));
+    if (valor == null) return;
+
+    setState(() {
+      carregandoPix = true;
+    });
+
+    try {
+      final response = await http.post(
+        Uri.parse('$doacaoApiUrl/pix'),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "valor": (valor * 100).toInt(),
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        setState(() {
+          pixCode = data['pixCode'];
+          pixGerado = true;
+          carregandoPix = false;
+        });
+      } else {
+        setState(() {
+          carregandoPix = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        carregandoPix = false;
+      });
+    }
+  }
+
+  void confirmarPagamento() {
+    setState(() {
+      pagamentoConfirmado = true;
+    });
+    Future.delayed(const Duration(seconds: 2), widget.fechar);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned.fill(
+      child: Material(
+        color: Colors.black54,
+        child: Center(
+          child: Container(
+            padding: const EdgeInsets.all(30),
+            margin: const EdgeInsets.symmetric(horizontal: 24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            constraints: const BoxConstraints(maxWidth: 400),
+            child: pagamentoConfirmado
+                ? Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      Icon(Icons.check_circle, color: Colors.green, size: 60),
+                      SizedBox(height: 16),
+                      Text(
+                        "Obrigado por doar!",
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        "Sua doação foi processada com sucesso.",
+                        style: TextStyle(color: Colors.grey),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  )
+                : Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(Icons.qr_code, color: Color(0xFF32BCAD), size: 28),
+                          const SizedBox(width: 12),
+                          const Text(
+                            'Doação via PIX',
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                          ),
+                          const Spacer(),
+                          IconButton(
+                            icon: const Icon(Icons.close),
+                            onPressed: widget.fechar,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      if (!pixGerado) ...[
+                        TextField(
+                          controller: valorController,
+                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          decoration: const InputDecoration(
+                            labelText: 'Valor da doação (R\$)',
+                            border: OutlineInputBorder(),
+                            prefixIcon: Icon(Icons.attach_money),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF32BCAD),
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                            ),
+                            onPressed: carregandoPix || valorController.text.trim().isEmpty
+                                ? null
+                                : gerarPix,
+                            icon: carregandoPix
+                                ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                    ),
+                                  )
+                                : const Icon(Icons.qr_code),
+                            label: Text(carregandoPix ? 'Gerando PIX...' : 'Gerar Código PIX'),
+                          ),
+                        ),
+                      ] else ...[
+                        Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[100],
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.grey[300]!),
+                          ),
+                          child: Column(
+                            children: [
+                              Container(
+                                width: 200,
+                                height: 200,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(color: Colors.grey[300]!),
+                                ),
+                                child: const Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.qr_code, size: 80, color: Colors.black54),
+                                      SizedBox(height: 8),
+                                      Text(
+                                        'QR Code PIX',
+                                        style: TextStyle(color: Colors.black54),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              const Text(
+                                'Escaneie o QR Code com seu app do banco',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Valor: R\$ ${valorController.text}',
+                                style: const TextStyle(fontSize: 16, color: Color(0xFF32BCAD)),
+                              ),
+                              const SizedBox(height: 16),
+                              Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(color: Colors.grey[300]!),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      'Código PIX:',
+                                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      pixCode ?? '',
+                                      style: const TextStyle(fontSize: 10, fontFamily: 'monospace'),
+                                      maxLines: 3,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton(
+                                onPressed: () {
+                                  setState(() {
+                                    pixGerado = false;
+                                    pixCode = null;
+                                  });
+                                },
+                                child: const Text('Voltar'),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.green,
+                                  foregroundColor: Colors.white,
+                                ),
+                                onPressed: confirmarPagamento,
+                                child: const Text('Já Paguei'),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ],
+                  ),
           ),
         ),
       ),
