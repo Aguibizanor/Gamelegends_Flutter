@@ -30,6 +30,7 @@ import 'descricao2.dart';
 import 'descricao3.dart';
 import 'privacidade.dart';
 import 'cartoes_page.dart';
+import 'footer_template.dart';
 
 void main() {
   runApp(const MyApp());
@@ -397,21 +398,7 @@ class _MainPrincipalState extends State<MainPrincipal> {
                               ),
                             ),
                             // ----------- FIM CARROSSEL -------------------------
-                            Container(
-                              width: double.infinity,
-                              color: const Color(0xFF90017F),
-                              padding: const EdgeInsets.symmetric(vertical: 35, horizontal: 20),
-                              child: Center(
-                                child: ConstrainedBox(
-                                  constraints: const BoxConstraints(maxWidth: 1200),
-                                  child: Column(
-                                    children: [
-                                      // ... (restante igual)
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
+                            const FooterTemplate(),
                           ],
                         ),
                 ),
