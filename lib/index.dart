@@ -32,12 +32,15 @@ class _IndexPrincipalState extends State<IndexPrincipal> {
   };
 
   List<dynamic> projetos = [];
+  List<dynamic> comentarios = [];
   bool isLoading = true;
+  bool isAdmin = false;
 
   @override
   void initState() {
     super.initState();
     _fetchProjetos();
+    _fetchComentarios();
     _loadUser();
   }
 
@@ -66,10 +69,44 @@ class _IndexPrincipalState extends State<IndexPrincipal> {
     // Exemplo: final usuarioData = ...;
     setState(() {
       formData = {
-        'email': "",
-        'usuario': "",
+        'email': "admin@gamelegends.com",
+        'usuario': "admin",
       };
+      isAdmin = formData['usuario'] == 'admin';
     });
+  }
+
+  Future<void> _fetchComentarios() async {
+    try {
+      final response = await http.get(Uri.parse('http://localhost:8080/comentarios'));
+      if (response.statusCode == 200) {
+        setState(() {
+          comentarios = json.decode(utf8.decode(response.bodyBytes));
+        });
+      }
+    } catch (e) {
+      print('Erro ao carregar comentários: $e');
+    }
+  }
+
+  Future<void> _excluirComentario(int comentarioId) async {
+    try {
+      final response = await http.delete(
+        Uri.parse('http://localhost:8080/comentarios/$comentarioId'),
+      );
+      if (response.statusCode == 200) {
+        setState(() {
+          comentarios.removeWhere((c) => c['id'] == comentarioId);
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Comentário excluído com sucesso')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Erro ao excluir comentário')),
+      );
+    }
   }
 
   void toggleList(String section) {

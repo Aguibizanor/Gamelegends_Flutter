@@ -11,6 +11,7 @@ import 'modal_pix_novo.dart';
 const String projetosApiUrl = "http://localhost:8080/projetos";
 const String avaliacaoApiUrl = "http://localhost:8080/avaliacao";
 const String doacaoApiUrl = "http://localhost:8080/doacao";
+const String comentariosApiUrl = "http://localhost:8080/comentarios";
 
 // Função para buscar dados do usuário logado
 Future<Map<String, dynamic>?> getUsuarioLogado() async {
@@ -20,10 +21,12 @@ Future<Map<String, dynamic>?> getUsuarioLogado() async {
   if (usuarioJson != null) {
     try {
       final usuario = jsonDecode(usuarioJson);
+      
       return {
         'nome': usuario['nome'],
         'email': usuario['email'],
-        'tipo': usuario['usuario'],
+        'usuario': usuario['usuario'],
+        'isAdmin': usuario['usuario'] == 'ADM',
       };
     } catch (e) {
       return null;
@@ -69,12 +72,17 @@ class _JogoDetalhesState extends State<JogoDetalhes> {
   List<Map<String, dynamic>> avaliacoes = [];
   double mediaEstrelas = 0.0;
   bool carregandoAvaliacoes = true;
+  
+  // Comentários
+  List<Map<String, dynamic>> comentarios = [];
+  bool carregandoComentarios = true;
 
   @override
   void initState() {
     super.initState();
     buscarDadosJogo();
     buscarDadosUsuario();
+    carregarComentarios();
   }
 
   Future<void> buscarDadosJogo() async {
@@ -93,6 +101,7 @@ class _JogoDetalhesState extends State<JogoDetalhes> {
             carregandoJogo = false;
           });
           await carregarAvaliacoes();
+          await carregarComentarios();
         } else {
           setState(() {
             carregandoJogo = false;
@@ -108,23 +117,31 @@ class _JogoDetalhesState extends State<JogoDetalhes> {
 
   Future<void> buscarDadosUsuario() async {
     final usuarioData = await getUsuarioLogado();
+    
     if (usuarioData != null && usuarioData['nome'] != null) {
       setState(() {
         usuarioLogado = true;
         nomeUsuario = usuarioData['nome'];
-        tipoUsuario = usuarioData['tipo'];
-        isAdmin = tipoUsuario == 'ADM';
+        tipoUsuario = usuarioData['usuario'];
+        isAdmin = usuarioData['isAdmin'] ?? false;
       });
     }
   }
 
   Future<void> carregarAvaliacoes() async {
-    if (jogoData == null) return;
+    if (jogoData == null || jogoData!['nomeProjeto'] == null) {
+      setState(() {
+        avaliacoes = [];
+        mediaEstrelas = 0.0;
+        carregandoAvaliacoes = false;
+      });
+      return;
+    }
     
     final avaliacoesData = await buscarAvaliacoesJogo(jogoData!['nomeProjeto']);
     final media = await buscarMediaEstrelas(jogoData!['nomeProjeto']);
     setState(() {
-      avaliacoes = avaliacoesData;
+      avaliacoes = avaliacoesData ?? [];
       mediaEstrelas = media;
       carregandoAvaliacoes = false;
     });
@@ -134,7 +151,13 @@ class _JogoDetalhesState extends State<JogoDetalhes> {
     try {
       final response = await http.get(Uri.parse('$avaliacaoApiUrl/jogo/$nomeJogo'));
       if (response.statusCode == 200) {
-        return List<Map<String, dynamic>>.from(jsonDecode(response.body));
+        final responseBody = response.body;
+        if (responseBody.isNotEmpty) {
+          final decodedData = jsonDecode(responseBody);
+          if (decodedData is List) {
+            return List<Map<String, dynamic>>.from(decodedData);
+          }
+        }
       }
     } catch (e) {
       print('Erro ao buscar avaliações: $e');
@@ -152,6 +175,152 @@ class _JogoDetalhesState extends State<JogoDetalhes> {
       print('Erro ao buscar média: $e');
     }
     return 0.0;
+  }
+
+  Future<void> carregarComentarios() async {
+    if (jogoData == null || jogoData!['nomeProjeto'] == null) {
+      setState(() {
+        comentarios = [];
+        carregandoComentarios = false;
+      });
+      return;
+    }
+    
+    try {
+      final response = await http.get(Uri.parse('$comentariosApiUrl/jogo/${jogoData!['nomeProjeto']}'));
+      if (response.statusCode == 200) {
+        final responseBody = response.body;
+        if (responseBody.isNotEmpty) {
+          final decodedData = jsonDecode(responseBody);
+          if (decodedData is List) {
+            setState(() {
+              comentarios = List<Map<String, dynamic>>.from(decodedData);
+              carregandoComentarios = false;
+            });
+          } else {
+            setState(() {
+              comentarios = [];
+              carregandoComentarios = false;
+            });
+          }
+        } else {
+          setState(() {
+            comentarios = [];
+            carregandoComentarios = false;
+          });
+        }
+      } else {
+        setState(() {
+          comentarios = [];
+          carregandoComentarios = false;
+        });
+      }
+    } catch (e) {
+      print('Erro ao carregar comentários: $e');
+      setState(() {
+        comentarios = [];
+        carregandoComentarios = false;
+      });
+    }
+  }
+
+  Future<void> excluirComentario(int comentarioId) async {
+    if (!isAdmin) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Apenas administradores podem excluir comentários'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    if (comentarioId <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('ID do comentário inválido')),
+      );
+      return;
+    }
+
+    try {
+      final response = await http.delete(Uri.parse('$comentariosApiUrl/$comentarioId'));
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        setState(() {
+          comentarios.removeWhere((c) => (c['id'] ?? 0) == comentarioId);
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Comentário excluído com sucesso'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao excluir comentário (${response.statusCode})'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      print('Erro ao excluir comentário: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erro ao excluir comentário: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> excluirAvaliacao(int avaliacaoId) async {
+    if (!isAdmin) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Apenas administradores podem excluir avaliações'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    if (avaliacaoId <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('ID da avaliação inválido')),
+      );
+      return;
+    }
+
+    try {
+      final response = await http.delete(Uri.parse('$avaliacaoApiUrl/$avaliacaoId'));
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        setState(() {
+          avaliacoes.removeWhere((a) => (a['id'] ?? 0) == avaliacaoId);
+        });
+        await carregarAvaliacoes();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Avaliação excluída com sucesso'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao excluir avaliação (${response.statusCode})'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      print('Erro ao excluir avaliação: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erro ao excluir avaliação: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   void toggleMenu() {
@@ -432,6 +601,8 @@ class _JogoDetalhesState extends State<JogoDetalhes> {
         const SizedBox(height: 20),
         _buildSecaoAvaliacoes(),
         const SizedBox(height: 20),
+        _buildSecaoComentarios(),
+        const SizedBox(height: 20),
         if (!usuarioLogado) ...[
           const Text(
             "Você precisa estar logado para avaliar ou doar.",
@@ -551,36 +722,245 @@ class _JogoDetalhesState extends State<JogoDetalhes> {
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(color: Colors.grey[200]!),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Stack(
                     children: [
-                      Row(
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            avaliacao['nomeUsuario'] ?? 'Anônimo',
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(width: 8),
                           Row(
-                            children: List.generate(5, (index) {
-                              return Icon(
-                                index < (avaliacao['estrelas'] ?? 0) ? Icons.star : Icons.star_border,
-                                color: const Color(0xFFFFC107),
-                                size: 16,
-                              );
-                            }),
+                            children: [
+                              Text(
+                                avaliacao['nomeUsuario'] ?? 'Anônimo',
+                                style: const TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(width: 8),
+                              Row(
+                                children: List.generate(5, (index) {
+                                  return Icon(
+                                    index < (avaliacao['estrelas'] ?? 0) ? Icons.star : Icons.star_border,
+                                    color: const Color(0xFFFFC107),
+                                    size: 16,
+                                  );
+                                }),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            avaliacao['comentario'] ?? '',
+                            style: const TextStyle(color: Colors.black87),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        avaliacao['comentario'] ?? '',
-                        style: const TextStyle(color: Colors.black87),
-                      ),
+                      if (isAdmin)
+                        Positioned(
+                          top: 0,
+                          right: 0,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.red.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: IconButton(
+                              icon: const Icon(
+                                Icons.delete,
+                                color: Colors.red,
+                                size: 18,
+                              ),
+                              onPressed: () {
+                                final id = avaliacao['id'];
+                                if (id != null && id is int && id > 0) {
+                                  showDialog(
+                                    context: context,
+                                    builder: (ctx) => AlertDialog(
+                                      title: const Text('Excluir Avaliação'),
+                                      content: const Text('Tem certeza que deseja excluir esta avaliação?'),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () => Navigator.pop(ctx),
+                                          child: const Text('Cancelar'),
+                                        ),
+                                        ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.red,
+                                            foregroundColor: Colors.white,
+                                          ),
+                                          onPressed: () {
+                                            Navigator.pop(ctx);
+                                            excluirAvaliacao(id);
+                                          },
+                                          child: const Text('Excluir'),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('ID da avaliação inválido'),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                }
+                              },
+                              tooltip: 'Excluir avaliação',
+                              padding: const EdgeInsets.all(4),
+                              constraints: const BoxConstraints(
+                                minWidth: 32,
+                                minHeight: 32,
+                              ),
+                            ),
+                          ),
+                        ),
                     ],
                   ),
                 );
               }).toList(),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSecaoComentarios() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Comentários',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF90017F),
+            ),
+          ),
+          const SizedBox(height: 12),
+          if (carregandoComentarios)
+            const Center(child: CircularProgressIndicator())
+          else if (comentarios.isEmpty)
+            const Text('Nenhum comentário ainda.')
+          else
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: comentarios.length,
+              itemBuilder: (context, index) {
+                if (index >= comentarios.length) return const SizedBox();
+                final comentario = comentarios[index];
+                if (comentario == null) return const SizedBox();
+                
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[50],
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.grey[200]!),
+                  ),
+                  child: Stack(
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            comentario['usuario']?.toString() ?? 'Usuário',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF90017F),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            comentario['texto']?.toString() ?? '',
+                            style: const TextStyle(color: Colors.black87),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            comentario['data']?.toString() ?? '',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (isAdmin)
+                        Positioned(
+                          top: 0,
+                          right: 0,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.red.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: IconButton(
+                              icon: const Icon(
+                                Icons.delete,
+                                color: Colors.red,
+                                size: 18,
+                              ),
+                              onPressed: () {
+                                final id = comentario['id'];
+                                if (id != null && id is int && id > 0) {
+                                  showDialog(
+                                    context: context,
+                                    builder: (ctx) => AlertDialog(
+                                      title: const Text('Excluir Comentário'),
+                                      content: const Text('Tem certeza que deseja excluir este comentário?'),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () => Navigator.pop(ctx),
+                                          child: const Text('Cancelar'),
+                                        ),
+                                        ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.red,
+                                            foregroundColor: Colors.white,
+                                          ),
+                                          onPressed: () {
+                                            Navigator.pop(ctx);
+                                            excluirComentario(id);
+                                          },
+                                          child: const Text('Excluir'),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('ID do comentário inválido'),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                }
+                              },
+                              tooltip: 'Excluir comentário',
+                              padding: const EdgeInsets.all(4),
+                              constraints: const BoxConstraints(
+                                minWidth: 32,
+                                minHeight: 32,
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                );
+              },
             ),
         ],
       ),

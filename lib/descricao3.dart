@@ -6,6 +6,8 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'navbar.dart';
 import 'cadastro_cartao.dart';
+import 'modal_doacao_novo.dart';
+import 'modal_pix_novo.dart';
 import 'admin_service.dart';
 import 'avaliacao_notifier.dart';
 import 'modal_admin.dart';
@@ -93,6 +95,7 @@ class _PaginaDescricao3State extends State<PaginaDescricao3> {
   int imagemAtual = 0;
   bool modalAvaliacaoAberto = false;
   bool modalDoacaoAberto = false;
+  bool modalPixAberto = false;
 
   final List<String> imagens = [pombo1, pombo2, pombo1];
   final TextEditingController _searchController = TextEditingController();
@@ -211,6 +214,18 @@ class _PaginaDescricao3State extends State<PaginaDescricao3> {
   void fecharModalDoacao() {
     setState(() {
       modalDoacaoAberto = false;
+    });
+  }
+
+  void abrirModalPix() {
+    setState(() {
+      modalPixAberto = true;
+    });
+  }
+
+  void fecharModalPix() {
+    setState(() {
+      modalPixAberto = false;
     });
   }
 
@@ -714,15 +729,15 @@ class _PaginaDescricao3State extends State<PaginaDescricao3> {
                         usuarioLogado: usuarioLogado,
                       ),
                     if (modalDoacaoAberto)
-                      _ModalDoacao(
+                      ModalDoacaoNovo(
                         fechar: fecharModalDoacao,
                         nomeUsuario: nomeUsuario,
-                        cartoesUsuario: cartoesUsuario,
-                        onCadastrarCartao: onCadastrarCartao,
-                        cartaoSelecionadoId: cartaoSelecionadoId,
-                        onCartaoSelecionado: onCartaoSelecionado,
-                        idCliente: idCliente,
                         usuarioLogado: usuarioLogado,
+                        abrirPix: abrirModalPix,
+                      ),
+                    if (modalPixAberto)
+                      ModalPixNovo(
+                        fechar: fecharModalPix,
                       ),
                     if (modalAdminAberto && isAdmin)
                       ModalAdmin(
@@ -1350,200 +1365,4 @@ class _ModalAvaliacaoState extends State<_ModalAvaliacao> {
   }
 }
 
-// MODAL DE DOAÇÃO
-class _ModalDoacao extends StatefulWidget {
-  final VoidCallback fechar;
-  final String? nomeUsuario;
-  final List<Map<String, dynamic>> cartoesUsuario;
-  final Function onCadastrarCartao;
-  final String? cartaoSelecionadoId;
-  final ValueChanged<String?> onCartaoSelecionado;
-  final int? idCliente;
-  final bool usuarioLogado;
-  const _ModalDoacao({
-    required this.fechar,
-    required this.nomeUsuario,
-    required this.cartoesUsuario,
-    required this.onCadastrarCartao,
-    required this.cartaoSelecionadoId,
-    required this.onCartaoSelecionado,
-    required this.idCliente,
-    required this.usuarioLogado,
-  });
 
-  @override
-  State<_ModalDoacao> createState() => _ModalDoacaoState();
-}
-
-class _ModalDoacaoState extends State<_ModalDoacao> {
-  final TextEditingController valorController = TextEditingController();
-  bool enviado = false;
-
-  Future<void> enviarDoacao() async {
-    double? valor = double.tryParse(valorController.text.replaceAll(',', '.'));
-    if (valor == null ||
-        widget.idCliente == null ||
-        widget.cartaoSelecionadoId == null ||
-        !widget.usuarioLogado) return;
-    bool sucesso = await enviarDoacaoParaBackend(
-      valor,
-      widget.idCliente,
-      widget.cartaoSelecionadoId,
-    );
-    setState(() {
-      enviado = sucesso;
-    });
-    Future.delayed(const Duration(seconds: 2), widget.fechar);
-  }
-
-  @override
-  void dispose() {
-    valorController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned.fill(
-      child: Material(
-        color: Colors.black54,
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.all(30),
-            margin: const EdgeInsets.symmetric(horizontal: 24),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            constraints: const BoxConstraints(maxWidth: 400),
-            child: !widget.usuarioLogado
-                ? Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: const [
-                      Icon(Icons.lock, color: Colors.red, size: 50),
-                      SizedBox(height: 10),
-                      Text(
-                        "Faça login para doar!",
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.red),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  )
-                : enviado
-                    ? Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: const [
-                          Icon(Icons.favorite, color: Colors.pink, size: 50),
-                          SizedBox(height: 10),
-                          Text(
-                            "Obrigado pela sua doação!",
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      )
-                    : Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Align(
-                            alignment: Alignment.topRight,
-                            child: IconButton(
-                              icon: const Icon(Icons.close),
-                              onPressed: widget.fechar,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Bem-vindo, ${widget.nomeUsuario ?? ""}',
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                          ),
-                          const SizedBox(height: 12),
-                          widget.cartoesUsuario.isEmpty
-                              ? Column(
-                                  children: [
-                                    const Icon(Icons.credit_card_off, size: 48, color: Colors.grey),
-                                    const SizedBox(height: 8),
-                                    const Text('Nenhum cartão cadastrado.', style: TextStyle(color: Colors.grey)),
-                                    const SizedBox(height: 12),
-                                    ElevatedButton.icon(
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: const Color(0xFF90017F),
-                                        foregroundColor: Colors.white,
-                                      ),
-                                      onPressed: () => widget.onCadastrarCartao(),
-                                      icon: const Icon(Icons.add),
-                                      label: const Text('Cadastrar Cartão'),
-                                    ),
-                                  ],
-                                )
-                              : Column(
-                                  children: [
-                                    DropdownButtonFormField<String>(
-                                      value: widget.cartaoSelecionadoId,
-                                      items: widget.cartoesUsuario
-                                          .map((cartao) {
-                                            final numero = cartao['numC']?.toString() ?? '';
-                                            final ultimos4 = numero.length >= 4 ? numero.substring(numero.length - 4) : numero;
-                                            return DropdownMenuItem(
-                                              value: cartao['id'].toString(),
-                                              child: Row(
-                                                children: [
-                                                  Icon(Icons.credit_card, color: Color(0xFF90017F), size: 20),
-                                                  const SizedBox(width: 8),
-                                                  Text('${cartao['bandeira'] ?? "Cartão"} - **** $ultimos4'),
-                                                ],
-                                              ),
-                                            );
-                                          })
-                                          .toList(),
-                                      onChanged: widget.onCartaoSelecionado,
-                                      decoration: const InputDecoration(
-                                        labelText: "Selecione o cartão para doação",
-                                        border: OutlineInputBorder(),
-                                        prefixIcon: Icon(Icons.credit_card),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    TextButton.icon(
-                                      onPressed: () => widget.onCadastrarCartao(),
-                                      icon: const Icon(Icons.add, size: 16),
-                                      label: const Text('Adicionar outro cartão'),
-                                      style: TextButton.styleFrom(
-                                        foregroundColor: const Color(0xFF90017F),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                          const SizedBox(height: 12),
-                          TextField(
-                            controller: valorController,
-                            keyboardType: TextInputType.numberWithOptions(decimal: true),
-                            decoration: const InputDecoration(
-                              labelText: 'Valor da doação',
-                              border: OutlineInputBorder(),
-                              prefixIcon: Icon(Icons.attach_money),
-                            ),
-                            onChanged: (_) => setState(() {}),
-                          ),
-                          const SizedBox(height: 16),
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF90017F),
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                            ),
-                            onPressed: valorController.text.trim().isEmpty ||
-                                    widget.cartoesUsuario.isEmpty ||
-                                    widget.cartaoSelecionadoId == null
-                                ? null
-                                : enviarDoacao,
-                            child: const Text('Enviar Doação'),
-                          ),
-                        ],
-                      ),
-          ),
-        ),
-      ),
-    );
-  }
-}
