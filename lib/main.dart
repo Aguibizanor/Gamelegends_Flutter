@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+ 
 import 'navbar.dart';
 import 'suporte.dart';
 import 'login.dart';
@@ -31,14 +31,14 @@ import 'descricao3.dart';
 import 'privacidade.dart';
 import 'cartoes_page.dart';
 import 'footer_template.dart';
-
+ 
 void main() {
   runApp(const MyApp());
 }
-
+ 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
+ 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -79,18 +79,18 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
+ 
 class MainPrincipal extends StatefulWidget {
   const MainPrincipal({Key? key}) : super(key: key);
-
+ 
   @override
   State<MainPrincipal> createState() => _MainPrincipalState();
 }
-
+ 
 class _MainPrincipalState extends State<MainPrincipal> {
   final ScrollController _carouselController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
-
+ 
   List<Map<String, dynamic>> data = [];
   bool isLoading = true;
   bool menuAberto = false;
@@ -101,7 +101,7 @@ class _MainPrincipalState extends State<MainPrincipal> {
     'email': "",
     'usuario': ""
   };
-
+ 
   @override
   void initState() {
     super.initState();
@@ -109,13 +109,13 @@ class _MainPrincipalState extends State<MainPrincipal> {
     _loadUser();
     _pageController = PageController(viewportFraction: 0.91, initialPage: _mobileCurrentPage);
   }
-
+ 
   @override
   void dispose() {
     _pageController?.dispose();
     super.dispose();
   }
-
+ 
   Future<void> _loadCarouselData() async {
     await Future.delayed(const Duration(milliseconds: 400));
     setState(() {
@@ -142,7 +142,7 @@ class _MainPrincipalState extends State<MainPrincipal> {
       isLoading = false;
     });
   }
-
+ 
   void _loadUser() {
     setState(() {
       formData = {
@@ -151,7 +151,7 @@ class _MainPrincipalState extends State<MainPrincipal> {
       };
     });
   }
-
+ 
   void _handleLeftClick() {
     _carouselController.animateTo(
       _carouselController.offset - 300,
@@ -159,7 +159,7 @@ class _MainPrincipalState extends State<MainPrincipal> {
       curve: Curves.ease,
     );
   }
-
+ 
   void _handleRightClick() {
     _carouselController.animateTo(
       _carouselController.offset + 300,
@@ -167,26 +167,24 @@ class _MainPrincipalState extends State<MainPrincipal> {
       curve: Curves.ease,
     );
   }
-
+ 
   void _handleMouseEnter(int index) {
     setState(() {
       focusedIndex = index;
     });
   }
-
+ 
   void _handleMouseLeave() {
     setState(() {
       focusedIndex = null;
     });
   }
-
-
-
+ 
   @override
   Widget build(BuildContext context) {
     final isWide = MediaQuery.of(context).size.width > 900;
     final isMobile = MediaQuery.of(context).size.width < 600;
-
+ 
     return Scaffold(
       body: Stack(
         children: [
@@ -199,14 +197,14 @@ class _MainPrincipalState extends State<MainPrincipal> {
               ),
               Expanded(
                 child: Container(
-                  color: const Color(0xFFE9E9E9),
+                  color: const Color(0xFFE6D7FF),
                   child: isLoading
                       ? const Center(child: CircularProgressIndicator())
                       : ListView(
                           children: [
                             Container(
                               padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 0),
-                              color: Colors.white,
+                              color: const Color(0xFFE6D7FF),
                               child: Center(
                                 child: ConstrainedBox(
                                   constraints: const BoxConstraints(maxWidth: 1200),
@@ -282,117 +280,120 @@ class _MainPrincipalState extends State<MainPrincipal> {
                               ),
                             ),
                             // ----------- CARROSSEL RESPONSIVO -------------
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 30),
-                              child: Center(
-                                child: ConstrainedBox(
-                                  constraints: const BoxConstraints(maxWidth: 1200),
-                                  child: Column(
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          IconButton(
-                                            iconSize: 48,
-                                            onPressed: isMobile
-                                                ? (_mobileCurrentPage > 0
-                                                    ? () {
-                                                        _pageController?.previousPage(
-                                                          duration: const Duration(milliseconds: 350),
-                                                          curve: Curves.ease,
-                                                        );
-                                                      }
-                                                    : null)
-                                                : _handleLeftClick,
-                                            icon: const Icon(Icons.arrow_back_ios),
-                                          ),
-                                          Expanded(
-                                            child: SizedBox(
-                                              height: 350,
-                                              child: isMobile
-                                                  ? PageView.builder(
-                                                      controller: _pageController,
-                                                      itemCount: data.length,
-                                                      onPageChanged: (index) {
-                                                        setState(() {
-                                                          _mobileCurrentPage = index;
-                                                        });
-                                                      },
-                                                      itemBuilder: (context, index) {
-                                                        final item = data[index];
-                                                        return Padding(
-                                                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
-                                                          child: _CarouselCard(item: item, onTap: () {
-                                                            String route = '/descricao';
-                                                            if (item['id'] == 2) route = '/descricao2';
-                                                            else if (item['id'] == 3) route = '/descricao3';
-                                                            Navigator.pushNamed(context, route);
-                                                          }),
-                                                        );
-                                                      },
-                                                    )
-                                                  : ListView.builder(
-                                                      controller: _carouselController,
-                                                      scrollDirection: Axis.horizontal,
-                                                      itemCount: data.length,
-                                                      itemBuilder: (context, index) {
-                                                        final item = data[index];
-                                                        final isFocused = index == focusedIndex;
-                                                        return MouseRegion(
-                                                          onEnter: (_) => _handleMouseEnter(index),
-                                                          onExit: (_) => _handleMouseLeave(),
-                                                          child: AnimatedContainer(
-                                                            duration: const Duration(milliseconds: 180),
-                                                            margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                                                            width: isFocused ? 280 : 240,
+                            Container(
+                              color: const Color(0xFFE6D7FF),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 30),
+                                child: Center(
+                                  child: ConstrainedBox(
+                                    constraints: const BoxConstraints(maxWidth: 1200),
+                                    child: Column(
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            IconButton(
+                                              iconSize: 48,
+                                              onPressed: isMobile
+                                                  ? (_mobileCurrentPage > 0
+                                                      ? () {
+                                                          _pageController?.previousPage(
+                                                            duration: const Duration(milliseconds: 350),
+                                                            curve: Curves.ease,
+                                                          );
+                                                        }
+                                                      : null)
+                                                  : _handleLeftClick,
+                                              icon: const Icon(Icons.arrow_back_ios),
+                                            ),
+                                            Expanded(
+                                              child: SizedBox(
+                                                height: 350,
+                                                child: isMobile
+                                                    ? PageView.builder(
+                                                        controller: _pageController,
+                                                        itemCount: data.length,
+                                                        onPageChanged: (index) {
+                                                          setState(() {
+                                                            _mobileCurrentPage = index;
+                                                          });
+                                                        },
+                                                        itemBuilder: (context, index) {
+                                                          final item = data[index];
+                                                          return Padding(
+                                                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
                                                             child: _CarouselCard(item: item, onTap: () {
                                                               String route = '/descricao';
                                                               if (item['id'] == 2) route = '/descricao2';
                                                               else if (item['id'] == 3) route = '/descricao3';
                                                               Navigator.pushNamed(context, route);
                                                             }),
-                                                          ),
-                                                        );
-                                                      },
-                                                    ),
+                                                          );
+                                                        },
+                                                      )
+                                                    : ListView.builder(
+                                                        controller: _carouselController,
+                                                        scrollDirection: Axis.horizontal,
+                                                        itemCount: data.length,
+                                                        itemBuilder: (context, index) {
+                                                          final item = data[index];
+                                                          final isFocused = index == focusedIndex;
+                                                          return MouseRegion(
+                                                            onEnter: (_) => _handleMouseEnter(index),
+                                                            onExit: (_) => _handleMouseLeave(),
+                                                            child: AnimatedContainer(
+                                                              duration: const Duration(milliseconds: 180),
+                                                              margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                                                              width: isFocused ? 280 : 240,
+                                                              child: _CarouselCard(item: item, onTap: () {
+                                                                String route = '/descricao';
+                                                                if (item['id'] == 2) route = '/descricao2';
+                                                                else if (item['id'] == 3) route = '/descricao3';
+                                                                Navigator.pushNamed(context, route);
+                                                              }),
+                                                            ),
+                                                          );
+                                                        },
+                                                      ),
+                                              ),
                                             ),
-                                          ),
-                                          IconButton(
-                                            iconSize: 48,
-                                            onPressed: isMobile
-                                                ? (_mobileCurrentPage < data.length - 1
-                                                    ? () {
-                                                        _pageController?.nextPage(
-                                                          duration: const Duration(milliseconds: 350),
-                                                          curve: Curves.ease,
-                                                        );
-                                                      }
-                                                    : null)
-                                                : _handleRightClick,
-                                            icon: const Icon(Icons.arrow_forward_ios),
-                                          ),
-                                        ],
-                                      ),
-                                      if (isMobile)
-                                        Padding(
-                                          padding: const EdgeInsets.only(top: 10),
-                                          child: Row(
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: List.generate(
-                                              data.length,
-                                              (index) => Padding(
-                                                padding: const EdgeInsets.symmetric(horizontal: 3),
-                                                child: CircleAvatar(
-                                                  radius: 5,
-                                                  backgroundColor: _mobileCurrentPage == index
-                                                      ? const Color(0xFF90017F)
-                                                      : Colors.grey.shade400,
+                                            IconButton(
+                                              iconSize: 48,
+                                              onPressed: isMobile
+                                                  ? (_mobileCurrentPage < data.length - 1
+                                                      ? () {
+                                                          _pageController?.nextPage(
+                                                            duration: const Duration(milliseconds: 350),
+                                                            curve: Curves.ease,
+                                                          );
+                                                        }
+                                                      : null)
+                                                  : _handleRightClick,
+                                              icon: const Icon(Icons.arrow_forward_ios),
+                                            ),
+                                          ],
+                                        ),
+                                        if (isMobile)
+                                          Padding(
+                                            padding: const EdgeInsets.only(top: 10),
+                                            child: Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: List.generate(
+                                                data.length,
+                                                (index) => Padding(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 3),
+                                                  child: CircleAvatar(
+                                                    radius: 5,
+                                                    backgroundColor: _mobileCurrentPage == index
+                                                        ? const Color(0xFF90017F)
+                                                        : Colors.grey.shade400,
+                                                  ),
                                                 ),
                                               ),
                                             ),
                                           ),
-                                        ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
@@ -405,7 +406,7 @@ class _MainPrincipalState extends State<MainPrincipal> {
               ),
             ],
           ),
-          if (!isWide && menuAberto)   
+          if (!isWide && menuAberto)  
             NavbarMobileMenu(
               closeMenu: () => setState(() => menuAberto = false),
               searchController: _searchController,
@@ -415,87 +416,98 @@ class _MainPrincipalState extends State<MainPrincipal> {
     );
   }
 }
-
+ 
 class _CarouselCard extends StatelessWidget {
   final Map<String, dynamic> item;
   final VoidCallback onTap;
-
+ 
   const _CarouselCard({required this.item, required this.onTap, Key? key}) : super(key: key);
-
+ 
   @override
   Widget build(BuildContext context) {
     return Material(
       color: Colors.white,
       borderRadius: BorderRadius.circular(16),
       elevation: 2,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Image.asset(
-              item['imagem'] ?? '',
-              height: 120,
-              width: double.infinity,
-              fit: BoxFit.cover,
-              errorBuilder: (c, o, s) => const FlutterLogo(size: 100),
-            ),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: const Color(0xFF90017F),
+            width: 1.5,
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item['name'] ?? '',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    color: Color(0xFF90017F),
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  item['descricao'] ?? '',
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: Colors.black87,
-                  ),
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 10),
-                GestureDetector(
-                  onTap: onTap,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF007BFF),
-                      borderRadius: BorderRadius.circular(8),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.asset(
+                item['imagem'] ?? '',
+                height: 120,
+                width: double.infinity,
+                fit: BoxFit.cover,
+                errorBuilder: (c, o, s) => const FlutterLogo(size: 100),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item['name'] ?? '',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: Color(0xFF90017F),
                     ),
-                    child: const Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'Veja Mais',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w500,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    item['descricao'] ?? '',
+                    style: const TextStyle(
+                      fontSize: 13, // Aumentado de 11 para 13
+                      color: Colors.black87,
+                      height: 1.3,
+                    ),
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 10),
+                  GestureDetector(
+                    onTap: onTap,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF007BFF),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'Veja Mais',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
-                        ),
-                        SizedBox(width: 8),
-                        Icon(Icons.arrow_circle_right_outlined, color: Colors.white, size: 20),
-                      ],
+                          SizedBox(width: 8),
+                          Icon(Icons.arrow_circle_right_outlined, color: Colors.white, size: 20),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
