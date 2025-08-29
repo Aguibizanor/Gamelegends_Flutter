@@ -16,14 +16,6 @@ class _PaginaMandarEmailState extends State<PaginaMandarEmail> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _searchController = TextEditingController();
-  List<String> emailsDisponiveis = [];
-  bool carregandoEmails = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _carregarEmails();
-  }
 
   @override
   void dispose() {
@@ -32,17 +24,23 @@ class _PaginaMandarEmailState extends State<PaginaMandarEmail> {
     super.dispose();
   }
 
-  void _carregarEmails() async {
-    final emails = await RedefinirSenhaService.listarEmailsDisponiveis();
-    print('Emails carregados: $emails');
-    setState(() {
-      emailsDisponiveis = emails ?? [];
-      carregandoEmails = false;
-    });
-  }
+
 
   void toggleMenu() => setState(() => menuAberto = !menuAberto);
   void closeMenu() => setState(() => menuAberto = false);
+  
+  bool _isRealEmailProvider(String email) {
+    if (!email.contains('@')) return false;
+    
+    final domain = email.toLowerCase().substring(email.indexOf('@'));
+    final realProviders = [
+      '@gmail.com', '@yahoo.com', '@hotmail.com', '@outlook.com',
+      '@live.com', '@icloud.com', '@protonmail.com', '@uol.com.br',
+      '@bol.com.br', '@terra.com.br'
+    ];
+    
+    return realProviders.contains(domain);
+  }
 
   Widget _buildColorfulSocialButton(IconData icon, List<Color> colors, VoidCallback onPressed) {
     return Container(
@@ -67,22 +65,43 @@ class _PaginaMandarEmailState extends State<PaginaMandarEmail> {
 
   void _mandarEmail() async {
     if (_formKey.currentState!.validate()) {
+      // Mostrar loading
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+      
       try {
         final resultado = await RedefinirSenhaService.enviarCodigo(_emailController.text);
         
+        Navigator.pop(context); // Fechar loading
+        
         if (resultado != null) {
+          final isReal = RedefinirSenhaService.isEmailReal;
+          final message = isReal 
+            ? '📧 Código enviado para seu email real: ${_emailController.text}'
+            : '💾 Código gerado para email cadastrado: ${_emailController.text}';
+            
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Código enviado para ${_emailController.text}')),
+            SnackBar(
+              content: Text(message),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 4),
+            ),
           );
           Navigator.pushNamed(context, '/codin');
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Email não encontrado')),
-          );
         }
       } catch (e) {
+        Navigator.pop(context); // Fechar loading
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Email não encontrado')),
+          SnackBar(
+            content: Text('Erro: ${e.toString().replaceAll('Exception: ', '')}'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 4),
+          ),
         );
       }
     }
@@ -167,73 +186,27 @@ class _PaginaMandarEmailState extends State<PaginaMandarEmail> {
                                           textAlign: TextAlign.center,
                                         ),
                                         SizedBox(height: 24),
-                                        if (carregandoEmails)
-                                          const Text('Carregando emails...', style: TextStyle(color: Colors.grey))
-                                        else if (emailsDisponiveis.isNotEmpty)
-                                          Container(
-                                            padding: const EdgeInsets.all(12),
-                                            margin: const EdgeInsets.only(bottom: 16),
-                                            decoration: BoxDecoration(
-                                              color: Colors.blue.shade50,
-                                              borderRadius: BorderRadius.circular(8),
-                                              border: Border.all(color: Colors.blue.shade200),
-                                            ),
-                                            child: Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  'Emails cadastrados (${emailsDisponiveis.length}):',
-                                                  style: const TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Colors.blue,
-                                                    fontSize: 14,
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 8),
-                                                Wrap(
-                                                  spacing: 8,
-                                                  runSpacing: 4,
-                                                  children: emailsDisponiveis.take(3).map((email) => 
-                                                    GestureDetector(
-                                                      onTap: () => setState(() => _emailController.text = email),
-                                                      child: Container(
-                                                        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                                        decoration: BoxDecoration(
-                                                          color: Colors.blue.shade100,
-                                                          borderRadius: BorderRadius.circular(12),
-                                                          border: Border.all(color: Colors.blue.shade300),
-                                                        ),
-                                                        child: Text(
-                                                          email,
-                                                          style: const TextStyle(
-                                                            color: Colors.blue,
-                                                            fontSize: 12,
-                                                            fontWeight: FontWeight.w500,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ).toList(),
-                                                ),
-                                                if (emailsDisponiveis.length > 3)
-                                                  Padding(
-                                                    padding: const EdgeInsets.only(top: 4),
-                                                    child: Text(
-                                                      '... e mais ${emailsDisponiveis.length - 3} emails',
-                                                      style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
-                                                    ),
-                                                  ),
-                                              ],
-                                            ),
-                                          ),
+
                                         TextFormField(
                                           controller: _emailController,
                                           keyboardType: TextInputType.emailAddress,
                                           decoration: InputDecoration(
                                             labelText: "Email",
                                             border: OutlineInputBorder(),
-                                            hintText: "Digite seu email",
+                                            hintText: "Digite seu email (Gmail, Yahoo, etc.)",
+                                            prefixIcon: Icon(Icons.email),
+                                            suffixIcon: _emailController.text.isNotEmpty
+                                              ? Icon(
+                                                  _isRealEmailProvider(_emailController.text) 
+                                                    ? Icons.cloud_done 
+                                                    : Icons.storage,
+                                                  color: _isRealEmailProvider(_emailController.text) 
+                                                    ? Colors.green 
+                                                    : Colors.blue,
+                                                )
+                                              : null,
                                           ),
+                                          onChanged: (value) => setState(() {}),
                                           validator: (value) {
                                             if (value == null || value.isEmpty) {
                                               return 'Digite o email';

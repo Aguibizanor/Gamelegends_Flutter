@@ -52,28 +52,75 @@ class _PaginaRedefinirSenhaState extends State<PaginaRedefinirSenha> {
 
   void _onSubmit() async {
     if (_formKey.currentState!.validate()) {
-      bool sucesso = await RedefinirSenhaService.redefinirSenha(_senhaController.text);
+      // Mostrar loading
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
       
-      if (sucesso) {
-        showDialog(
-          context: context,
-          builder: (ctx) => AlertDialog(
-            title: Text("Sucesso"),
-            content: Text("Senha redefinida com sucesso!"),
-            actions: [
-              TextButton(
-                child: Text("OK"),
-                onPressed: () {
-                  Navigator.of(ctx).pop();
-                  Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
-                },
+      try {
+        bool sucesso = await RedefinirSenhaService.redefinirSenha(_senhaController.text);
+        
+        Navigator.pop(context); // Fechar loading
+        
+        if (sucesso) {
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (ctx) => AlertDialog(
+              title: Row(
+                children: [
+                  Icon(Icons.check_circle, color: Colors.green, size: 28),
+                  SizedBox(width: 8),
+                  Text("Sucesso!"),
+                ],
               ),
-            ],
-          ),
-        );
-      } else {
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("Senha redefinida com sucesso!"),
+                  SizedBox(height: 8),
+                  Text(
+                    RedefinirSenhaService.isEmailReal
+                      ? "📧 Email real: ${RedefinirSenhaService.emailAtual}"
+                      : "💾 Email cadastrado: ${RedefinirSenhaService.emailAtual}",
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  child: Text("FAZER LOGIN"),
+                  onPressed: () {
+                    Navigator.of(ctx).pop();
+                    Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+                  },
+                ),
+              ],
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('❌ Erro ao redefinir senha'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } catch (e) {
+        Navigator.pop(context); // Fechar loading
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Erro ao redefinir senha')),
+          SnackBar(
+            content: Text('❌ Erro: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     }

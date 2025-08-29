@@ -55,18 +55,55 @@ class _PaginaCodinState extends State<PaginaCodin> {
     
     if (codigo.length != 6) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Digite o código completo')),
+        const SnackBar(
+          content: Text('❌ Digite o código completo de 6 dígitos'),
+          backgroundColor: Colors.orange,
+        ),
       );
       return;
     }
     
-    bool valido = await RedefinirSenhaService.verificarCodigo(codigo);
+    // Mostrar loading
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
     
-    if (valido) {
-      Navigator.pushNamed(context, '/redefinir');
-    } else {
+    try {
+      bool valido = await RedefinirSenhaService.verificarCodigo(codigo);
+      
+      Navigator.pop(context); // Fechar loading
+      
+      if (valido) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('✅ Código verificado com sucesso!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.pushNamed(context, '/redefinir');
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('❌ Código inválido ou expirado'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        // Limpar campos
+        for (var controller in _codeControllers) {
+          controller.clear();
+        }
+      }
+    } catch (e) {
+      Navigator.pop(context); // Fechar loading
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Código inválido ou expirado')),
+        SnackBar(
+          content: Text('❌ Erro: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }
@@ -139,13 +176,61 @@ class _PaginaCodinState extends State<PaginaCodin> {
                                         ),
                                       ),
                                       SizedBox(height: 16),
-                                      Text(
-                                        'Digite o código de 6 dígitos enviado para seu email:',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          color: Colors.black87,
-                                        ),
-                                        textAlign: TextAlign.center,
+                                      Column(
+                                        children: [
+                                          Text(
+                                            'Digite o código de 6 dígitos:',
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              color: Colors.black87,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                          SizedBox(height: 8),
+                                          Container(
+                                            padding: EdgeInsets.all(12),
+                                            decoration: BoxDecoration(
+                                              color: RedefinirSenhaService.isEmailReal 
+                                                ? Colors.green.shade50 
+                                                : Colors.blue.shade50,
+                                              borderRadius: BorderRadius.circular(8),
+                                              border: Border.all(
+                                                color: RedefinirSenhaService.isEmailReal 
+                                                  ? Colors.green.shade200 
+                                                  : Colors.blue.shade200,
+                                              ),
+                                            ),
+                                            child: Row(
+                                              children: [
+                                                Icon(
+                                                  RedefinirSenhaService.isEmailReal 
+                                                    ? Icons.email 
+                                                    : Icons.storage,
+                                                  color: RedefinirSenhaService.isEmailReal 
+                                                    ? Colors.green 
+                                                    : Colors.blue,
+                                                  size: 20,
+                                                ),
+                                                SizedBox(width: 8),
+                                                Expanded(
+                                                  child: Text(
+                                                    RedefinirSenhaService.isEmailReal
+                                                      ? 'Verifique sua caixa de entrada: ${RedefinirSenhaService.emailAtual}'
+                                                      : 'Código salvo no banco para: ${RedefinirSenhaService.emailAtual}',
+                                                    style: TextStyle(
+                                                      fontSize: 13,
+                                                      color: RedefinirSenhaService.isEmailReal 
+                                                        ? Colors.green.shade700 
+                                                        : Colors.blue.shade700,
+                                                      fontWeight: FontWeight.w500,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                       SizedBox(height: 32),
                                       Row(
@@ -233,10 +318,10 @@ class _PaginaCodinState extends State<PaginaCodin> {
                                             ),
                                           ),
                                           TextButton(
-                                            onPressed: () => Navigator.pushNamed(context, '/login'),
+                                            onPressed: () => Navigator.pushNamed(context, '/mandaremail'),
                                             child: Text(
-                                              "Fazer login",
-                                              style: TextStyle(color: Colors.blue),
+                                              "Gerar novo código",
+                                              style: TextStyle(color: Colors.orange),
                                             ),
                                           ),
                                         ],

@@ -6,6 +6,7 @@ class RedefinirSenhaService {
   
   static String? _emailAtual;
   static String? _codigoAtual;
+  static bool _isEmailReal = false;
   
   static Future<List<String>?> listarEmailsDisponiveis() async {
     try {
@@ -31,12 +32,17 @@ class RedefinirSenhaService {
       
       if (response.statusCode == 200) {
         _emailAtual = email;
-        return jsonDecode(response.body);
+        _isEmailReal = _checkIfRealEmail(email);
+        final result = jsonDecode(response.body);
+        print('✅ Código enviado para: $email (Real: $_isEmailReal)');
+        return result;
+      } else {
+        final error = jsonDecode(response.body);
+        throw Exception(error['message'] ?? 'Erro ao enviar código');
       }
-      return null;
     } catch (e) {
-      print('Erro ao enviar código: $e');
-      return null;
+      print('❌ Erro ao enviar código: $e');
+      rethrow;
     }
   }
   
@@ -55,11 +61,14 @@ class RedefinirSenhaService {
       
       if (response.statusCode == 200) {
         _codigoAtual = codigo;
+        print('✅ Código verificado com sucesso');
         return true;
+      } else {
+        print('❌ Código inválido ou expirado');
+        return false;
       }
-      return false;
     } catch (e) {
-      print('Erro ao verificar código: $e');
+      print('❌ Erro ao verificar código: $e');
       return false;
     }
   }
@@ -92,7 +101,22 @@ class RedefinirSenhaService {
   static void _limparDados() {
     _emailAtual = null;
     _codigoAtual = null;
+    _isEmailReal = false;
+  }
+  
+  static bool _checkIfRealEmail(String email) {
+    if (!email.contains('@')) return false;
+    
+    final domain = email.toLowerCase().substring(email.indexOf('@'));
+    final realProviders = [
+      '@gmail.com', '@yahoo.com', '@hotmail.com', '@outlook.com',
+      '@live.com', '@icloud.com', '@protonmail.com', '@uol.com.br',
+      '@bol.com.br', '@terra.com.br'
+    ];
+    
+    return realProviders.contains(domain);
   }
   
   static String? get emailAtual => _emailAtual;
+  static bool get isEmailReal => _isEmailReal;
 }
