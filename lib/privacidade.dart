@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
+
 import 'navbar.dart';
 import 'footer_template.dart';
 
@@ -38,7 +38,7 @@ class _PrivacidadePageState extends State<PrivacidadePage> {
               ),
               Expanded(
                 child: Container(
-                  color: const Color(0xFFE9E9E9),
+                  color: const Color(0xFFE6D7FF),
                   child: ListView(
                     padding: const EdgeInsets.all(20),
                     children: [

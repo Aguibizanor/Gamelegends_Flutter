@@ -17,6 +17,8 @@ class _PaginaRedefinirSenhaState extends State<PaginaRedefinirSenha> {
   final _senhaController = TextEditingController();
   final _confirmarSenhaController = TextEditingController();
   final _searchController = TextEditingController();
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
 
   @override
   void dispose() {
@@ -36,7 +38,7 @@ class _PaginaRedefinirSenhaState extends State<PaginaRedefinirSenha> {
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: colors.first.withOpacity(0.4),
+            color: colors.first.withValues(alpha: 0.4),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -52,6 +54,17 @@ class _PaginaRedefinirSenhaState extends State<PaginaRedefinirSenha> {
 
   void _onSubmit() async {
     if (_formKey.currentState!.validate()) {
+      // Validação adicional da senha
+      if (_senhaController.text.length != 6) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('❌ A senha deve ter exatamente 6 caracteres'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+        return;
+      }
+      
       // Mostrar loading
       showDialog(
         context: context,
@@ -118,8 +131,9 @@ class _PaginaRedefinirSenhaState extends State<PaginaRedefinirSenha> {
         Navigator.pop(context); // Fechar loading
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('❌ Erro: ${e.toString()}'),
+            content: Text('❌ Erro ao redefinir senha: ${e.toString()}'),
             backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
           ),
         );
       }
@@ -139,10 +153,12 @@ class _PaginaRedefinirSenhaState extends State<PaginaRedefinirSenha> {
                 onMenuTap: toggleMenu,
               ),
               Expanded(
-                child: ListView(
-                  children: [
-                    Container(
-                      padding: EdgeInsets.symmetric(vertical: 40, horizontal: 8),
+                child: Container(
+                  color: const Color(0xFFE6D7FF),
+                  child: ListView(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.symmetric(vertical: 40, horizontal: 8),
                       child: Center(
                         child: Container(
                           constraints: BoxConstraints(maxWidth: 700),
@@ -207,19 +223,26 @@ class _PaginaRedefinirSenhaState extends State<PaginaRedefinirSenha> {
                                         SizedBox(height: 24),
                                         TextFormField(
                                           controller: _senhaController,
-                                          obscureText: true,
+                                          obscureText: _obscurePassword,
+                                          maxLength: 6,
                                           decoration: InputDecoration(
                                             labelText: "Nova Senha",
                                             border: OutlineInputBorder(),
                                             hintText: "Digite sua nova senha",
                                             prefixIcon: Icon(Icons.lock),
+                                            suffixIcon: IconButton(
+                                              icon: Icon(
+                                                _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                                              ),
+                                              onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                                            ),
                                           ),
                                           validator: (value) {
                                             if (value == null || value.isEmpty) {
                                               return 'Digite a nova senha';
                                             }
-                                            if (value.length < 6) {
-                                              return 'Senha deve ter pelo menos 6 caracteres';
+                                            if (value.length != 6) {
+                                              return 'Senha deve ter exatamente 6 caracteres';
                                             }
                                             return null;
                                           },
@@ -227,12 +250,19 @@ class _PaginaRedefinirSenhaState extends State<PaginaRedefinirSenha> {
                                         SizedBox(height: 16),
                                         TextFormField(
                                           controller: _confirmarSenhaController,
-                                          obscureText: true,
+                                          obscureText: _obscureConfirmPassword,
+                                          maxLength: 6,
                                           decoration: InputDecoration(
                                             labelText: "Confirmar Senha",
                                             border: OutlineInputBorder(),
                                             hintText: "Confirme sua nova senha",
                                             prefixIcon: Icon(Icons.lock_outline),
+                                            suffixIcon: IconButton(
+                                              icon: Icon(
+                                                _obscureConfirmPassword ? Icons.visibility : Icons.visibility_off,
+                                              ),
+                                              onPressed: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
+                                            ),
                                           ),
                                           validator: (value) {
                                             if (value == null || value.isEmpty) {
@@ -350,7 +380,7 @@ class _PaginaRedefinirSenhaState extends State<PaginaRedefinirSenha> {
                                     height: 1.6,
                                     shadows: [
                                       Shadow(
-                                        color: Colors.black.withOpacity(0.3),
+                                        color: Colors.black.withValues(alpha: 0.3),
                                         offset: const Offset(2, 2),
                                         blurRadius: 4,
                                       ),
@@ -465,7 +495,7 @@ class _PaginaRedefinirSenhaState extends State<PaginaRedefinirSenha> {
                                     borderRadius: BorderRadius.circular(25),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: Colors.black.withOpacity(0.2),
+                                        color: Colors.black.withValues(alpha: 0.2),
                                         blurRadius: 8,
                                         offset: const Offset(0, 4),
                                       ),
@@ -492,7 +522,7 @@ class _PaginaRedefinirSenhaState extends State<PaginaRedefinirSenha> {
                               Text(
                                 "© Game Legends ✨ | Feito com 💜 pelo nosso time incrível!",
                                 style: TextStyle(
-                                  color: Colors.white.withOpacity(0.9),
+                                  color: Colors.white.withValues(alpha: 0.9),
                                   fontSize: 15,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -503,7 +533,8 @@ class _PaginaRedefinirSenhaState extends State<PaginaRedefinirSenha> {
                         ),
                       ),
                     ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ],

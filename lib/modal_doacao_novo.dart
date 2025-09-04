@@ -222,10 +222,10 @@ class _ModalDoacaoNovoState extends State<ModalDoacaoNovo> {
                                       DropdownButtonFormField<String>(
                                         value: cartaoSelecionadoId,
                                         items: cartoesUsuario
-                                            .map((cartao) {
+                                            .map<DropdownMenuItem<String>>((cartao) {
                                               final numero = cartao['numC']?.toString() ?? '';
                                               final ultimos4 = numero.length >= 4 ? numero.substring(numero.length - 4) : numero;
-                                              return DropdownMenuItem(
+                                              return DropdownMenuItem<String>(
                                                 value: cartao['id'].toString(),
                                                 child: Row(
                                                   children: [

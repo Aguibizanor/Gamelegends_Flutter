@@ -12,7 +12,13 @@ Future<int?> getClienteId() async {
   if (usuarioStr != null) {
     try {
       final usuarioData = jsonDecode(usuarioStr) as Map<String, dynamic>;
-      return usuarioData['id']?.toInt();
+      final id = usuarioData['id'];
+      if (id != null) {
+        if (id is int) return id;
+        if (id is String) return int.tryParse(id);
+        if (id is double) return id.toInt();
+        return int.tryParse(id.toString());
+      }
     } catch (e) {
       print('Erro ao obter ID do cliente: $e');
     }
@@ -46,8 +52,20 @@ class _CadastroCartaoScreenState extends State<CadastroCartaoScreen> {
 
     try {
       final clienteId = await getClienteId();
+      print('Debug - ClienteId obtido: $clienteId');
+      
+      // Debug - verificar dados do usuário
+      final prefs = await SharedPreferences.getInstance();
+      final usuarioStr = prefs.getString('usuario');
+      print('Debug - Usuario string: $usuarioStr');
+      
       if (clienteId == null) {
         _mostrarErro('Erro: Usuário não identificado. Faça login novamente.');
+        return;
+      }
+      
+      if (_bandeiraSelecionada == null) {
+        _mostrarErro('Erro: Selecione uma bandeira.');
         return;
       }
 
@@ -60,8 +78,15 @@ class _CadastroCartaoScreenState extends State<CadastroCartaoScreen> {
         "clienteId": clienteId
       };
       
-      print('Dados: $dados');
-      print('ClienteId: $clienteId');
+      print('=== DEBUG CADASTRO CARTAO ===');
+      print('ClienteId: $clienteId (tipo: ${clienteId.runtimeType})');
+      print('Numero: ${_numeroController.text.replaceAll(' ', '')}');
+      print('Nome: ${_nomeController.text.trim()}');
+      print('Validade: ${_validadeController.text.trim()}');
+      print('CVV: ${_cvvController.text.trim()}');
+      print('Bandeira: $_bandeiraSelecionada');
+      print('Dados completos: $dados');
+      print('========================');
 
       final response = await http.post(
         Uri.parse(cartaoApiUrl),
@@ -80,11 +105,18 @@ class _CadastroCartaoScreenState extends State<CadastroCartaoScreen> {
             backgroundColor: Colors.green,
           ),
         );
+      } else if (response.statusCode == 400) {
+        _mostrarErro('Dados inválidos. Verifique as informações do cartão.');
+      } else if (response.statusCode == 404) {
+        _mostrarErro('Usuário não encontrado. Faça login novamente.');
+      } else if (response.statusCode == 500) {
+        _mostrarErro('Erro interno do servidor. Tente novamente mais tarde.');
       } else {
-        _mostrarErro('Erro ${response.statusCode}: ${response.body}');
+        _mostrarErro('Erro ${response.statusCode}: Falha ao cadastrar cartão');
       }
     } catch (e) {
-      _mostrarErro('Erro: $e');
+      print('Erro na requisição: $e');
+      _mostrarErro('Erro de conexão: $e');
     } finally {
       setState(() => _carregando = false);
     }
@@ -96,25 +128,66 @@ class _CadastroCartaoScreenState extends State<CadastroCartaoScreen> {
     );
   }
 
+  Future<void> _testarUsuario() async {
+    final prefs = await SharedPreferences.getInstance();
+    final usuarioStr = prefs.getString('usuario');
+    print('=== TESTE USUARIO ===');
+    print('Usuario string: $usuarioStr');
+    if (usuarioStr != null) {
+      try {
+        final usuarioData = jsonDecode(usuarioStr);
+        print('Usuario data: $usuarioData');
+        print('ID: ${usuarioData['id']} (tipo: ${usuarioData['id'].runtimeType})');
+      } catch (e) {
+        print('Erro ao decodificar: $e');
+      }
+    }
+    print('==================');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F7F7),
+      backgroundColor: const Color(0xFFE6D7FF),
       appBar: AppBar(
         title: const Text('Cadastrar Cartão'),
         backgroundColor: const Color(0xFF90017F),
         foregroundColor: Colors.white,
+        actions: [
+          IconButton(
+            onPressed: _testarUsuario,
+            icon: const Icon(Icons.bug_report),
+            tooltip: 'Testar Usuário',
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 400),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: const Color(0xFF90017F),
+                  width: 2,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              padding: const EdgeInsets.all(24),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
                   const Icon(
                     Icons.credit_card,
                     size: 64,
@@ -157,10 +230,15 @@ class _CadastroCartaoScreenState extends State<CadastroCartaoScreen> {
                     keyboardType: TextInputType.number,
                     inputFormatters: [
                       FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(19),
                       _CardNumberFormatter(),
                     ],
                     validator: (value) {
                       if (value == null || value.isEmpty) return 'Digite o número do cartão';
+                      final numeroLimpo = value.replaceAll(' ', '');
+                      if (numeroLimpo.length < 13 || numeroLimpo.length > 19) {
+                        return 'Número do cartão deve ter entre 13 e 19 dígitos';
+                      }
                       return null;
                     },
                   ),
@@ -194,10 +272,14 @@ class _CadastroCartaoScreenState extends State<CadastroCartaoScreen> {
                           keyboardType: TextInputType.number,
                           inputFormatters: [
                             FilteringTextInputFormatter.digitsOnly,
+                            LengthLimitingTextInputFormatter(5),
                             _ValidadeFormatter(),
                           ],
                           validator: (value) {
                             if (value == null || value.isEmpty) return 'Digite a validade';
+                            if (!RegExp(r'^\d{2}/\d{2}$').hasMatch(value)) {
+                              return 'Formato inválido (MM/AA)';
+                            }
                             return null;
                           },
                         ),
@@ -214,9 +296,13 @@ class _CadastroCartaoScreenState extends State<CadastroCartaoScreen> {
                           keyboardType: TextInputType.number,
                           inputFormatters: [
                             FilteringTextInputFormatter.digitsOnly,
+                            LengthLimitingTextInputFormatter(4),
                           ],
                           validator: (value) {
                             if (value == null || value.isEmpty) return 'Digite o CVV';
+                            if (value.length < 3 || value.length > 4) {
+                              return 'CVV deve ter 3 ou 4 dígitos';
+                            }
                             return null;
                           },
                         ),
@@ -239,7 +325,8 @@ class _CadastroCartaoScreenState extends State<CadastroCartaoScreen> {
                         ? const CircularProgressIndicator(color: Colors.white)
                         : const Text('Cadastrar Cartão', style: TextStyle(fontSize: 16)),
                   ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

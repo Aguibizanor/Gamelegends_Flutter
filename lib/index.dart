@@ -17,6 +17,7 @@ class _IndexPrincipalState extends State<IndexPrincipal> {
   final TextEditingController _searchController = TextEditingController();
   bool menuAberto = false;
   bool isMobileOpen = false;
+  bool sidebarVisible = true;
 
   Map<String, String> formData = {
     'email': "",
@@ -89,25 +90,7 @@ class _IndexPrincipalState extends State<IndexPrincipal> {
     }
   }
 
-  Future<void> _excluirComentario(int comentarioId) async {
-    try {
-      final response = await http.delete(
-        Uri.parse('http://localhost:8080/comentarios/$comentarioId'),
-      );
-      if (response.statusCode == 200) {
-        setState(() {
-          comentarios.removeWhere((c) => c['id'] == comentarioId);
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Comentário excluído com sucesso')),
-        );
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Erro ao excluir comentário')),
-      );
-    }
-  }
+
 
   void toggleList(String section) {
     setState(() {
@@ -134,7 +117,7 @@ class _IndexPrincipalState extends State<IndexPrincipal> {
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: colors.first.withOpacity( 0.4),
+            color: colors.first.withValues(alpha: 0.4),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -158,7 +141,7 @@ class _IndexPrincipalState extends State<IndexPrincipal> {
     final isWide = MediaQuery.of(context).size.width > 900;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFE9E9E9),
+      backgroundColor: const Color(0xFFE6D7FF),
 
       body: Stack(
         children: [
@@ -174,23 +157,68 @@ class _IndexPrincipalState extends State<IndexPrincipal> {
                   children: [
           // Conteúdo principal
           Container(
-            margin: EdgeInsets.only(left: isWide ? 260 : 0),
+            color: const Color(0xFFE6D7FF),
+            margin: EdgeInsets.only(left: isWide && sidebarVisible ? 260 : 0),
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  // Botão hamburguer mobile lateral
-                  if (!isWide)
-                    Container(
-                      alignment: Alignment.topLeft,
-                      padding: const EdgeInsets.all(8),
-                      child: IconButton(
-                        icon: Icon(isMobileOpen ? Icons.chevron_left : Icons.chevron_right),
-                        onPressed: toggleMobileMenu,
-                      ),
+                  // Botão de controle no conteúdo
+                  Container(
+                    alignment: Alignment.topLeft,
+                    padding: const EdgeInsets.all(10),
+                    child: Row(
+                      children: [
+                        if (!isWide)
+                          Container(
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF90017F),
+                              borderRadius: BorderRadius.circular(8),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.3),
+                                  blurRadius: 6,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ],
+                            ),
+                            child: IconButton(
+                              icon: Icon(
+                                isMobileOpen ? Icons.chevron_left : Icons.chevron_right,
+                                color: Colors.white,
+                                size: 24,
+                              ),
+                              onPressed: toggleMobileMenu,
+                            ),
+                          ),
+                        if (isWide)
+                          Container(
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF90017F),
+                              borderRadius: BorderRadius.circular(8),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.3),
+                                  blurRadius: 6,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ],
+                            ),
+                            child: IconButton(
+                              icon: Icon(
+                                sidebarVisible ? Icons.menu_open : Icons.menu,
+                                color: Colors.white,
+                                size: 24,
+                              ),
+                              onPressed: () => setState(() => sidebarVisible = !sidebarVisible),
+                              tooltip: sidebarVisible ? 'Ocultar filtros' : 'Mostrar filtros',
+                            ),
+                          ),
+                      ],
                     ),
+                  ),
                   // Lista de projetos/jogos
                   Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 6),
+                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
                     child: isLoading
                         ? const Center(child: CircularProgressIndicator())
                         : GridView.builder(
@@ -267,7 +295,7 @@ class _IndexPrincipalState extends State<IndexPrincipal> {
                                     height: 1.6,
                                     shadows: [
                                       Shadow(
-                                        color: Colors.black.withOpacity( 0.3),
+                                        color: Colors.black.withValues(alpha: 0.3),
                                         offset: const Offset(2, 2),
                                         blurRadius: 4,
                                       ),
@@ -389,7 +417,7 @@ class _IndexPrincipalState extends State<IndexPrincipal> {
                                     borderRadius: BorderRadius.circular(25),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: Colors.black.withOpacity( 0.2),
+                                        color: Colors.black.withValues(alpha: 0.2),
                                         blurRadius: 8,
                                         offset: const Offset(0, 4),
                                       ),
@@ -418,7 +446,7 @@ class _IndexPrincipalState extends State<IndexPrincipal> {
                               Text(
                                 "© Game Legends ✨ | Feito com 💜 pelo nosso time incrível!",
                                 style: TextStyle(
-                                  color: Colors.white.withOpacity( 0.9),
+                                  color: Colors.white.withValues(alpha: 0.9),
                                   fontSize: 15,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -434,7 +462,7 @@ class _IndexPrincipalState extends State<IndexPrincipal> {
             ),
           ),
           // Sidebar sobreposta
-          if (isWide)
+          if (isWide && sidebarVisible)
             Positioned(
               left: 0,
               top: 0,
@@ -488,6 +516,34 @@ class _IndexPrincipalState extends State<IndexPrincipal> {
                 ),
               ),
             ),
+          // Botão de fechar sidebar desktop (fora da sidebar)
+          if (isWide && sidebarVisible)
+            Positioned(
+              left: 270,
+              top: 20,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFF90017F),
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.3),
+                      blurRadius: 6,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: IconButton(
+                  icon: const Icon(
+                    Icons.chevron_left,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                  onPressed: () => setState(() => sidebarVisible = false),
+                  tooltip: 'Fechar filtros',
+                ),
+              ),
+            ),
           // Sidebar mobile sobreposta
           if (isMobileOpen && !isWide)
             Positioned(
@@ -500,7 +556,7 @@ class _IndexPrincipalState extends State<IndexPrincipal> {
                   color: Colors.white,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.3),
+                      color: Colors.black.withValues(alpha: 0.3),
                       blurRadius: 10,
                       offset: const Offset(2, 0),
                     ),
@@ -549,6 +605,34 @@ class _IndexPrincipalState extends State<IndexPrincipal> {
                       ],
                     ),
                   ],
+                ),
+              ),
+            ),
+          // Botão de fechar sidebar mobile (fora da sidebar)
+          if (isMobileOpen && !isWide)
+            Positioned(
+              left: 270,
+              top: 20,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFF90017F),
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.3),
+                      blurRadius: 6,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: IconButton(
+                  icon: const Icon(
+                    Icons.chevron_left,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                  onPressed: () => setState(() => isMobileOpen = false),
+                  tooltip: 'Fechar filtros',
                 ),
               ),
             ),

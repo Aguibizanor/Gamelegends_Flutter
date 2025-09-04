@@ -92,6 +92,7 @@ class _EsportePageState extends State<EsportePage> {
   final ScrollController _scrollController = ScrollController();
   bool menuAberto = false;
   bool isMobileOpen = false;
+  bool sidebarVisible = true;
   Map<String, bool> isOpen = {
     'genero': true,
     'plataformas': true,
@@ -124,7 +125,7 @@ class _EsportePageState extends State<EsportePage> {
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: colors.first.withOpacity(0.4),
+            color: colors.first.withValues(alpha: 0.4),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -157,8 +158,8 @@ class _EsportePageState extends State<EsportePage> {
               children: [
                 // Conteúdo principal sempre visível
                 Container(
-                  color: const Color(0xFFE9E9E9),
-                  margin: EdgeInsets.only(left: isWide ? 260 : 0),
+                  color: const Color(0xFFE6D7FF),
+                  margin: EdgeInsets.only(left: isWide && sidebarVisible ? 260 : 0),
                   child: ListView(
                     controller: _scrollController,
                     padding: const EdgeInsets.all(10),
@@ -221,7 +222,7 @@ class _EsportePageState extends State<EsportePage> {
                                             height: 1.6,
                                             shadows: [
                                               Shadow(
-                                                color: Colors.black.withOpacity(0.3),
+                                                color: Colors.black.withValues(alpha: 0.3),
                                                 offset: const Offset(2, 2),
                                                 blurRadius: 4,
                                               ),
@@ -343,7 +344,7 @@ class _EsportePageState extends State<EsportePage> {
                                             borderRadius: BorderRadius.circular(25),
                                             boxShadow: [
                                               BoxShadow(
-                                                color: Colors.black.withOpacity(0.2),
+                                                color: Colors.black.withValues(alpha: 0.2),
                                                 blurRadius: 8,
                                                 offset: const Offset(0, 4),
                                               ),
@@ -372,7 +373,7 @@ class _EsportePageState extends State<EsportePage> {
                                       Text(
                                         "© Game Legends ✨ | Feito com 💜 pelo nosso time incrível!",
                                         style: TextStyle(
-                                          color: Colors.white.withOpacity(0.9),
+                                          color: Colors.white.withValues(alpha: 0.9),
                                           fontSize: 15,
                                           fontWeight: FontWeight.w500,
                                         ),
@@ -386,33 +387,60 @@ class _EsportePageState extends State<EsportePage> {
                     ],
                   ),
                 ),
-                // Seta destacada
-                if (!isWide)
-                  Positioned(
-                    top: 20,
-                    left: isMobileOpen ? 270 : 10,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF90017F),
-                        borderRadius: BorderRadius.circular(8),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.3),
-                            blurRadius: 6,
-                            offset: const Offset(0, 3),
+                // Botões de controle
+                Positioned(
+                  top: 20,
+                  left: (!isWide && isMobileOpen) ? 270 : 10,
+                  child: Row(
+                    children: [
+                      if (!isWide)
+                        Container(
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF90017F),
+                            borderRadius: BorderRadius.circular(8),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.3),
+                                blurRadius: 6,
+                                offset: const Offset(0, 3),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                      child: IconButton(
-                        icon: Icon(
-                          isMobileOpen ? Icons.chevron_left : Icons.chevron_right,
-                          color: Colors.white,
-                          size: 24,
+                          child: IconButton(
+                            icon: Icon(
+                              isMobileOpen ? Icons.chevron_left : Icons.chevron_right,
+                              color: Colors.white,
+                              size: 24,
+                            ),
+                            onPressed: toggleMobileMenu,
+                          ),
                         ),
-                        onPressed: toggleMobileMenu,
-                      ),
-                    ),
+                      if (isWide)
+                        Container(
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF90017F),
+                            borderRadius: BorderRadius.circular(8),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.3),
+                                blurRadius: 6,
+                                offset: const Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          child: IconButton(
+                            icon: Icon(
+                              sidebarVisible ? Icons.menu_open : Icons.menu,
+                              color: Colors.white,
+                              size: 24,
+                            ),
+                            onPressed: () => setState(() => sidebarVisible = !sidebarVisible),
+                            tooltip: sidebarVisible ? 'Ocultar filtros' : 'Mostrar filtros',
+                          ),
+                        ),
+                    ],
                   ),
+                ),
                 // Sidebar sobreposta para mobile
                 if (isMobileOpen && !isWide)
                   Positioned(
@@ -425,7 +453,7 @@ class _EsportePageState extends State<EsportePage> {
                         color: Colors.white,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.3),
+                            color: Colors.black.withValues(alpha: 0.3),
                             blurRadius: 10,
                             offset: const Offset(2, 0),
                           ),
@@ -478,7 +506,7 @@ class _EsportePageState extends State<EsportePage> {
                     ),
                   ),
                 // Sidebar fixa para desktop
-                if (isWide)
+                if (isWide && sidebarVisible)
                   Positioned(
                     left: 0,
                     top: 0,

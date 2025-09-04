@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'cadastro_cartao.dart';
 
 
 const String cartaoApiUrl = "http://localhost:8080/cadcartao";
@@ -28,6 +29,16 @@ Future<List<Map<String, dynamic>>> buscarCartoesCliente(int clienteId) async {
     print('Erro ao buscar cartões: $e');
   }
   return [];
+}
+
+Future<bool> excluirCartao(int cartaoId) async {
+  try {
+    final response = await http.delete(Uri.parse('$cartaoApiUrl/$cartaoId'));
+    return response.statusCode == 200 || response.statusCode == 204;
+  } catch (e) {
+    print('Erro ao excluir cartão: $e');
+    return false;
+  }
 }
 
 class CartoesPage extends StatefulWidget {
@@ -80,8 +91,57 @@ class _CartoesPageState extends State<CartoesPage> {
     }
   }
 
-  void _adicionarCartao() {
-    Navigator.pushNamed(context, '/perfil');
+  void _adicionarCartao() async {
+    final resultado = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const CadastroCartaoScreen(),
+      ),
+    );
+    if (resultado == true) {
+      await _carregarCartoes();
+    }
+  }
+
+  void _excluirCartao(int cartaoId, String numeroCartao) async {
+    final confirmar = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Excluir Cartão'),
+        content: Text('Tem certeza que deseja excluir o cartão **** $numeroCartao?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Excluir', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmar == true) {
+      final sucesso = await excluirCartao(cartaoId);
+      if (sucesso) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Cartão excluído com sucesso'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        await _carregarCartoes();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Erro ao excluir cartão'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   IconData _getCardIcon(String bandeira) {
@@ -100,7 +160,7 @@ class _CartoesPageState extends State<CartoesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F7F7),
+      backgroundColor: const Color(0xFFE6D7FF),
       appBar: AppBar(
         title: const Text('Meus Cartões'),
         backgroundColor: const Color(0xFF90017F),
@@ -180,13 +240,30 @@ class _CartoesPageState extends State<CartoesPage> {
                                   color: Colors.white,
                                   size: 32,
                                 ),
-                                Text(
-                                  cartao['bandeira'] ?? '',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                Row(
+                                  children: [
+                                    Text(
+                                      cartao['bandeira'] ?? '',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    IconButton(
+                                      onPressed: () => _excluirCartao(
+                                        cartao['id'],
+                                        ultimos4,
+                                      ),
+                                      icon: const Icon(
+                                        Icons.delete,
+                                        color: Colors.white70,
+                                        size: 20,
+                                      ),
+                                      tooltip: 'Excluir cartão',
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),

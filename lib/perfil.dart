@@ -197,11 +197,31 @@ class _PaginaPerfilState extends State<PaginaPerfil> {
   }
  
   Future<void> _handleLogout() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.remove('usuario');
-    _showDialog("Logout realizado com sucesso!", onClose: () {
-      Navigator.pushReplacementNamed(context, '/');
-    });
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text("Confirmar Logout"),
+        content: const Text("Tem certeza que deseja sair da sua conta?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text("Cancelar"),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+            onPressed: () async {
+              Navigator.pop(ctx);
+              SharedPreferences prefs = await SharedPreferences.getInstance();
+              await prefs.remove('usuario');
+              _showDialog("Logout realizado com sucesso!", onClose: () {
+                Navigator.pushReplacementNamed(context, '/');
+              });
+            },
+            child: const Text("Confirmar", style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
   }
  
   Future<void> _handleDelete() async {
@@ -245,7 +265,7 @@ class _PaginaPerfilState extends State<PaginaPerfil> {
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: colors.first.withOpacity( 0.4),
+            color: colors.first.withValues(alpha:  0.4),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -285,20 +305,27 @@ class _PaginaPerfilState extends State<PaginaPerfil> {
  
   @override
   Widget build(BuildContext context) {
+    final isWide = MediaQuery.of(context).size.width > 900;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFE9E9E9),
-      appBar: Navbar(
-        onMenuTap: _toggleMenu,
-        isMenuOpen: menuAberto,
-        searchController: _searchController,
-      ),
+      backgroundColor: const Color(0xFFE6D7FF),
       body: Stack(
         children: [
-          loading
-              ? const Center(child: CircularProgressIndicator())
-              : SingleChildScrollView(
-                  child: Column(
-                    children: [
+          Column(
+            children: [
+              Navbar(
+                searchController: _searchController,
+                isMenuOpen: menuAberto,
+                onMenuTap: _toggleMenu,
+              ),
+              Expanded(
+                child: Stack(
+                  children: [
+                    loading
+                        ? const Center(child: CircularProgressIndicator())
+                        : SingleChildScrollView(
+                            child: Column(
+                              children: [
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 16),
                         child: Center(
@@ -309,7 +336,7 @@ class _PaginaPerfilState extends State<PaginaPerfil> {
                               borderRadius: BorderRadius.circular(24),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
+                                  color: Colors.black.withValues(alpha: 0.1),
                                   blurRadius: 20,
                                   offset: const Offset(0, 8),
                                   spreadRadius: 2,
@@ -323,7 +350,7 @@ class _PaginaPerfilState extends State<PaginaPerfil> {
                                   padding: const EdgeInsets.all(32),
                                   decoration: BoxDecoration(
                                     gradient: LinearGradient(
-                                      colors: [const Color(0xFF90017F), const Color(0xFF90017F).withOpacity(0.8)],
+                                      colors: [const Color(0xFF90017F), const Color(0xFF90017F).withValues(alpha: 0.8)],
                                       begin: Alignment.topLeft,
                                       end: Alignment.bottomRight,
                                     ),
@@ -342,7 +369,7 @@ class _PaginaPerfilState extends State<PaginaPerfil> {
                                               border: Border.all(color: Colors.white, width: 4),
                                               boxShadow: [
                                                 BoxShadow(
-                                                  color: Colors.black.withOpacity(0.2),
+                                                  color: Colors.black.withValues(alpha: 0.2),
                                                   blurRadius: 10,
                                                   offset: const Offset(0, 4),
                                                 ),
@@ -368,7 +395,7 @@ class _PaginaPerfilState extends State<PaginaPerfil> {
                                                   border: Border.all(color: const Color(0xFF90017F), width: 2),
                                                   boxShadow: [
                                                     BoxShadow(
-                                                      color: Colors.black.withOpacity(0.2),
+                                                      color: Colors.black.withValues(alpha: 0.2),
                                                       blurRadius: 4,
                                                       offset: const Offset(0, 2),
                                                     ),
@@ -397,7 +424,7 @@ class _PaginaPerfilState extends State<PaginaPerfil> {
                                       Container(
                                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                         decoration: BoxDecoration(
-                                          color: Colors.white.withOpacity(0.2),
+                                          color: Colors.white.withValues(alpha: 0.2),
                                           borderRadius: BorderRadius.circular(20),
                                         ),
                                         child: Row(
@@ -547,7 +574,7 @@ class _PaginaPerfilState extends State<PaginaPerfil> {
                                       height: 1.6,
                                       shadows: [
                                         Shadow(
-                                          color: Colors.black.withOpacity( 0.3),
+                                          color: Colors.black.withValues(alpha:  0.3),
                                           offset: const Offset(2, 2),
                                           blurRadius: 4,
                                         ),
@@ -669,7 +696,7 @@ class _PaginaPerfilState extends State<PaginaPerfil> {
                                       borderRadius: BorderRadius.circular(25),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: Colors.black.withOpacity( 0.2),
+                                          color: Colors.black.withValues(alpha:  0.2),
                                           blurRadius: 8,
                                           offset: const Offset(0, 4),
                                         ),
@@ -698,7 +725,7 @@ class _PaginaPerfilState extends State<PaginaPerfil> {
                                 Text(
                                   "© Game Legends ✨ | Feito com 💜 pelo nosso time incrível!",
                                   style: TextStyle(
-                                    color: Colors.white.withOpacity( 0.9),
+                                    color: Colors.white.withValues(alpha:  0.9),
                                     fontSize: 15,
                                     fontWeight: FontWeight.w500,
                                   ),
@@ -709,20 +736,25 @@ class _PaginaPerfilState extends State<PaginaPerfil> {
                           ),
                         ),
                       ),
+                              ],
+                            ),
+                          ),
+                      if (modalVisible)
+                        PerfilModal(
+                          formData: formData,
+                          onClose: () => setState(() => modalVisible = false),
+                          onSave: _handleSave,
+                        ),
                     ],
                   ),
                 ),
-          if (menuAberto)
-            NavbarMobileMenu(
-              closeMenu: () => setState(() => menuAberto = false),
-              searchController: _searchController,
+              ],
             ),
-          if (modalVisible)
-            PerfilModal(
-              formData: formData,
-              onClose: () => setState(() => modalVisible = false),
-              onSave: _handleSave,
-            ),
+            if (!isWide && menuAberto)
+              NavbarMobileMenu(
+                closeMenu: () => setState(() => menuAberto = false),
+                searchController: _searchController,
+              ),
         ],
       ),
     );
@@ -771,7 +803,7 @@ class PerfilInfo extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: const Color(0xFF90017F).withOpacity(0.1),
+              color: const Color(0xFF90017F).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(icon, color: const Color(0xFF90017F), size: 20),
@@ -892,7 +924,7 @@ class _PerfilModalState extends State<PerfilModal> {
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
+                  color: Colors.black.withValues(alpha: 0.2),
                   blurRadius: 20,
                   offset: const Offset(0, 10),
                 ),

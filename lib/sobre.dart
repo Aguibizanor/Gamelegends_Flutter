@@ -36,7 +36,7 @@ class _PaginaSobreState extends State<PaginaSobre> {
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: colors.first.withOpacity( 0.4),
+            color: colors.first.withValues(alpha:  0.4),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -55,7 +55,7 @@ class _PaginaSobreState extends State<PaginaSobre> {
     final isWide = MediaQuery.of(context).size.width > 900;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFE9E9E9),
+      backgroundColor: const Color(0xFFE6D7FF),
       body: Stack(
         children: [
           Column(
@@ -80,7 +80,7 @@ class _PaginaSobreState extends State<PaginaSobre> {
                 ),
                 alignment: Alignment.center,
                 child: Container(
-                  color: Colors.black.withOpacity( 0.3),
+                  color: Colors.black.withValues(alpha:  0.3),
                   padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 12),
                   child: Text(
                     'Quem Somos',
@@ -340,7 +340,7 @@ class _PaginaSobreState extends State<PaginaSobre> {
                               borderRadius: BorderRadius.circular(25),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity( 0.2),
+                                  color: Colors.black.withValues(alpha:  0.2),
                                   blurRadius: 8,
                                   offset: const Offset(0, 4),
                                 ),
@@ -367,7 +367,7 @@ class _PaginaSobreState extends State<PaginaSobre> {
                         Text(
                           "© Game Legends ✨ | Feito com 💜 pelo nosso time incrível!",
                           style: TextStyle(
-                            color: Colors.white.withOpacity( 0.9),
+                            color: Colors.white.withValues(alpha:  0.9),
                             fontSize: 15,
                             fontWeight: FontWeight.w500,
                           ),

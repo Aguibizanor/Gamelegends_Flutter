@@ -92,7 +92,7 @@ class _WindowsPageState extends State<WindowsPage> {
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: colors.first.withOpacity(0.4),
+            color: colors.first.withValues(alpha: 0.4),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -125,7 +125,7 @@ class _WindowsPageState extends State<WindowsPage> {
               children: [
                 // Conteúdo principal sempre visível
                 Container(
-                  color: const Color(0xFFE9E9E9),
+                  color: const Color(0xFFE6D7FF),
                   margin: EdgeInsets.only(left: isWide ? 260 : 0),
                   child: ListView(
                     controller: _scrollController,
@@ -189,7 +189,7 @@ class _WindowsPageState extends State<WindowsPage> {
                                             height: 1.6,
                                             shadows: [
                                               Shadow(
-                                                color: Colors.black.withOpacity(0.3),
+                                                color: Colors.black.withValues(alpha: 0.3),
                                                 offset: const Offset(2, 2),
                                                 blurRadius: 4,
                                               ),
@@ -311,7 +311,7 @@ class _WindowsPageState extends State<WindowsPage> {
                                             borderRadius: BorderRadius.circular(25),
                                             boxShadow: [
                                               BoxShadow(
-                                                color: Colors.black.withOpacity(0.2),
+                                                color: Colors.black.withValues(alpha: 0.2),
                                                 blurRadius: 8,
                                                 offset: const Offset(0, 4),
                                               ),
@@ -340,7 +340,7 @@ class _WindowsPageState extends State<WindowsPage> {
                                       Text(
                                         "© Game Legends ✨ | Feito com 💜 pelo nosso time incrível!",
                                         style: TextStyle(
-                                          color: Colors.white.withOpacity(0.9),
+                                          color: Colors.white.withValues(alpha: 0.9),
                                           fontSize: 15,
                                           fontWeight: FontWeight.w500,
                                         ),
@@ -365,7 +365,7 @@ class _WindowsPageState extends State<WindowsPage> {
                         borderRadius: BorderRadius.circular(8),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.3),
+                            color: Colors.black.withValues(alpha: 0.3),
                             blurRadius: 6,
                             offset: const Offset(0, 3),
                           ),
@@ -393,7 +393,7 @@ class _WindowsPageState extends State<WindowsPage> {
                         color: Colors.white,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.3),
+                            color: Colors.black.withValues(alpha: 0.3),
                             blurRadius: 10,
                             offset: const Offset(2, 0),
                           ),

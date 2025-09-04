@@ -1,9 +1,51 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'navbar.dart';
+
+class CpfInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
+    String text = newValue.text.replaceAll(RegExp(r'\D'), '');
+    if (text.length > 11) text = text.substring(0, 11);
+    
+    String formatted = '';
+    for (int i = 0; i < text.length; i++) {
+      if (i == 3 || i == 6) formatted += '.';
+      if (i == 9) formatted += '-';
+      formatted += text[i];
+    }
+    
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
+    );
+  }
+}
+
+class PhoneInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
+    String text = newValue.text.replaceAll(RegExp(r'\D'), '');
+    if (text.length > 11) text = text.substring(0, 11);
+    
+    String formatted = '';
+    for (int i = 0; i < text.length; i++) {
+      if (i == 0) formatted += '(';
+      if (i == 2) formatted += ') ';
+      if (i == 7) formatted += '-';
+      formatted += text[i];
+    }
+    
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
+    );
+  }
+}
 
 class CadastroForm extends StatefulWidget {
   const CadastroForm({super.key});
@@ -28,6 +70,8 @@ class _CadastroFormState extends State<CadastroForm> {
   final TextEditingController _searchController = TextEditingController();
   bool menuAberto = false;
   String _mensagem = '';
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
 
   void _handleChange(String key, String value) {
     setState(() {
@@ -48,7 +92,7 @@ class _CadastroFormState extends State<CadastroForm> {
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: colors.first.withOpacity( 0.4),
+            color: colors.first.withValues(alpha: 0.4),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -63,67 +107,115 @@ class _CadastroFormState extends State<CadastroForm> {
   }
 
   Future<void> _handleSubmit() async {
-    if (_formKey.currentState!.validate()) {
-      _formKey.currentState!.save();
-
-      final hoje = DateTime.now();
-      final nascimento = DateTime.tryParse(_formData['dataNascimento'] ?? '');
-      if (nascimento != null) {
-        int idade = hoje.year - nascimento.year;
-        if (hoje.month < nascimento.month ||
-            (hoje.month == nascimento.month && hoje.day < nascimento.day)) {
-          idade--;
-        }
-        if (idade < 16) {
-          setState(() {
-            _mensagem = 'Você deve ter pelo menos 16 anos para se cadastrar.';
-          });
-          return;
-        }
-      }
-
-      if (_formData['senha'] != _formData['confirmarSenha']) {
-        setState(() {
-          _mensagem = 'As senhas não correspondem!';
-        });
-        return;
-      }
-
-      final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@(yahoo|gmail|email)\.com(\.br)?$');
-      if (!emailRegex.hasMatch(_formData['email'] ?? '')) {
-        setState(() {
-          _mensagem = "Formato de email inválido. Use um email válido como yahoo, gmail ou email.";
-        });
-        return;
-      }
-
-      final cadastroData = json.encode({
-        ..._formData,
-        'datanascimento': _formData['dataNascimento'],
+    setState(() {
+      _mensagem = '';
+    });
+    
+    if (!_formKey.currentState!.validate()) {
+      setState(() {
+        _mensagem = 'Por favor, preencha todos os campos obrigatórios.';
       });
+      return;
+    }
+    
+    _formKey.currentState!.save();
 
-      try {
-        final response = await http.post(
-          Uri.parse('http://localhost:8080/cadastro'),
-          headers: {'Content-Type': 'application/json'},
-          body: cadastroData,
-        );
-
-        if (response.statusCode == 201) {
-          setState(() {
-            _mensagem = 'Cadastro realizado com sucesso!';
-          });
-        } else {
-          final errorResponse = json.decode(response.body);
-          setState(() {
-            _mensagem = errorResponse['message'] ?? 'Erro no cadastro.';
-          });
-        }
-      } catch (error) {
+    final hoje = DateTime.now();
+    final nascimento = DateTime.tryParse(_formData['dataNascimento'] ?? '');
+    if (nascimento != null) {
+      int idade = hoje.year - nascimento.year;
+      if (hoje.month < nascimento.month ||
+          (hoje.month == nascimento.month && hoje.day < nascimento.day)) {
+        idade--;
+      }
+      if (idade < 16) {
         setState(() {
-          _mensagem = 'Erro ao se conectar ao servidor. Tente novamente.';
+          _mensagem = 'Você deve ter pelo menos 16 anos para se cadastrar.';
+        });
+        return;
+      }
+    }
+
+    if (_formData['senha'] != _formData['confirmarSenha']) {
+      setState(() {
+        _mensagem = 'As senhas não correspondem!';
+      });
+      return;
+    }
+
+    final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@(yahoo|gmail|email)\.com(\.br)?$');
+    if (!emailRegex.hasMatch(_formData['email'] ?? '')) {
+      setState(() {
+        _mensagem = "Formato de email inválido. Use um email válido como yahoo, gmail ou email.";
+      });
+      return;
+    }
+
+    final cadastroData = json.encode({
+      'nome': _formData['nome'],
+      'sobrenome': _formData['sobrenome'],
+      'cpf': _formData['cpf'],
+      'datanascimento': _formData['dataNascimento'],
+      'email': _formData['email'],
+      'telefone': _formData['telefone'],
+      'senha': _formData['senha'],
+      'usuario': _formData['usuario'],
+    });
+
+    try {
+      print('📁 Enviando dados de cadastro: $cadastroData');
+      final response = await http.post(
+        Uri.parse('http://localhost:8080/cadastro'),
+        headers: {'Content-Type': 'application/json'},
+        body: cadastroData,
+      );
+      
+      print('📡 Status da resposta: ${response.statusCode}');
+      print('📄 Corpo da resposta: ${response.body}');
+
+      if (response.statusCode == 201) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (ctx) => AlertDialog(
+            title: Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.green, size: 28),
+                SizedBox(width: 8),
+                Text("Sucesso!"),
+              ],
+            ),
+            content: Text("Cadastro realizado com sucesso!"),
+            actions: [
+              TextButton(
+                child: Text("IR PARA LOGIN"),
+                onPressed: () {
+                  Navigator.of(ctx).pop();
+                  Navigator.pushReplacementNamed(
+                    context, 
+                    '/login',
+                    arguments: {
+                      'email': _formData['email'],
+                      'senha': _formData['senha'],
+                      'showMessage': true,
+                    },
+                  );
+                },
+              ),
+            ],
+          ),
+        );
+        return;
+      } else {
+        final errorResponse = json.decode(response.body);
+        setState(() {
+          _mensagem = errorResponse['message'] ?? 'Erro no cadastro.';
         });
       }
+    } catch (error) {
+      setState(() {
+        _mensagem = 'Erro ao se conectar ao servidor. Tente novamente.';
+      });
     }
   }
 
@@ -132,7 +224,7 @@ class _CadastroFormState extends State<CadastroForm> {
     final isWide = MediaQuery.of(context).size.width > 900;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFE9E9E9),
+      backgroundColor: const Color(0xFFE6D7FF),
       body: Stack(
         children: [
           Column(
@@ -155,7 +247,7 @@ class _CadastroFormState extends State<CadastroForm> {
                           borderRadius: BorderRadius.circular(10),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity( 0.1),
+                              color: Colors.black.withValues(alpha: 0.1),
                               blurRadius: 10,
                               spreadRadius: 5,
                             ),
@@ -187,7 +279,7 @@ class _CadastroFormState extends State<CadastroForm> {
                                 label: 'CPF',
                                 onSaved: (value) => _handleChange('cpf', value ?? ''),
                                 keyboardType: TextInputType.number,
-                                maxLength: 14,
+                                isCpf: true,
                               ),
                               _buildTextFormField(
                                 label: 'Data de Nascimento',
@@ -204,17 +296,19 @@ class _CadastroFormState extends State<CadastroForm> {
                                 label: 'Telefone',
                                 onSaved: (value) => _handleChange('telefone', value ?? ''),
                                 keyboardType: TextInputType.phone,
-                                maxLength: 15,
+                                isPhone: true,
                               ),
-                              _buildTextFormField(
+                              _buildPasswordField(
                                 label: 'Senha',
                                 onSaved: (value) => _handleChange('senha', value ?? ''),
-                                obscureText: true,
+                                obscureText: _obscurePassword,
+                                onToggleVisibility: () => setState(() => _obscurePassword = !_obscurePassword),
                               ),
-                              _buildTextFormField(
+                              _buildPasswordField(
                                 label: 'Confirmar Senha',
                                 onSaved: (value) => _handleChange('confirmarSenha', value ?? ''),
-                                obscureText: true,
+                                obscureText: _obscureConfirmPassword,
+                                onToggleVisibility: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
                               ),
                               _buildDropdownUserType(),
                               const SizedBox(height: 20),
@@ -266,8 +360,8 @@ class _CadastroFormState extends State<CadastroForm> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 30),
-                    // ======= RODAPÉ COLORIDO =========
+                    const SizedBox(height: 50),
+                    // Rodapé
                     Container(
                       width: double.infinity,
                       color: const Color(0xFF90017F),
@@ -309,7 +403,7 @@ class _CadastroFormState extends State<CadastroForm> {
                                     height: 1.6,
                                     shadows: [
                                       Shadow(
-                                        color: Colors.black.withOpacity( 0.3),
+                                        color: Colors.black.withValues(alpha: 0.3),
                                         offset: const Offset(2, 2),
                                         blurRadius: 4,
                                       ),
@@ -424,7 +518,7 @@ class _CadastroFormState extends State<CadastroForm> {
                                     borderRadius: BorderRadius.circular(25),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: Colors.black.withOpacity( 0.2),
+                                        color: Colors.black.withValues(alpha: 0.2),
                                         blurRadius: 8,
                                         offset: const Offset(0, 4),
                                       ),
@@ -451,7 +545,7 @@ class _CadastroFormState extends State<CadastroForm> {
                               Text(
                                 "© Game Legends ✨ | Feito com 💜 pelo nosso time incrível!",
                                 style: TextStyle(
-                                  color: Colors.white.withOpacity( 0.9),
+                                  color: Colors.white.withValues(alpha: 0.9),
                                   fontSize: 15,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -484,6 +578,8 @@ class _CadastroFormState extends State<CadastroForm> {
     TextInputType keyboardType = TextInputType.text,
     int? maxLength,
     bool isDate = false,
+    bool isCpf = false,
+    bool isPhone = false,
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -523,8 +619,8 @@ class _CadastroFormState extends State<CadastroForm> {
                   },
                   onSaved: onSaved,
                   validator: (value) {
-                    if (_formData['dataNascimento'] == null || _formData['dataNascimento']!.isEmpty) {
-                      return 'Campo obrigatório';
+                    if (_formData['dataNascimento'] == null || _formData['dataNascimento']!.trim().isEmpty) {
+                      return 'Este campo é obrigatório';
                     }
                     return null;
                   },
@@ -540,31 +636,93 @@ class _CadastroFormState extends State<CadastroForm> {
                   obscureText: obscureText,
                   keyboardType: keyboardType,
                   maxLength: maxLength,
+                  inputFormatters: isCpf ? [CpfInputFormatter()] : isPhone ? [PhoneInputFormatter()] : null,
                   onSaved: onSaved,
                   validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Campo obrigatório';
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Este campo é obrigatório';
+                    }
+                    if (isCpf) {
+                      String numbers = value.replaceAll(RegExp(r'\D'), '');
+                      if (numbers.length != 11) {
+                        return 'CPF deve ter 11 dígitos';
+                      }
+                    }
+                    if (isPhone) {
+                      String numbers = value.replaceAll(RegExp(r'\D'), '');
+                      if (numbers.length < 10 || numbers.length > 11) {
+                        return 'Telefone deve ter 10 ou 11 dígitos';
+                      }
                     }
                     return null;
                   },
                   onChanged: (value) {
-                    if (label == 'CPF') {
-                      String cpf = value.replaceAll(RegExp(r'\D'), '').substring(0, value.length > 11 ? 11 : value.length);
-                      if (cpf.length >= 3) cpf = cpf.replaceFirst(RegExp(r'^(\d{3})(\d)'), r'$1.$2');
-                      if (cpf.length >= 6) cpf = cpf.replaceFirst(RegExp(r'^(\d{3})\.(\d{3})(\d)'), r'$1.$2.$3');
-                      if (cpf.length >= 9) cpf = cpf.replaceFirst(RegExp(r'^(\d{3})\.(\d{3})\.(\d{3})(\d{1,2})'), r'$1.$2.$3-$4');
+                    if (isCpf) {
+                      String cpf = value.replaceAll(RegExp(r'\D'), '');
                       _handleChange('cpf', cpf);
-                    } else if (label == 'Telefone') {
-                      String telefone = value.replaceAll(RegExp(r'\D'), '').substring(0, value.length > 11 ? 11 : value.length);
-                      if (telefone.length >= 2) telefone = telefone.replaceFirst(RegExp(r'^(\d{2})(\d)'), r'($1) $2');
-                      if (telefone.length >= 7) telefone = telefone.replaceFirst(RegExp(r'^(\(\d{2}\)\s\d{5})(\d)'), r'$1-$2');
+                    } else if (isPhone) {
+                      String telefone = value.replaceAll(RegExp(r'\D'), '');
                       _handleChange('telefone', telefone);
                     } else {
                       onSaved(value);
                     }
                   },
-                  initialValue: _formData[label.toLowerCase()] ?? '',
+                  // initialValue removido - valor controlado por onChanged
                 ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPasswordField({
+    required String label,
+    required void Function(String?) onSaved,
+    required bool obscureText,
+    required VoidCallback onToggleVisibility,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF90017F),
+            ),
+          ),
+          const SizedBox(height: 5),
+          TextFormField(
+            decoration: InputDecoration(
+              contentPadding: const EdgeInsets.all(10),
+              border: OutlineInputBorder(
+                borderSide: const BorderSide(color: Colors.grey),
+                borderRadius: BorderRadius.circular(5),
+              ),
+              suffixIcon: IconButton(
+                icon: Icon(
+                  obscureText ? Icons.visibility : Icons.visibility_off,
+                ),
+                onPressed: onToggleVisibility,
+              ),
+            ),
+            obscureText: obscureText,
+            onSaved: onSaved,
+            validator: (value) {
+              if (value == null || value.trim().isEmpty) {
+                return 'Este campo é obrigatório';
+              }
+              if (value.length < 6) {
+                return 'Senha deve ter pelo menos 6 caracteres';
+              }
+              return null;
+            },
+            onChanged: (value) {
+              onSaved(value);
+            },
+            // initialValue removido - valor controlado por onChanged
+          ),
         ],
       ),
     );
@@ -592,7 +750,7 @@ class _CadastroFormState extends State<CadastroForm> {
           DropdownMenuItem(value: 'Cliente', child: Text('Cliente')),
         ],
         onChanged: (value) => _handleChange('usuario', value ?? ''),
-        validator: (value) => value == null || value.isEmpty ? 'Campo obrigatório' : null,
+        validator: (value) => value == null || value.trim().isEmpty ? 'Este campo é obrigatório' : null,
         onSaved: (value) => _handleChange('usuario', value ?? ''),
       ),
     );

@@ -17,6 +17,7 @@ class _PaginaLoginState extends State<PaginaLogin> {
   final TextEditingController _searchController = TextEditingController();
 
   String? errorMessage;
+  String? successMessage;
   bool loading = false;
   bool menuAberto = false;
 
@@ -40,6 +41,7 @@ class _PaginaLoginState extends State<PaginaLogin> {
     });
 
     try {
+      print('🔐 Tentando login com email: $email');
       final response = await http.post(
         Uri.parse("http://localhost:8080/login"),
         headers: {"Content-Type": "application/json"},
@@ -48,24 +50,26 @@ class _PaginaLoginState extends State<PaginaLogin> {
           "senha": senha,
         }),
       );
+      
+      print('📡 Status da resposta: ${response.statusCode}');
+      print('📄 Corpo da resposta: ${response.body}');
 
       if (response.statusCode == 200) {
         final responseMap = jsonDecode(response.body);
 
         // Salvar dados completos do usuário no SharedPreferences
         final prefs = await SharedPreferences.getInstance();
-        final tipoUsuario = responseMap['usuario'] ?? 'Cliente';
         
         final dadosUsuario = {
           "id": responseMap['id'],
           "nome": responseMap['nome'] ?? '',
           "sobrenome": responseMap['sobrenome'] ?? '',
           "cpf": responseMap['cpf'] ?? '',
-          "datanascimento": responseMap['datanascimento'] ?? responseMap['dataNascimento'] ?? '',
+          "datanascimento": responseMap['datanascimento'] ?? '',
           "email": responseMap['email'] ?? email,
           "senha": responseMap['senha'] ?? '',
           "telefone": responseMap['telefone'] ?? '',
-          "usuario": tipoUsuario,
+          "usuario": responseMap['usuario'] ?? 'Cliente',
         };
         
         await prefs.setString('usuario', jsonEncode(dadosUsuario));
@@ -113,7 +117,7 @@ class _PaginaLoginState extends State<PaginaLogin> {
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: colors.first.withOpacity( 0.4),
+            color: colors.first.withValues(alpha:  0.4),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -136,6 +140,17 @@ class _PaginaLoginState extends State<PaginaLogin> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    if (args != null && args['showMessage'] == true) {
+      emailController.text = args['email'] ?? '';
+      senhaController.text = args['senha'] ?? '';
+      successMessage = 'Email e senha salvos com sucesso!';
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
@@ -148,10 +163,12 @@ class _PaginaLoginState extends State<PaginaLogin> {
                 onMenuTap: toggleMenu,
               ),
               Expanded(
-                child: ListView(
-                  children: [
-                    Container(
-                      padding: EdgeInsets.symmetric(vertical: 40, horizontal: 8),
+                child: Container(
+                  color: const Color(0xFFE6D7FF),
+                  child: ListView(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.symmetric(vertical: 40, horizontal: 8),
                       child: Center(
                         child: Container(
                           constraints: BoxConstraints(maxWidth: 700),
@@ -222,6 +239,14 @@ class _PaginaLoginState extends State<PaginaLogin> {
                                           hintText: "Senha",
                                         ),
                                       ),
+                                      if (successMessage != null)
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(vertical: 12),
+                                          child: Text(
+                                            successMessage!,
+                                            style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+                                          ),
+                                        ),
                                       if (errorMessage != null)
                                         Padding(
                                           padding: const EdgeInsets.symmetric(vertical: 12),
@@ -337,7 +362,7 @@ class _PaginaLoginState extends State<PaginaLogin> {
                                     height: 1.6,
                                     shadows: [
                                       Shadow(
-                                        color: Colors.black.withOpacity( 0.3),
+                                        color: Colors.black.withValues(alpha:  0.3),
                                         offset: const Offset(2, 2),
                                         blurRadius: 4,
                                       ),
@@ -452,7 +477,7 @@ class _PaginaLoginState extends State<PaginaLogin> {
                                     borderRadius: BorderRadius.circular(25),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: Colors.black.withOpacity( 0.2),
+                                        color: Colors.black.withValues(alpha:  0.2),
                                         blurRadius: 8,
                                         offset: const Offset(0, 4),
                                       ),
@@ -479,7 +504,7 @@ class _PaginaLoginState extends State<PaginaLogin> {
                               Text(
                                 "© Game Legends ✨ | Feito com 💜 pelo nosso time incrível!",
                                 style: TextStyle(
-                                  color: Colors.white.withOpacity( 0.9),
+                                  color: Colors.white.withValues(alpha:  0.9),
                                   fontSize: 15,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -490,7 +515,8 @@ class _PaginaLoginState extends State<PaginaLogin> {
                         ),
                       ),
                     ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ],

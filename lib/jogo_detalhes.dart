@@ -421,7 +421,7 @@ class _JogoDetalhesState extends State<JogoDetalhes> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F7F7),
+      backgroundColor: const Color(0xFFE6D7FF),
       body: Stack(
         children: [
           Column(
@@ -758,7 +758,7 @@ class _JogoDetalhesState extends State<JogoDetalhes> {
                           right: 0,
                           child: Container(
                             decoration: BoxDecoration(
-                              color: Colors.red.withOpacity(0.1),
+                              color: Colors.red.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: IconButton(
@@ -830,7 +830,7 @@ class _JogoDetalhesState extends State<JogoDetalhes> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -903,7 +903,7 @@ class _JogoDetalhesState extends State<JogoDetalhes> {
                           right: 0,
                           child: Container(
                             decoration: BoxDecoration(
-                              color: Colors.red.withOpacity(0.1),
+                              color: Colors.red.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: IconButton(
@@ -1124,7 +1124,7 @@ class _JogoDetalhesState extends State<JogoDetalhes> {
                     borderRadius: BorderRadius.circular(25),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity( 0.2),
+                        color: Colors.black.withValues(alpha: 0.2),
                         blurRadius: 8,
                         offset: const Offset(0, 4),
                       ),
@@ -1151,7 +1151,7 @@ class _JogoDetalhesState extends State<JogoDetalhes> {
               Text(
                 "© Game Legends ✨ | Feito com 💜 pelo nosso time incrível!",
                 style: TextStyle(
-                  color: Colors.white.withOpacity( 0.9),
+                  color: Colors.white.withValues(alpha: 0.9),
                   fontSize: 15,
                   fontWeight: FontWeight.w500,
                 ),
@@ -1171,7 +1171,7 @@ class _JogoDetalhesState extends State<JogoDetalhes> {
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: colors.first.withOpacity( 0.4),
+            color: colors.first.withValues(alpha: 0.4),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -1493,10 +1493,10 @@ class _ModalDoacaoState extends State<_ModalDoacao> {
                                         DropdownButtonFormField<String>(
                                           value: cartaoSelecionadoId,
                                           items: cartoesUsuario
-                                              .map((cartao) {
+                                              .map<DropdownMenuItem<String>>((cartao) {
                                                 final numero = cartao['numC']?.toString() ?? '';
                                                 final ultimos4 = numero.length >= 4 ? numero.substring(numero.length - 4) : numero;
-                                                return DropdownMenuItem(
+                                                return DropdownMenuItem<String>(
                                                   value: cartao['id'].toString(),
                                                   child: Row(
                                                     children: [

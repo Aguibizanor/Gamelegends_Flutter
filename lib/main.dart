@@ -61,7 +61,7 @@ class MyApp extends StatelessWidget {
         '/esporte': (context) => EsportePage(),
         '/esseMes': (context) => EsseMesPage(),
         '/hoje': (context) => HojePage(),
-        '/iOS': (context) => IosPage(),
+        '/iOS': (context) => IOsPage(),
         '/macOs': (context) => MacOsPage(),
         '/sobrevivencia': (context) => SobrevivenciaPage(),
         '/terror': (context) => TerrorPage(),

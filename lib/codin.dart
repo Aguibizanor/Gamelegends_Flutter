@@ -3,20 +3,20 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'redefinir_senha_service.dart';
 import 'navbar.dart';
-
+ 
 class PaginaCodin extends StatefulWidget {
   const PaginaCodin({Key? key}) : super(key: key);
-
+ 
   @override
   State<PaginaCodin> createState() => _PaginaCodinState();
 }
-
+ 
 class _PaginaCodinState extends State<PaginaCodin> {
   bool menuAberto = false;
   final List<TextEditingController> _codeControllers =
       List.generate(6, (_) => TextEditingController());
   final _searchController = TextEditingController();
-
+ 
   @override
   void dispose() {
     for (final c in _codeControllers) {
@@ -25,10 +25,10 @@ class _PaginaCodinState extends State<PaginaCodin> {
     _searchController.dispose();
     super.dispose();
   }
-
+ 
   void toggleMenu() => setState(() => menuAberto = !menuAberto);
   void closeMenu() => setState(() => menuAberto = false);
-
+ 
   Widget _buildColorfulSocialButton(IconData icon, List<Color> colors, VoidCallback onPressed) {
     return Container(
       decoration: BoxDecoration(
@@ -36,7 +36,7 @@ class _PaginaCodinState extends State<PaginaCodin> {
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: colors.first.withOpacity(0.4),
+            color: colors.first.withValues(alpha: 0.4),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -49,10 +49,55 @@ class _PaginaCodinState extends State<PaginaCodin> {
       ),
     );
   }
-
+ 
+  void _gerarNovoCodigo() async {
+    if (RedefinirSenhaService.emailAtual == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('❌ Email não encontrado'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+ 
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+ 
+    try {
+      await RedefinirSenhaService.enviarCodigo(RedefinirSenhaService.emailAtual!);
+      Navigator.pop(context);
+     
+      // Limpar campos
+      for (var controller in _codeControllers) {
+        controller.clear();
+      }
+     
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('✅ Novo código gerado com sucesso!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('❌ Erro ao gerar novo código: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+ 
   void _confirmar() async {
     String codigo = _codeControllers.map((c) => c.text).join();
-    
+   
     if (codigo.length != 6) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -62,7 +107,7 @@ class _PaginaCodinState extends State<PaginaCodin> {
       );
       return;
     }
-    
+   
     // Mostrar loading
     showDialog(
       context: context,
@@ -71,12 +116,12 @@ class _PaginaCodinState extends State<PaginaCodin> {
         child: CircularProgressIndicator(),
       ),
     );
-    
+   
     try {
       bool valido = await RedefinirSenhaService.verificarCodigo(codigo);
-      
+     
       Navigator.pop(context); // Fechar loading
-      
+     
       if (valido) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -107,7 +152,7 @@ class _PaginaCodinState extends State<PaginaCodin> {
       );
     }
   }
-
+ 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -121,10 +166,12 @@ class _PaginaCodinState extends State<PaginaCodin> {
                 onMenuTap: toggleMenu,
               ),
               Expanded(
-                child: ListView(
-                  children: [
-                    Container(
-                      padding: EdgeInsets.symmetric(vertical: 40, horizontal: 8),
+                child: Container(
+                  color: const Color(0xFFE6D7FF),
+                  child: ListView(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.symmetric(vertical: 40, horizontal: 8),
                       child: Center(
                         child: Container(
                           constraints: BoxConstraints(maxWidth: 700),
@@ -191,24 +238,24 @@ class _PaginaCodinState extends State<PaginaCodin> {
                                           Container(
                                             padding: EdgeInsets.all(12),
                                             decoration: BoxDecoration(
-                                              color: RedefinirSenhaService.isEmailReal 
-                                                ? Colors.green.shade50 
+                                              color: RedefinirSenhaService.isEmailReal
+                                                ? Colors.green.shade50
                                                 : Colors.blue.shade50,
                                               borderRadius: BorderRadius.circular(8),
                                               border: Border.all(
-                                                color: RedefinirSenhaService.isEmailReal 
-                                                  ? Colors.green.shade200 
+                                                color: RedefinirSenhaService.isEmailReal
+                                                  ? Colors.green.shade200
                                                   : Colors.blue.shade200,
                                               ),
                                             ),
                                             child: Row(
                                               children: [
                                                 Icon(
-                                                  RedefinirSenhaService.isEmailReal 
-                                                    ? Icons.email 
+                                                  RedefinirSenhaService.isEmailReal
+                                                    ? Icons.email
                                                     : Icons.storage,
-                                                  color: RedefinirSenhaService.isEmailReal 
-                                                    ? Colors.green 
+                                                  color: RedefinirSenhaService.isEmailReal
+                                                    ? Colors.green
                                                     : Colors.blue,
                                                   size: 20,
                                                 ),
@@ -220,8 +267,8 @@ class _PaginaCodinState extends State<PaginaCodin> {
                                                       : 'Código salvo no banco para: ${RedefinirSenhaService.emailAtual}',
                                                     style: TextStyle(
                                                       fontSize: 13,
-                                                      color: RedefinirSenhaService.isEmailReal 
-                                                        ? Colors.green.shade700 
+                                                      color: RedefinirSenhaService.isEmailReal
+                                                        ? Colors.green.shade700
                                                         : Colors.blue.shade700,
                                                       fontWeight: FontWeight.w500,
                                                     ),
@@ -233,56 +280,101 @@ class _PaginaCodinState extends State<PaginaCodin> {
                                         ],
                                       ),
                                       SizedBox(height: 32),
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: List.generate(6, (i) {
-                                          return Container(
-                                            width: 50,
-                                            height: 60,
-                                            margin: const EdgeInsets.symmetric(horizontal: 4),
-                                            decoration: BoxDecoration(
-                                              color: Colors.white,
-                                              borderRadius: BorderRadius.circular(8),
-                                            ),
-                                            child: TextField(
-                                              controller: _codeControllers[i],
-                                              maxLength: 1,
-                                              textAlign: TextAlign.center,
-                                              keyboardType: TextInputType.number,
-                                              style: const TextStyle(
-                                                fontSize: 24,
-                                                fontWeight: FontWeight.bold,
+                                      Container(
+                                        padding: EdgeInsets.all(20),
+                                        decoration: BoxDecoration(
+                                          gradient: LinearGradient(
+                                            colors: [
+                                              Color(0xFF90017F).withValues(alpha: 0.05),
+                                              Color(0xFF05B7E7).withValues(alpha: 0.05),
+                                            ],
+                                          ),
+                                          borderRadius: BorderRadius.circular(16),
+                                          border: Border.all(
+                                            color: Color(0xFF90017F).withValues(alpha: 0.2),
+                                            width: 1,
+                                          ),
+                                        ),
+                                        child: Column(
+                                          children: [
+                                            Text(
+                                              'Código de Verificação',
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w600,
                                                 color: Color(0xFF90017F),
                                               ),
-                                              decoration: InputDecoration(
-                                                counterText: '',
-                                                filled: true,
-                                                fillColor: Colors.white,
-                                                border: OutlineInputBorder(
-                                                  borderRadius: BorderRadius.circular(8),
-                                                  borderSide: const BorderSide(color: Color(0xFF90017F)),
-                                                ),
-                                                enabledBorder: OutlineInputBorder(
-                                                  borderRadius: BorderRadius.circular(8),
-                                                  borderSide: const BorderSide(color: Color(0xFF90017F)),
-                                                ),
-                                                focusedBorder: OutlineInputBorder(
-                                                  borderRadius: BorderRadius.circular(8),
-                                                  borderSide: const BorderSide(color: Color(0xFF90017F), width: 2),
-                                                ),
-                                                contentPadding: const EdgeInsets.symmetric(vertical: 16),
-                                              ),
-                                              onChanged: (value) {
-                                                if (value.length == 1 && i < 5) {
-                                                  FocusScope.of(context).nextFocus();
-                                                }
-                                                if (value.isEmpty && i > 0) {
-                                                  FocusScope.of(context).previousFocus();
-                                                }
-                                              },
                                             ),
-                                          );
-                                        }),
+                                            SizedBox(height: 16),
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: List.generate(6, (i) {
+                                                return Container(
+                                                  width: 35,
+                                                  height: 45,
+                                                  margin: EdgeInsets.symmetric(horizontal: 2),
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.white,
+                                                    borderRadius: BorderRadius.circular(12),
+                                                    boxShadow: [
+                                                      BoxShadow(
+                                                        color: Color(0xFF90017F).withValues(alpha: 0.1),
+                                                        blurRadius: 8,
+                                                        offset: Offset(0, 2),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  child: TextField(
+                                                    controller: _codeControllers[i],
+                                                    maxLength: 1,
+                                                    textAlign: TextAlign.center,
+                                                    keyboardType: TextInputType.number,
+                                                    style: const TextStyle(
+                                                      fontSize: 22,
+                                                      fontWeight: FontWeight.bold,
+                                                      color: Color(0xFF90017F),
+                                                    ),
+                                                    decoration: InputDecoration(
+                                                      counterText: '',
+                                                      filled: true,
+                                                      fillColor: Colors.white,
+                                                      border: OutlineInputBorder(
+                                                        borderRadius: BorderRadius.circular(12),
+                                                        borderSide: BorderSide(
+                                                          color: Color(0xFF90017F).withValues(alpha: 0.3),
+                                                          width: 1.5,
+                                                        ),
+                                                      ),
+                                                      enabledBorder: OutlineInputBorder(
+                                                        borderRadius: BorderRadius.circular(12),
+                                                        borderSide: BorderSide(
+                                                          color: Color(0xFF90017F).withValues(alpha: 0.3),
+                                                          width: 1.5,
+                                                        ),
+                                                      ),
+                                                      focusedBorder: OutlineInputBorder(
+                                                        borderRadius: BorderRadius.circular(12),
+                                                        borderSide: const BorderSide(
+                                                          color: Color(0xFF90017F),
+                                                          width: 2.5,
+                                                        ),
+                                                      ),
+                                                      contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                                                    ),
+                                                    onChanged: (value) {
+                                                      if (value.length == 1 && i < 5) {
+                                                        FocusScope.of(context).nextFocus();
+                                                      }
+                                                      if (value.isEmpty && i > 0) {
+                                                        FocusScope.of(context).previousFocus();
+                                                      }
+                                                    },
+                                                  ),
+                                                );
+                                              }),
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                       SizedBox(height: 32),
                                       SizedBox(
@@ -318,7 +410,7 @@ class _PaginaCodinState extends State<PaginaCodin> {
                                             ),
                                           ),
                                           TextButton(
-                                            onPressed: () => Navigator.pushNamed(context, '/mandaremail'),
+                                            onPressed: _gerarNovoCodigo,
                                             child: Text(
                                               "Gerar novo código",
                                               style: TextStyle(color: Colors.orange),
@@ -389,7 +481,7 @@ class _PaginaCodinState extends State<PaginaCodin> {
                                     height: 1.6,
                                     shadows: [
                                       Shadow(
-                                        color: Colors.black.withOpacity(0.3),
+                                        color: Colors.black.withValues(alpha: 0.3),
                                         offset: const Offset(2, 2),
                                         blurRadius: 4,
                                       ),
@@ -504,7 +596,7 @@ class _PaginaCodinState extends State<PaginaCodin> {
                                     borderRadius: BorderRadius.circular(25),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: Colors.black.withOpacity(0.2),
+                                        color: Colors.black.withValues(alpha: 0.2),
                                         blurRadius: 8,
                                         offset: const Offset(0, 4),
                                       ),
@@ -531,7 +623,7 @@ class _PaginaCodinState extends State<PaginaCodin> {
                               Text(
                                 "© Game Legends ✨ | Feito com 💜 pelo nosso time incrível!",
                                 style: TextStyle(
-                                  color: Colors.white.withOpacity(0.9),
+                                  color: Colors.white.withValues(alpha: 0.9),
                                   fontSize: 15,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -542,7 +634,8 @@ class _PaginaCodinState extends State<PaginaCodin> {
                         ),
                       ),
                     ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -557,3 +650,4 @@ class _PaginaCodinState extends State<PaginaCodin> {
     );
   }
 }
+ 

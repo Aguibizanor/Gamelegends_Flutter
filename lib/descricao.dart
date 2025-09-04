@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:url_launcher/url_launcher.dart';
+
 import 'navbar.dart';
 import 'cadastro_cartao.dart';
 import 'modal_doacao_novo.dart';
 import 'modal_pix_novo.dart';
 import 'footer_template.dart';
+import 'admin_service.dart';
 
 // Imagens e assets
 final String logo = 'assets/logo.site.tcc.png';
@@ -187,7 +188,7 @@ class _PaginaDescricaoState extends State<PaginaDescricao> {
   Widget build(BuildContext context) {
     final isWide = MediaQuery.of(context).size.width > 700;
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F7F7),
+      backgroundColor: const Color(0xFFE6D7FF),
       body: Stack(
         children: [
           Column(
@@ -383,11 +384,20 @@ class _DescricaoEInfoState extends State<_DescricaoEInfo> {
   List<Map<String, dynamic>> avaliacoes = [];
   double mediaEstrelas = 0.0;
   bool carregandoAvaliacoes = true;
+  bool isAdmin = false;
 
   @override
   void initState() {
     super.initState();
     carregarAvaliacoes();
+    verificarAdmin();
+  }
+
+  Future<void> verificarAdmin() async {
+    final adminStatus = await AdminService.isAdmin();
+    setState(() {
+      isAdmin = adminStatus;
+    });
   }
 
   Future<void> carregarAvaliacoes() async {
@@ -398,6 +408,34 @@ class _DescricaoEInfoState extends State<_DescricaoEInfo> {
       mediaEstrelas = media;
       carregandoAvaliacoes = false;
     });
+  }
+
+  Future<void> removerComentario(int avaliacaoId) async {
+    final sucesso = await AdminService.excluirComentario(avaliacaoId);
+    if (sucesso) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Comentário removido com sucesso!')),
+      );
+      carregarAvaliacoes();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Erro ao remover comentário')),
+      );
+    }
+  }
+
+  Future<void> removerAvaliacao(int avaliacaoId) async {
+    final sucesso = await AdminService.excluirComentario(avaliacaoId);
+    if (sucesso) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Avaliação removida com sucesso!')),
+      );
+      carregarAvaliacoes();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Erro ao remover avaliação')),
+      );
+    }
   }
 
   @override
@@ -524,6 +562,13 @@ class _DescricaoEInfoState extends State<_DescricaoEInfo> {
                                   );
                                 }),
                               ),
+                              const Spacer(),
+                              if (isAdmin)
+                                IconButton(
+                                  icon: const Icon(Icons.delete, color: Colors.red, size: 20),
+                                  onPressed: () => _mostrarDialogoRemocao(avaliacao),
+                                  tooltip: 'Remover comentário',
+                                ),
                             ],
                           ),
                           const SizedBox(height: 4),
@@ -574,6 +619,34 @@ class _DescricaoEInfoState extends State<_DescricaoEInfo> {
           ],
         ),
       ],
+    );
+  }
+
+  void _mostrarDialogoRemocao(Map<String, dynamic> avaliacao) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Remover Avaliação'),
+          content: Text(
+            'Tem certeza que deseja remover a avaliação de "${avaliacao['nomeUsuario'] ?? 'Anônimo'}"?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                removerAvaliacao(avaliacao['id']);
+              },
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              child: const Text('Remover'),
+            ),
+          ],
+        );
+      },
     );
   }
 }
