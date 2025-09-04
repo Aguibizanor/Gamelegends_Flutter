@@ -52,12 +52,6 @@ class _CadastroCartaoScreenState extends State<CadastroCartaoScreen> {
 
     try {
       final clienteId = await getClienteId();
-      print('Debug - ClienteId obtido: $clienteId');
-      
-      // Debug - verificar dados do usuário
-      final prefs = await SharedPreferences.getInstance();
-      final usuarioStr = prefs.getString('usuario');
-      print('Debug - Usuario string: $usuarioStr');
       
       if (clienteId == null) {
         _mostrarErro('Erro: Usuário não identificado. Faça login novamente.');
@@ -78,24 +72,11 @@ class _CadastroCartaoScreenState extends State<CadastroCartaoScreen> {
         "clienteId": clienteId
       };
       
-      print('=== DEBUG CADASTRO CARTAO ===');
-      print('ClienteId: $clienteId (tipo: ${clienteId.runtimeType})');
-      print('Numero: ${_numeroController.text.replaceAll(' ', '')}');
-      print('Nome: ${_nomeController.text.trim()}');
-      print('Validade: ${_validadeController.text.trim()}');
-      print('CVV: ${_cvvController.text.trim()}');
-      print('Bandeira: $_bandeiraSelecionada');
-      print('Dados completos: $dados');
-      print('========================');
-
       final response = await http.post(
         Uri.parse(cartaoApiUrl),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode(dados),
       );
-      
-      print('Status: ${response.statusCode}');
-      print('Response: ${response.body}');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         Navigator.pop(context, true);
@@ -115,8 +96,7 @@ class _CadastroCartaoScreenState extends State<CadastroCartaoScreen> {
         _mostrarErro('Erro ${response.statusCode}: Falha ao cadastrar cartão');
       }
     } catch (e) {
-      print('Erro na requisição: $e');
-      _mostrarErro('Erro de conexão: $e');
+      _mostrarErro('Erro de conexão. Verifique sua internet.');
     } finally {
       setState(() => _carregando = false);
     }
@@ -153,13 +133,7 @@ class _CadastroCartaoScreenState extends State<CadastroCartaoScreen> {
         title: const Text('Cadastrar Cartão'),
         backgroundColor: const Color(0xFF90017F),
         foregroundColor: Colors.white,
-        actions: [
-          IconButton(
-            onPressed: _testarUsuario,
-            icon: const Icon(Icons.bug_report),
-            tooltip: 'Testar Usuário',
-          ),
-        ],
+
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
