@@ -170,7 +170,7 @@ class _CartasPageState extends State<CartasPage> {
                         user: (game.containsKey('user') && game['user'] != null) ? game['user'] as String : '',
                         comments: (game['comments'] is List) ? List<String>.from(game['comments'] as List) : [],
                         description: (game.containsKey('description') && game['description'] != null) ? game['description'] as String : '',
-                        onTap: () {},
+                        onTap: () => launchUrl(Uri.parse('https://www.reddit.com/r/Game_Legends_jogos/s/GZVUlKiWg8')),
                         sidebarOpen: false,
                       )),
                       
@@ -311,9 +311,9 @@ class _CartasPageState extends State<CartasPage> {
                                           ),
                                           const SizedBox(width: 20),
                                           _buildColorfulSocialButton(
-                                            Icons.camera_alt,
-                                            [Color(0xFFB19CD9), Color(0xFFD1C4E9)],
-                                            () {},
+                                            Icons.reddit,
+                                            [Color(0xFFFF4500), Color(0xFFFF6B35)],
+                                            () => launchUrl(Uri.parse('https://www.reddit.com/r/Game_Legends_jogos/s/GZVUlKiWg8')),
                                           ),
                                           const SizedBox(width: 20),
                                           _buildColorfulSocialButton(
@@ -325,7 +325,7 @@ class _CartasPageState extends State<CartasPage> {
                                           _buildColorfulSocialButton(
                                             Icons.business,
                                             [Color(0xFF0077B5), Color(0xFF00A0DC)],
-                                            () {},
+                                            () => launchUrl(Uri.parse('https://www.reddit.com/r/Game_Legends_jogos/s/GZVUlKiWg8')),
                                           ),
                                         ],
                                       ),

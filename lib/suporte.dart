@@ -253,9 +253,9 @@ class _PaginaSuporteState extends State<PaginaSuporte> {
                             ),
                             const SizedBox(width: 20),
                             _buildColorfulSocialButton(
-                              Icons.camera_alt,
-                              [Color(0xFFB19CD9), Color(0xFFD1C4E9)],
-                              () {},
+                              Icons.reddit,
+                              [Color(0xFFFF4500), Color(0xFFFF6B35)],
+                              () => launchUrl(Uri.parse('https://www.reddit.com/r/Game_Legends_jogos/s/GZVUlKiWg8')),
                             ),
                             const SizedBox(width: 20),
                             _buildColorfulSocialButton(

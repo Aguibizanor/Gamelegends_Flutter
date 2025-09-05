@@ -402,7 +402,7 @@ class _PaginaPerfilState extends State<PaginaPerfil> {
                                                   ],
                                                 ),
                                                 child: const Icon(
-                                                  Icons.camera_alt,
+                                                  Icons.reddit,
                                                   color: Color(0xFF90017F),
                                                   size: 20,
                                                 ),
@@ -664,9 +664,9 @@ class _PaginaPerfilState extends State<PaginaPerfil> {
                                     ),
                                     const SizedBox(width: 20),
                                     _buildColorfulSocialButton(
-                                      Icons.camera_alt,
-                                      [Color(0xFFB19CD9), Color(0xFFD1C4E9)],
-                                      () {},
+                                      Icons.reddit,
+                                      [Color(0xFFFF4500), Color(0xFFFF6B35)],
+                                      () => launchUrl(Uri.parse('https://www.reddit.com/r/Game_Legends_jogos/s/GZVUlKiWg8')),
                                     ),
                                     const SizedBox(width: 20),
                                     _buildColorfulSocialButton(
@@ -678,7 +678,7 @@ class _PaginaPerfilState extends State<PaginaPerfil> {
                                     _buildColorfulSocialButton(
                                       Icons.business,
                                       [Color(0xFF0077B5), Color(0xFF00A0DC)],
-                                      () {},
+                                      () => launchUrl(Uri.parse('https://www.reddit.com/r/Game_Legends_jogos/s/GZVUlKiWg8')),
                                     ),
                                   ],
                                 ),

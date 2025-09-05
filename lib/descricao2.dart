@@ -639,9 +639,9 @@ class _PaginaDescricao2State extends State<PaginaDescricao2> {
                                         ),
                                         const SizedBox(width: 20),
                                         _buildColorfulSocialButton(
-                                          Icons.camera_alt,
-                                          [Color(0xFFB19CD9), Color(0xFFD1C4E9)],
-                                          () {},
+                                          Icons.reddit,
+                                          [Color(0xFFFF4500), Color(0xFFFF6B35)],
+                                          () => launchUrl(Uri.parse('https://www.reddit.com/r/Game_Legends_jogos/s/GZVUlKiWg8')),
                                         ),
                                         const SizedBox(width: 20),
                                         _buildColorfulSocialButton(
@@ -653,7 +653,7 @@ class _PaginaDescricao2State extends State<PaginaDescricao2> {
                                         _buildColorfulSocialButton(
                                           Icons.business,
                                           [Color(0xFF0077B5), Color(0xFF00A0DC)],
-                                          () {},
+                                          () => launchUrl(Uri.parse('https://www.reddit.com/r/Game_Legends_jogos/s/GZVUlKiWg8')),
                                         ),
                                       ],
                                     ),
@@ -860,7 +860,7 @@ class _DescricaoEInfoState extends State<_DescricaoEInfo> {
               const TextSpan(text: 'Desenvolvedor: DungeonMaster Studios ('),
               WidgetSpan(
                 child: GestureDetector(
-                  onTap: () {},
+                  onTap: () => launchUrl(Uri.parse('https://www.reddit.com/r/Game_Legends_jogos/s/GZVUlKiWg8')),
                   child: const Text('Twitter',
                       style: TextStyle(color: Colors.blue, decoration: TextDecoration.underline)),
                 ),
@@ -868,7 +868,7 @@ class _DescricaoEInfoState extends State<_DescricaoEInfo> {
               const TextSpan(text: ' / '),
               WidgetSpan(
                 child: GestureDetector(
-                  onTap: () {},
+                  onTap: () => launchUrl(Uri.parse('https://www.reddit.com/r/Game_Legends_jogos/s/GZVUlKiWg8')),
                   child: const Text('Steam',
                       style: TextStyle(color: Colors.blue, decoration: TextDecoration.underline)),
                 ),
@@ -876,7 +876,7 @@ class _DescricaoEInfoState extends State<_DescricaoEInfo> {
               const TextSpan(text: ')\\nArtista: CryptArt ('),
               WidgetSpan(
                 child: GestureDetector(
-                  onTap: () {},
+                  onTap: () => launchUrl(Uri.parse('https://www.reddit.com/r/Game_Legends_jogos/s/GZVUlKiWg8')),
                   child: const Text('Portfolio',
                       style: TextStyle(color: Colors.blue, decoration: TextDecoration.underline)),
                 ),
