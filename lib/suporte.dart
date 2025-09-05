@@ -98,30 +98,72 @@ class _PaginaSuporteState extends State<PaginaSuporte> {
             children: [
               // FAQ Section
               Container(
-                padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 0),
+                padding: const EdgeInsets.all(20),
                 color: const Color(0xFFE6D7FF),
                 child: Center(
                   child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 720),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        const SizedBox(height: 12),
-                        const Text(
-                          "Perguntas Frequentes",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 30,
-                            color: Color(0xFF90017F),
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        ...faqData.map((faq) => FAQItem(
-                              question: faq["question"]!,
-                              answer: faq["answer"]!,
+                    constraints: const BoxConstraints(maxWidth: 600),
+                    child: Card(
+                      elevation: 8,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                      child: Padding(
+                        padding: const EdgeInsets.all(30),
+                        child: Column(
+                          children: [
+                            const Text(
+                              "Perguntas Frequentes",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 28,
+                                color: Color(0xFF90017F),
+                              ),
+                            ),
+                            const SizedBox(height: 30),
+                            ...faqData.map((faq) => Container(
+                              margin: const EdgeInsets.only(bottom: 15),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF90017F),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: ExpansionTile(
+                                backgroundColor: const Color(0xFF90017F),
+                                collapsedBackgroundColor: const Color(0xFF90017F),
+                                iconColor: Colors.white,
+                                collapsedIconColor: Colors.white,
+                                title: Text(
+                                  faq["question"]!,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                                children: [
+                                  Container(
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.all(20),
+                                    decoration: const BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.only(
+                                        bottomLeft: Radius.circular(8),
+                                        bottomRight: Radius.circular(8),
+                                      ),
+                                    ),
+                                    child: Text(
+                                      faq["answer"]!,
+                                      style: const TextStyle(
+                                        color: Colors.black87,
+                                        fontSize: 14,
+                                        height: 1.4,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             )),
-                      ],
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -253,9 +295,9 @@ class _PaginaSuporteState extends State<PaginaSuporte> {
                             ),
                             const SizedBox(width: 20),
                             _buildColorfulSocialButton(
-                              Icons.reddit,
-                              [Color(0xFFFF4500), Color(0xFFFF6B35)],
-                              () => launchUrl(Uri.parse('https://www.reddit.com/r/Game_Legends_jogos/s/GZVUlKiWg8')),
+                              Icons.camera_alt,
+                              [Color(0xFFB19CD9), Color(0xFFD1C4E9)],
+                              () {},
                             ),
                             const SizedBox(width: 20),
                             _buildColorfulSocialButton(
