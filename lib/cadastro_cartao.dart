@@ -108,22 +108,7 @@ class _CadastroCartaoScreenState extends State<CadastroCartaoScreen> {
     );
   }
 
-  Future<void> _testarUsuario() async {
-    final prefs = await SharedPreferences.getInstance();
-    final usuarioStr = prefs.getString('usuario');
-    print('=== TESTE USUARIO ===');
-    print('Usuario string: $usuarioStr');
-    if (usuarioStr != null) {
-      try {
-        final usuarioData = jsonDecode(usuarioStr);
-        print('Usuario data: $usuarioData');
-        print('ID: ${usuarioData['id']} (tipo: ${usuarioData['id'].runtimeType})');
-      } catch (e) {
-        print('Erro ao decodificar: $e');
-      }
-    }
-    print('==================');
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -150,7 +135,7 @@ class _CadastroCartaoScreenState extends State<CadastroCartaoScreen> {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
+                    color: Colors.black.withOpacity(0.1),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),

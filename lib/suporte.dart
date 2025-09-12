@@ -20,14 +20,14 @@ class _PaginaSuporteState extends State<PaginaSuporte> {
   // Simula FAQ
   final List<Map<String, String>> faqData = [
     {
-      "question": "Como posso visualizar ou alterar minhas configurações de conta?",
+      "question": "Como posso baixar e jogar os jogos disponíveis na plataforma?",
       "answer":
-          "Clique no ícone de perfil no canto superior direito e selecione 'Configurações da Conta' para visualizar ou editar suas informações pessoais e preferências."
+          "Navegue pela nossa biblioteca de jogos, clique no jogo desejado e use o botão 'Download' na página do jogo. Todos os jogos são gratuitos e podem ser baixados diretamente."
     },
     {
-      "question": "Onde posso encontrar o histórico das doações nos projetos?",
+      "question": "Como posso publicar meu jogo indie na Game Legends?",
       "answer":
-          "Vá para 'Minha Conta' e selecione 'Histórico de Compras' para ver todas as suas transações anteriores."
+          "Crie uma conta como desenvolvedor, acesse seu perfil e clique em 'Publicar Jogo'. Preencha as informações do seu projeto, faça upload dos arquivos e aguarde a aprovação da nossa equipe."
     },
     {
       "question": "Esqueci minha senha. Como posso recuperá-la?",
@@ -35,9 +35,9 @@ class _PaginaSuporteState extends State<PaginaSuporte> {
           "Clique em 'Esqueci minha senha' na página de login e siga as instruções para redefinir sua senha."
     },
     {
-      "question": "Como posso encontrar as últimas notícias e atualizações sobre os jogos?",
+      "question": "Como posso navegar e filtrar os jogos disponíveis no site?",
       "answer":
-          "Acesse a seção de notícias no menu principal para ver as últimas novidades sobre os projetos e lançamentos."
+          "Use a barra lateral esquerda para filtrar jogos por gênero (Terror, Esporte, Aventura, etc.), plataforma (Windows, Mac, Android, iOS), data de postagem (Hoje, Essa semana, Esse mês) ou status de desenvolvimento (Desenvolvido, Desenvolvendo)."
     },
     {
       "question": "Como posso deixar um comentário ou avaliação para um jogo?",
@@ -64,7 +64,7 @@ class _PaginaSuporteState extends State<PaginaSuporte> {
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: colors.first.withValues(alpha:  0.4),
+            color: colors.first.withOpacity(0.4),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -102,68 +102,66 @@ class _PaginaSuporteState extends State<PaginaSuporte> {
                 color: const Color(0xFFE6D7FF),
                 child: Center(
                   child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 600),
-                    child: Card(
-                      elevation: 8,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                      child: Padding(
-                        padding: const EdgeInsets.all(30),
-                        child: Column(
-                          children: [
-                            const Text(
-                              "Perguntas Frequentes",
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 28,
-                                color: Color(0xFF90017F),
+                    constraints: const BoxConstraints(maxWidth: 800),
+                    child: Column(
+                      children: [
+                        const Text(
+                          "Perguntas Frequentes",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 32,
+                            color: Color(0xFF90017F),
+                          ),
+                        ),
+                        const SizedBox(height: 30),
+                        ...faqData.map((faq) => Container(
+                          margin: const EdgeInsets.only(bottom: 10),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: ExpansionTile(
+                            backgroundColor: const Color(0xFF90017F),
+                            collapsedBackgroundColor: const Color(0xFF90017F),
+                            iconColor: Colors.white,
+                            collapsedIconColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            collapsedShape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            title: Text(
+                              faq["question"]!,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 16,
                               ),
                             ),
-                            const SizedBox(height: 30),
-                            ...faqData.map((faq) => Container(
-                              margin: const EdgeInsets.only(bottom: 15),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF90017F),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: ExpansionTile(
-                                backgroundColor: const Color(0xFF90017F),
-                                collapsedBackgroundColor: const Color(0xFF90017F),
-                                iconColor: Colors.white,
-                                collapsedIconColor: Colors.white,
-                                title: Text(
-                                  faq["question"]!,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 16,
+                            children: [
+                              Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.all(20),
+                                decoration: const BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.only(
+                                    bottomLeft: Radius.circular(8),
+                                    bottomRight: Radius.circular(8),
                                   ),
                                 ),
-                                children: [
-                                  Container(
-                                    width: double.infinity,
-                                    padding: const EdgeInsets.all(20),
-                                    decoration: const BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.only(
-                                        bottomLeft: Radius.circular(8),
-                                        bottomRight: Radius.circular(8),
-                                      ),
-                                    ),
-                                    child: Text(
-                                      faq["answer"]!,
-                                      style: const TextStyle(
-                                        color: Colors.black87,
-                                        fontSize: 14,
-                                        height: 1.4,
-                                      ),
-                                    ),
+                                child: Text(
+                                  faq["answer"]!,
+                                  style: const TextStyle(
+                                    color: Colors.black87,
+                                    fontSize: 14,
+                                    height: 1.5,
                                   ),
-                                ],
+                                ),
                               ),
-                            )),
-                          ],
-                        ),
-                      ),
+                            ],
+                          ),
+                        )),
+                      ],
                     ),
                   ),
                 ),
@@ -295,9 +293,9 @@ class _PaginaSuporteState extends State<PaginaSuporte> {
                             ),
                             const SizedBox(width: 20),
                             _buildColorfulSocialButton(
-                              Icons.camera_alt,
-                              [Color(0xFFB19CD9), Color(0xFFD1C4E9)],
-                              () {},
+                              Icons.reddit,
+                              [Color(0xFFFF4500), Color(0xFFFF6B35)],
+                              () => launchUrl(Uri.parse('https://www.reddit.com/r/Game_Legends_jogos/s/GZVUlKiWg8')),
                             ),
                             const SizedBox(width: 20),
                             _buildColorfulSocialButton(
@@ -325,7 +323,7 @@ class _PaginaSuporteState extends State<PaginaSuporte> {
                               borderRadius: BorderRadius.circular(25),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withValues(alpha:  0.2),
+                                  color: Colors.black.withOpacity(0.2),
                                   blurRadius: 8,
                                   offset: const Offset(0, 4),
                                 ),
@@ -352,7 +350,7 @@ class _PaginaSuporteState extends State<PaginaSuporte> {
                         Text(
                           "© Game Legends ✨ | Feito com 💜 pelo nosso time incrível!",
                           style: TextStyle(
-                            color: Colors.white.withValues(alpha:  0.9),
+                            color: Colors.white.withOpacity(0.9),
                             fontSize: 15,
                             fontWeight: FontWeight.w500,
                           ),
@@ -380,58 +378,5 @@ class _PaginaSuporteState extends State<PaginaSuporte> {
   }
 }
  
-// Widget FAQItem
-class FAQItem extends StatefulWidget {
-  final String question;
-  final String answer;
- 
-  const FAQItem({super.key, required this.question, required this.answer});
- 
-  @override
-  State<FAQItem> createState() => _FAQItemState();
-}
- 
-class _FAQItemState extends State<FAQItem> {
-  bool isOpen = false;
- 
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: isOpen ? 3 : 1,
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      child: InkWell(
-        onTap: () => setState(() {
-          isOpen = !isOpen;
-        }),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                      child: Text(
-                    widget.question,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.w600, fontSize: 17),
-                  )),
-                  Icon(isOpen ? Icons.remove : Icons.add),
-                ],
-              ),
-              if (isOpen)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
-                  child: Text(
-                    widget.answer,
-                    style: const TextStyle(color: Colors.black87, fontSize: 15),
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
+
  

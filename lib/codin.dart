@@ -36,7 +36,7 @@ class _PaginaCodinState extends State<PaginaCodin> {
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: colors.first.withValues(alpha: 0.4),
+            color: colors.first.withOpacity(0.4),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -285,13 +285,13 @@ class _PaginaCodinState extends State<PaginaCodin> {
                                         decoration: BoxDecoration(
                                           gradient: LinearGradient(
                                             colors: [
-                                              Color(0xFF90017F).withValues(alpha: 0.05),
-                                              Color(0xFF05B7E7).withValues(alpha: 0.05),
+                                              Color(0xFF90017F).withOpacity(0.05),
+                                              Color(0xFF05B7E7).withOpacity(0.05),
                                             ],
                                           ),
                                           borderRadius: BorderRadius.circular(16),
                                           border: Border.all(
-                                            color: Color(0xFF90017F).withValues(alpha: 0.2),
+                                            color: Color(0xFF90017F).withOpacity(0.2),
                                             width: 1,
                                           ),
                                         ),
@@ -318,7 +318,7 @@ class _PaginaCodinState extends State<PaginaCodin> {
                                                     borderRadius: BorderRadius.circular(12),
                                                     boxShadow: [
                                                       BoxShadow(
-                                                        color: Color(0xFF90017F).withValues(alpha: 0.1),
+                                                        color: Color(0xFF90017F).withOpacity(0.1),
                                                         blurRadius: 8,
                                                         offset: Offset(0, 2),
                                                       ),
@@ -341,14 +341,14 @@ class _PaginaCodinState extends State<PaginaCodin> {
                                                       border: OutlineInputBorder(
                                                         borderRadius: BorderRadius.circular(12),
                                                         borderSide: BorderSide(
-                                                          color: Color(0xFF90017F).withValues(alpha: 0.3),
+                                                          color: Color(0xFF90017F).withOpacity(0.3),
                                                           width: 1.5,
                                                         ),
                                                       ),
                                                       enabledBorder: OutlineInputBorder(
                                                         borderRadius: BorderRadius.circular(12),
                                                         borderSide: BorderSide(
-                                                          color: Color(0xFF90017F).withValues(alpha: 0.3),
+                                                          color: Color(0xFF90017F).withOpacity(0.3),
                                                           width: 1.5,
                                                         ),
                                                       ),
@@ -481,7 +481,7 @@ class _PaginaCodinState extends State<PaginaCodin> {
                                     height: 1.6,
                                     shadows: [
                                       Shadow(
-                                        color: Colors.black.withValues(alpha: 0.3),
+                                        color: Colors.black.withOpacity(0.3),
                                         offset: const Offset(2, 2),
                                         blurRadius: 4,
                                       ),
@@ -596,7 +596,7 @@ class _PaginaCodinState extends State<PaginaCodin> {
                                     borderRadius: BorderRadius.circular(25),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: Colors.black.withValues(alpha: 0.2),
+                                        color: Colors.black.withOpacity(0.2),
                                         blurRadius: 8,
                                         offset: const Offset(0, 4),
                                       ),
@@ -623,7 +623,7 @@ class _PaginaCodinState extends State<PaginaCodin> {
                               Text(
                                 "© Game Legends ✨ | Feito com 💜 pelo nosso time incrível!",
                                 style: TextStyle(
-                                  color: Colors.white.withValues(alpha: 0.9),
+                                  color: Colors.white.withOpacity(0.9),
                                   fontSize: 15,
                                   fontWeight: FontWeight.w500,
                                 ),
