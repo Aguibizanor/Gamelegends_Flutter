@@ -235,19 +235,13 @@ class _JogoDetalhesState extends State<JogoDetalhes> {
       return;
     }
 
-    if (comentarioId <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('ID do comentário inválido')),
-      );
-      return;
-    }
-
     try {
       final response = await http.delete(Uri.parse('$comentariosApiUrl/$comentarioId'));
-      if (response.statusCode == 200 || response.statusCode == 204) {
+      if (response.statusCode == 204 || response.statusCode == 200) {
         setState(() {
           comentarios.removeWhere((c) => (c['id'] ?? 0) == comentarioId);
         });
+        await carregarComentarios();
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Comentário excluído com sucesso'),
@@ -256,17 +250,16 @@ class _JogoDetalhesState extends State<JogoDetalhes> {
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erro ao excluir comentário (${response.statusCode})'),
+          const SnackBar(
+            content: Text('Erro ao excluir comentário'),
             backgroundColor: Colors.red,
           ),
         );
       }
     } catch (e) {
-      print('Erro ao excluir comentário: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Erro ao excluir comentário: $e'),
+        const SnackBar(
+          content: Text('Erro ao excluir comentário'),
           backgroundColor: Colors.red,
         ),
       );
@@ -284,16 +277,9 @@ class _JogoDetalhesState extends State<JogoDetalhes> {
       return;
     }
 
-    if (avaliacaoId <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('ID da avaliação inválido')),
-      );
-      return;
-    }
-
     try {
       final response = await http.delete(Uri.parse('$avaliacaoApiUrl/$avaliacaoId'));
-      if (response.statusCode == 200 || response.statusCode == 204) {
+      if (response.statusCode == 204 || response.statusCode == 200) {
         setState(() {
           avaliacoes.removeWhere((a) => (a['id'] ?? 0) == avaliacaoId);
         });
@@ -306,17 +292,16 @@ class _JogoDetalhesState extends State<JogoDetalhes> {
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erro ao excluir avaliação (${response.statusCode})'),
+          const SnackBar(
+            content: Text('Erro ao excluir avaliação'),
             backgroundColor: Colors.red,
           ),
         );
       }
     } catch (e) {
-      print('Erro ao excluir avaliação: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Erro ao excluir avaliação: $e'),
+        const SnackBar(
+          content: Text('Erro ao excluir avaliação'),
           backgroundColor: Colors.red,
         ),
       );
@@ -1644,7 +1629,7 @@ class _ModalAdminState extends State<_ModalAdmin> {
   Future<void> _excluirAvaliacao(int avaliacaoId) async {
     try {
       final response = await http.delete(Uri.parse('$avaliacaoApiUrl/$avaliacaoId'));
-      if (response.statusCode == 200) {
+      if (response.statusCode == 204 || response.statusCode == 200) {
         setState(() {
           avaliacoes.removeWhere((av) => av['id'] == avaliacaoId);
         });
@@ -1665,8 +1650,8 @@ class _ModalAdminState extends State<_ModalAdmin> {
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Erro: $e'),
+        const SnackBar(
+          content: Text('Erro ao excluir avaliação'),
           backgroundColor: Colors.red,
         ),
       );
