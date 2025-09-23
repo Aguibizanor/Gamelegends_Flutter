@@ -164,7 +164,11 @@ class _EssaSemanaPageState extends State<EssaSemanaPage> {
                         user: (game.containsKey('user') && game['user'] != null) ? game['user'] as String : '',
                         comments: (game['comments'] is List) ? List<String>.from(game['comments'] as List) : [],
                         description: (game.containsKey('description') && game['description'] != null) ? game['description'] as String : '',
-                        onTap: () {},
+                        onTap: () {
+                          if (game['name'] == 'Subida de Pomba') {
+                            Navigator.pushNamed(context, '/descricao3');
+                          }
+                        },
                         sidebarOpen: false,
                       )),
                       

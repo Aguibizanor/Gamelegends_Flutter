@@ -171,7 +171,11 @@ class _AventuraPageState extends State<AventuraPage> {
                         user: (game.containsKey('user') && game['user'] != null) ? game['user'] as String : '',
                         comments: (game['comments'] is List) ? List<String>.from(game['comments'] as List) : [],
                         description: (game.containsKey('description') && game['description'] != null) ? game['description'] as String : '',
-                        onTap: () {},
+                        onTap: () {
+                          if (game['name'] == 'Coop Catacombs') {
+                            Navigator.pushNamed(context, '/descricao2');
+                          }
+                        },
                         sidebarOpen: false,
                       )),
                       
