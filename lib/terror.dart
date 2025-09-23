@@ -163,7 +163,7 @@ class _TerrorPageState extends State<TerrorPage> {
                         user: (game.containsKey('user') && game['user'] != null) ? game['user'] as String : '',
                         comments: (game['comments'] is List) ? List<String>.from(game['comments'] as List) : [],
                         description: (game.containsKey('description') && game['description'] != null) ? game['description'] as String : '',
-                        onTap: () => launchUrl(Uri.parse('https://www.reddit.com/r/Game_Legends_jogos/s/GZVUlKiWg8')),
+                        onTap: () {},
                         sidebarOpen: false,
                       )),
                       
