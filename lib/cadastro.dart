@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'navbar.dart';
+import 'config/api_config.dart';
 
 class CpfInputFormatter extends TextInputFormatter {
   @override
@@ -165,7 +166,7 @@ class _CadastroFormState extends State<CadastroForm> {
     try {
       print('📁 Enviando dados de cadastro: $cadastroData');
       final response = await http.post(
-        Uri.parse('http://localhost:8080/cadastro'),
+        Uri.parse(ApiConfig.cadastroUrl),
         headers: {'Content-Type': 'application/json'},
         body: cadastroData,
       );

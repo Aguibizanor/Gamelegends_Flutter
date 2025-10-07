@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'config/network_config.dart';
  
 class RedefinirSenhaService {
-  static const String baseUrl = 'http://localhost:8080/redefinir-senha';
+  static String get baseUrl => '${NetworkConfig.baseUrl}/redefinir-senha';
  
   static String? _emailAtual;
   static String? _codigoAtual;

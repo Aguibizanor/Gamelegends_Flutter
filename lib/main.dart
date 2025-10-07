@@ -31,6 +31,7 @@ import 'descricao3.dart';
 import 'privacidade.dart';
 import 'cartoes_page.dart';
 import 'footer_template.dart';
+import 'test_connection.dart';
  
 void main() {
   runApp(const MyApp());
@@ -75,6 +76,7 @@ class MyApp extends StatelessWidget {
         '/descricao3': (context) => PaginaDescricao3(),
         '/privacidade': (context) => PrivacidadePage(),
         '/cartoes': (context) => CartoesPage(),
+        '/test': (context) => TestConnection(),
       },
     );
   }

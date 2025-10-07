@@ -5,6 +5,7 @@ import 'navbar.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'jogo_detalhes.dart';
+import 'config/api_config.dart';
 
 class IndexPrincipal extends StatefulWidget {
   const IndexPrincipal({Key? key}) : super(key: key);
@@ -47,7 +48,7 @@ class _IndexPrincipalState extends State<IndexPrincipal> {
 
   Future<void> _fetchProjetos() async {
     try {
-      final response = await http.get(Uri.parse('http://localhost:8080/projetos'));
+      final response = await http.get(Uri.parse(ApiConfig.projetosUrl));
       if (response.statusCode == 200) {
         setState(() {
           projetos = json.decode(utf8.decode(response.bodyBytes));
@@ -79,7 +80,7 @@ class _IndexPrincipalState extends State<IndexPrincipal> {
 
   Future<void> _fetchComentarios() async {
     try {
-      final response = await http.get(Uri.parse('http://localhost:8080/comentarios'));
+      final response = await http.get(Uri.parse(ApiConfig.comentariosUrl));
       if (response.statusCode == 200) {
         setState(() {
           comentarios = json.decode(utf8.decode(response.bodyBytes));
@@ -133,7 +134,7 @@ class _IndexPrincipalState extends State<IndexPrincipal> {
 
   String getProjetoImagem(dynamic projeto) {
     // Sempre retorna o endpoint que serve o byte[] convertido em imagem
-    return 'http://localhost:8080/projetos/${projeto['id']}/foto';
+    return '${ApiConfig.projetosUrl}/${projeto['id']}/foto';
   }
 
   @override

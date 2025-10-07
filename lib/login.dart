@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'navbar.dart';
+import 'config/api_config.dart';
 
 class PaginaLogin extends StatefulWidget {
   @override
@@ -43,7 +44,7 @@ class _PaginaLoginState extends State<PaginaLogin> {
     try {
       print('🔐 Tentando login com email: $email');
       final response = await http.post(
-        Uri.parse("http://localhost:8080/login"),
+        Uri.parse(ApiConfig.loginUrl),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
           "email": email,

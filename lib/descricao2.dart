@@ -11,6 +11,7 @@ import 'modal_pix_novo.dart';
 import 'admin_service.dart';
 import 'avaliacao_notifier.dart';
 import 'modal_admin.dart';
+import 'config/api_config.dart';
 
 // Imagens e assets
 final String logo = 'assets/logo.site.tcc.png';
@@ -20,9 +21,9 @@ final String coopdescricao3 = 'assets/coopdescricao3.png';
 final String esquerda = 'assets/esquerda.png';
 
 // Endpoints do backend Spring Boot
-const String avaliacaoApiUrl = "http://localhost:8080/avaliacao";
-const String doacaoApiUrl = "http://localhost:8080/doacao";
-const String cartaoApiUrl = "http://localhost:8080/cadcartao/cliente/";
+String get avaliacaoApiUrl => ApiConfig.avaliacaoUrl;
+String get doacaoApiUrl => ApiConfig.doacaoUrl;
+String get cartaoApiUrl => '${ApiConfig.cadCartaoUrl}/cliente/';
 
 // Função para buscar cartões do cliente
 Future<List<Map<String, dynamic>>> buscarCartoesCliente(int clienteId) async {
@@ -44,7 +45,7 @@ Future<List<Map<String, dynamic>>> buscarCartoesCliente(int clienteId) async {
   }
   return [];
 }
-const String clienteApiUrl = "http://localhost:8080/cliente/";
+String get clienteApiUrl => '${ApiConfig.clienteUrl}/';
 
 // Função para buscar o id do cliente do storage
 Future<int?> getClienteId() async {

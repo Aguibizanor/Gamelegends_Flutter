@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'config/network_config.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://localhost:8080';
+  static String get baseUrl => NetworkConfig.baseUrl;
   
   static Future<Map<String, dynamic>?> buscarUsuario(int id) async {
     try {

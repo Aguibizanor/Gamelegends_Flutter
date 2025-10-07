@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'config/network_config.dart';
 
 class AdminService {
-  static const String baseUrl = "http://localhost:8080";
+  static String get baseUrl => NetworkConfig.baseUrl;
 
   // Verificar se o usuário é administrador
   static Future<bool> isAdmin() async {

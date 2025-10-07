@@ -9,6 +9,7 @@ import 'modal_doacao_novo.dart';
 import 'modal_pix_novo.dart';
 import 'footer_template.dart';
 import 'admin_service.dart';
+import 'config/api_config.dart';
 
 // Imagens e assets
 final String logo = 'assets/logo.site.tcc.png';
@@ -18,10 +19,10 @@ final String gato3 = 'assets/gato3.png';
 final String esquerda = 'assets/esquerda.png';
 
 // Endpoints do backend Spring Boot
-const String avaliacaoApiUrl = "http://localhost:8080/avaliacao";
-const String doacaoApiUrl = "http://localhost:8080/doacao";
-const String cartaoApiUrl = "http://localhost:8080/cadcartao/cliente/";
-const String clienteApiUrl = "http://localhost:8080/cliente/";
+String get avaliacaoApiUrl => ApiConfig.avaliacaoUrl;
+String get doacaoApiUrl => ApiConfig.doacaoUrl;
+String get cartaoApiUrl => '${ApiConfig.cadCartaoUrl}/cliente/';
+String get clienteApiUrl => '${ApiConfig.clienteUrl}/';
 
 // Função para buscar o id do cliente do storage
 Future<int?> getClienteId() async {

@@ -8,10 +8,12 @@ import 'modal_doacao_novo.dart';
 import 'modal_pix_novo.dart';
 
 // Endpoints do backend
-const String projetosApiUrl = "http://localhost:8080/projetos";
-const String avaliacaoApiUrl = "http://localhost:8080/avaliacao";
-const String doacaoApiUrl = "http://localhost:8080/doacao";
-const String comentariosApiUrl = "http://localhost:8080/comentarios";
+import 'config/api_config.dart';
+
+String get projetosApiUrl => ApiConfig.projetosUrl;
+String get avaliacaoApiUrl => ApiConfig.avaliacaoUrl;
+String get doacaoApiUrl => ApiConfig.doacaoUrl;
+String get comentariosApiUrl => ApiConfig.comentariosUrl;
 
 // Função para buscar dados do usuário logado
 Future<Map<String, dynamic>?> getUsuarioLogado() async {
@@ -1347,7 +1349,7 @@ class _ModalDoacaoState extends State<_ModalDoacao> {
         final clienteId = usuarioData['id'];
         
         if (clienteId != null) {
-          final response = await http.get(Uri.parse('http://localhost:8080/cadcartao/cliente/$clienteId'));
+          final response = await http.get(Uri.parse('${ApiConfig.cadCartaoUrl}/cliente/$clienteId'));
           if (response.statusCode == 200) {
             final cartoes = List<Map<String, dynamic>>.from(jsonDecode(response.body));
             setState(() {
